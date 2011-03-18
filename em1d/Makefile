@@ -1,0 +1,13 @@
+LIB_DIR = .
+TARGET = $(LIB_DIR)/libem1d.a
+all :  $(TARGET)
+
+$(TARGET) : 
+	cd common; make
+
+clean :
+	cd common; make clean
+	cd moment; make clean
+	cd md_wave; make clean
+	rm -f $(TARGET) $(LIB_DIR)/mods/*
+

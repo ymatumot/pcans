@@ -1,0 +1,13 @@
+CANS_LIB_DIR = .
+TARGET = $(CANS_LIB_DIR)/libcans_em1d.a
+all :  $(TARGET)
+
+$(TARGET) : 
+	cd common; make
+
+clean :
+	cd common; make clean
+	cd md_wave; make clean
+	cd md_moment; make clean
+	rm -f $(TARGET) $(CANS_LIB_DIR)/mods/*
+

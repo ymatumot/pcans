@@ -1,0 +1,11 @@
+syntax: glob
+*.dat
+*.ps
+*.eps
+*.png
+*.jpg
+*.pdf
+*.svg
+*.mod
+*.o
+*.out
