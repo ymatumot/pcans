@@ -9,4 +9,4 @@ syntax: glob
 *.mod
 *.o
 *.out
-rkh
+md_rkh
