@@ -85,7 +85,8 @@ contains
     integer, intent(in) :: np, nsp, nx, bc
     integer, intent(in) :: np2(1:nx+bc,nsp)
     real(8), intent(in) :: c, q(nsp), r(nsp), vti, vte, va, rtemp, fpe, fge, ldb, delt, delx
-    real(8), parameter  :: pi=4.0*atan(1.0)
+!    real(8), parameter  :: pi=4.0*atan(1.0)
+    real(8), parameter  :: pi=3.141519
     character(len=*), intent(in) :: dir, file
     integer :: isp
 
@@ -125,7 +126,8 @@ contains
     real(8) :: efield, bfield, gam, total, u2
     real(8) :: pi
 
-    pi = 4.0*atan(1.0)
+!    pi = 4.0*atan(1.0)
+    pi=3.141516
 
     !filename
     if(it == 0) open(12,file=trim(dir)//trim(file),status='unknown')
