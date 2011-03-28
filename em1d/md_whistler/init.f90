@@ -110,9 +110,8 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 10
+    np2(1:nx+bc,1) = 1000
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
-    np2(1:nx+bc,3) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
@@ -137,8 +136,7 @@ contains
 
     use boundary, only : boundary__particle
 
-    integer :: i, ii, isp, n
-    integer, allocatable :: seed(:)
+    integer :: i, ii, isp
     real(8) :: sd, sd2, aa, bb, v0, u0
 
     v0 = 0.0*c
@@ -159,7 +157,7 @@ contains
     !velocity
     !Maxwellian distribution
     do isp=1,nsp
-       if(isp .eq. 1) then 
+       if(isp == 1) then 
           sd = vti/dsqrt(2.0D0)
           sd = sd/sqrt(1.-(sd/c)**2)
           
@@ -176,7 +174,7 @@ contains
              enddo
           enddo
        endif
-       if(isp .eq. 2) then
+       if(isp == 2) then
           sd = vte/dsqrt(2.0D0)
 
           do i=1,nx+bc

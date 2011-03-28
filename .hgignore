@@ -8,3 +8,4 @@ syntax: glob
 *.svg
 *.o
 *.out
+*.mod
