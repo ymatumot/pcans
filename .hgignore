@@ -6,6 +6,5 @@ syntax: glob
 *.jpg
 *.pdf
 *.svg
-*.mod
 *.o
 *.out

@@ -110,8 +110,9 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 1000
+    np2(1:nx+bc,1) = 10
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
+    np2(1:nx+bc,3) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
