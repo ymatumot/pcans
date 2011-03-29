@@ -176,16 +176,15 @@ contains
        endif
        if(isp == 2) then
           sd = vte/dsqrt(2.0D0)
+          sd = sd/sqrt(1.-(sd/c)**2)
+          sd2 = sd*sqrt(t_ani)
 
           do i=1,nx+bc
              do ii=1,np2(i,isp)
-                sd2 = sd/sqrt(1.-(sd/c)**2)
                 call random_number(aa)
                 call random_number(bb)
-                up(2,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+                up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
 
-                sd2 = sd*sqrt(t_ani)
-                sd2 = sd2/sqrt(1.-(sd2/c)**2)
                 call random_number(aa)
                 call random_number(bb)
                 up(3,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
