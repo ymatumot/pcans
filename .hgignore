@@ -9,3 +9,4 @@ syntax: glob
 *.o
 *.out
 *.mod
+*.a
