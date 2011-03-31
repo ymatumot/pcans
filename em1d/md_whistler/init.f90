@@ -52,7 +52,7 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 50000
+    itmax  = 0
     intvl1 = 50
     intvl2 = 500
     dir    = './dat/'
@@ -89,7 +89,7 @@ contains
     delt = 0.5
     ldb  = delx
 
-    r(1) = 1837.0
+    r(1) = 16.0
     r(2) = 1.0
 
     alpha = 5.0
@@ -110,7 +110,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 1000
+    np2(1:nx+bc,1) = 50
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
@@ -160,6 +160,9 @@ contains
        if(isp == 1) then 
           sd = vti/dsqrt(2.0D0)
           sd = sd/sqrt(1.-(sd/c)**2)
+          sd2 = sd*sqrt(t_ani)
+!!$          sd = vti/dsqrt(2.0D0)
+!!$          sd = sd/sqrt(1.-(sd/c)**2)
           
           do i=1,nx+bc
              do ii=1,np2(i,isp)
@@ -169,8 +172,8 @@ contains
 
                 call random_number(aa)
                 call random_number(bb)
-                up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-                up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+                up(3,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+                up(4,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
              enddo
           enddo
        endif
