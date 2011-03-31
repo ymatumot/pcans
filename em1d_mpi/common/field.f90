@@ -85,7 +85,9 @@ contains
                          nxs,nxe,nxs1,nxe1,bc,bcp, &
                          nup,ndown,nroot,nproc,nrank,mnpr,nstat,ncomw,nerr)
 
-    f3 = c*delt*gfac/delxf-1)+gkl(6,i))
+    f3 = c*delt*gfac/delx
+    do i=nxs,nxe
+       gkl(2,i) = gkl(2,i)+f3*(-gkl(6,i-1)+gkl(6,i))
        gkl(3,i) = gkl(3,i)-f3*(-gkl(5,i-1)+gkl(5,i))
     enddo
 

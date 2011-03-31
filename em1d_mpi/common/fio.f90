@@ -100,7 +100,8 @@ contains
     integer :: isp
     real(8) :: pi
 
-    pi = 4.0*atan(1.0)
+!    pi = 4.0*atan(1.0)
+    pi = 3.141519
 
     if(nrank == nroot)then
 
@@ -146,7 +147,8 @@ contains
     real(8) :: efield, bfield, gam, total, u2
     real(8) :: efield_g, bfield_g
 
-    pi = 4.0*atan(1.0)
+!    pi = 4.0*atan(1.0)
+    pi = 3.141519
 
     !filename
     if(nrank == nroot)then

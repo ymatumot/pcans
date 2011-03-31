@@ -1,7 +1,7 @@
 MODS_DIR = $(LIB_DIR)/mods
 
 #Intel Fortran
-FC = mpif90
+FC = ifort
 #FFLAGS = -O2 -msse3 -heap-arrays 10240
 FFLAGS = -O3 -msse3 -heap-arrays 102400 -par-report=2
 #FFLAGS = -fast -heap-arrays 10240 -par-report=2

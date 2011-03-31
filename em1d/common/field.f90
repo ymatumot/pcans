@@ -87,7 +87,7 @@ contains
 
     !solve  < ex, ey & ez >
     do i=1,nx
-       gf(4,i) = gkl(4,i)
+       gf(4,i) = gkl(4,i)   ! if (Ex=0) gf(4,i)=0.
     enddo
     do i=1,nx+bc
        gf(5,i) = gkl(5,i)-f3*(-gf(3,i)+gf(3,i+1))
