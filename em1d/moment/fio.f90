@@ -85,33 +85,33 @@ contains
 
 
     do i=1,nsp
-     n_file=10+i-1
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'den_',i,'.dat'
-     open(n_file,file=filename,status='unknown')
+       n_file=10+i-1
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'den_',i,'.dat'
+       open(n_file,file=filename,status='unknown')
     enddo
 
     do i=1,nsp
-     n_file=10+nsp+(i-1)*3
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Txx_',i,'.dat'
-     open(n_file,file=filename,status='unknown')
-     n_file=10+nsp+(i-1)*3+1
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tyy_',i,'.dat'
-     open(n_file,file=filename,status='unknown')
-     n_file=10+nsp+(i-1)*3+2
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tzz_',i,'.dat'
-     open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+(i-1)*3
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Txx_',i,'.dat'
+       open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+(i-1)*3+1
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tyy_',i,'.dat'
+       open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+(i-1)*3+2
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tzz_',i,'.dat'
+       open(n_file,file=filename,status='unknown')
     enddo
 
     do i=1,nsp
-     n_file=10+nsp+3*nsp+(i-1)*3
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vx',i,'.dat'
-     open(n_file,file=filename,status='unknown')
-     n_file=10+nsp+3*nsp+(i-1)*3+1
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vy',i,'.dat'
-     open(n_file,file=filename,status='unknown')
-     n_file=10+nsp+3*nsp+(i-1)*3+2
-     write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vz',i,'.dat'
-     open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+3*nsp+(i-1)*3
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vx',i,'.dat'
+       open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+3*nsp+(i-1)*3+1
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vy',i,'.dat'
+       open(n_file,file=filename,status='unknown')
+       n_file=10+nsp+3*nsp+(i-1)*3+2
+       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vz',i,'.dat'
+       open(n_file,file=filename,status='unknown')
     enddo
 
     n_file=10+nsp+3*nsp+3*nsp
@@ -124,13 +124,13 @@ contains
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bz.dat'
     open(n_file,file=filename,status='unknown')
 
-    n_file=10+nsp+3*nsp+3*nsp+3*nsp
+    n_file=10+nsp+3*nsp+3*nsp+3
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ex.dat'
     open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+3*nsp+1
+    n_file=10+nsp+3*nsp+3*nsp+3+1
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ey.dat'
     open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+3*nsp+2
+    n_file=10+nsp+3*nsp+3*nsp+3+2
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ez.dat'
     open(n_file,file=filename,status='unknown')
 
@@ -155,40 +155,39 @@ contains
     temp(1:nx+bc,3,1:nsp) = dsqrt(+temp(1:nx+bc,3,1:nsp)/den(1:nx+bc,1:nsp) &
                                   -vel(1:nx+bc,3,1:nsp)*vel(1:nx+bc,3,1:nsp))
 
-
     do j=1,nsp
-     n_file=10+j-1
-     write(n_file,99)(den(i,j),i=1,nx+bc)
+       n_file=10+j-1
+       write(n_file,99)(den(i,j),i=1,nx+bc)
     enddo
 
     do j=1,nsp
-     n_file=10+nsp+(j-1)*3
-     write(n_file,99)(temp(i,1,j),i=1,nx+bc)
-     n_file=10+nsp+(j-1)*3+1
-     write(n_file,99)(temp(i,2,j),i=1,nx+bc)
-     n_file=10+nsp+(j-1)*3+2
-     write(n_file,99)(temp(i,3,j),i=1,nx+bc)
+       n_file=10+nsp+(j-1)*3
+       write(n_file,99)(temp(i,1,j),i=1,nx+bc)
+       n_file=10+nsp+(j-1)*3+1
+       write(n_file,99)(temp(i,2,j),i=1,nx+bc)
+       n_file=10+nsp+(j-1)*3+2
+       write(n_file,99)(temp(i,3,j),i=1,nx+bc)
     enddo
 
     do j=1,nsp
-     n_file=10+nsp+nsp*3+(j-1)*3
-     write(n_file,99)(vel(i,1,j),i=1,nx+bc)
-     n_file=10+nsp+nsp*3+(j-1)*3+1
-     write(n_file,99)(vel(i,2,j),i=1,nx+bc)
-     n_file=10+nsp+nsp*3+(j-1)*3+2
-     write(n_file,99)(vel(i,3,j),i=1,nx+bc)
+       n_file=10+nsp+nsp*3+(j-1)*3
+       write(n_file,99)(vel(i,1,j),i=1,nx+bc)
+       n_file=10+nsp+nsp*3+(j-1)*3+1
+       write(n_file,99)(vel(i,2,j),i=1,nx+bc)
+       n_file=10+nsp+nsp*3+(j-1)*3+2
+       write(n_file,99)(vel(i,3,j),i=1,nx+bc)
     enddo
 
     do j=1,6
-     n_file=10+nsp+nsp*3+nsp*3+(j-1)
-     write(n_file,99)(tmp(i,j),i=1,nx+bc)
+       n_file=10+nsp+nsp*3+nsp*3+(j-1)
+       write(n_file,99)(tmp(i,j),i=1,nx+bc)
     enddo
 
 99  format(100000E15.5)
 
     n_file=10+nsp+nsp*3+nsp*3+5
     do j=10,n_file
-     close(j)
+       close(j)
     enddo
 
   end subroutine fio__mom
