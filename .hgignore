@@ -10,4 +10,4 @@ syntax: glob
 *.out
 *.mod
 *.a
-core
+core*
