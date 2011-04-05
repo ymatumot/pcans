@@ -110,7 +110,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 50
+    np2(1:nx+bc,1) = 1000
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
@@ -159,8 +159,9 @@ contains
     do isp=1,nsp
        if(isp == 1) then 
           sd = vti/dsqrt(2.0D0)
-          sd = sd/sqrt(1.-(sd/c)**2)
           sd2 = sd*sqrt(t_ani)
+          sd = sd/sqrt(1.-(sd/c)**2)
+          sd2 = sd2/sqrt(1.-(sd2/c)**2)
 !!$          sd = vti/dsqrt(2.0D0)
 !!$          sd = sd/sqrt(1.-(sd/c)**2)
           
@@ -179,8 +180,9 @@ contains
        endif
        if(isp == 2) then
           sd = vte/dsqrt(2.0D0)
-          sd = sd/sqrt(1.-(sd/c)**2)
           sd2 = sd*sqrt(t_ani)
+          sd = sd/sqrt(1.-(sd/c)**2)
+          sd2 = sd2/sqrt(1.-(sd2/c)**2)
 
           do i=1,nx+bc
              do ii=1,np2(i,isp)
