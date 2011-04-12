@@ -2,7 +2,7 @@ LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
 TARGET = $(LIB_DIR)/libem1d.a
 
-OBJS = fio.o particle.o field.o boundary.o crct.o
+OBJS = fio.o particle.o field.o crct.o
 
 .PHONY : all 
 .PHONY : clean
@@ -14,9 +14,6 @@ OBJS = fio.o particle.o field.o boundary.o crct.o
 '.update' : $(OBJS)
 	ar -r $(TARGET) $(OBJS)
 	touch .update
-
-field.o : boundary.o
-crct.o : boundary.o
 
 clean :
 	rm -f $(OBJS)

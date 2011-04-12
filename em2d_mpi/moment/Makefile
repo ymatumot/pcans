@@ -1,7 +1,7 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
 TARGET = mom.out
-OBJS = boundary.o particle.o const.o main.o mom_calc.o fio.o
+OBJS = boundary.o particle.o main.o mom_calc.o fio.o
 FFLAGS2 = -mcmodel=medium -shared-intel
 
 .PHONY : all 
@@ -16,7 +16,7 @@ all: $(TARGET)
 $(TARGET) : $(OBJS)
 	$(FC) -o mom.out $(FFLAGS) $(FFLAGS2) $(OBJS)
 
-main.o : const.o boundary.o fio.o mom_calc.o particle.o
+main.o : boundary.o fio.o mom_calc.o particle.o
 
 clean :
 	rm -f $(TARGET) $(OBJS) *.mod

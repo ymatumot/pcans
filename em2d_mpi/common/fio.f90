@@ -34,7 +34,7 @@ contains
     open(100+nrank,file=filename,form='unformatted')
 
     !time & parameters
-    write(100+nrank)it2,np,nxgs,nxge,nygs,nyge,nsp,nproc,bc,delt,delx,c
+    write(100+nrank)it2,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,nproc,bc,delt,delx,c
     write(100+nrank)np2
     write(100+nrank)q
     write(100+nrank)r

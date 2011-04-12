@@ -6,27 +6,33 @@ module fio
 
   public :: fio__input, fio__psd, fio__mom
 
+  logical, save                :: lflag=.true.
+  integer, allocatable, public :: np2(:,:)
+  integer,              public :: it0, np, nx, nsp, bc
+  real(8), allocatable, public :: q(:), r(:), up(:,:,:,:), uf(:,:)
+  real(8),              public :: c, delt, delx
+
 
 contains
 
 
-  subroutine fio__input(up,uf,c,q,r,delt,delx,np2,it0,np,nx,nsp,bc,dir,file)
+  subroutine fio__input(dir,file)
 
-    integer, intent(in)  :: np, nsp, nx, bc
-    character(len=*), intent(in) :: dir, file
-    integer, intent(out) :: np2(1:nx+bc,nsp), it0
-    real(8), intent(out) :: up(4,np,1:nx+bc,nsp)
-    real(8), intent(out) :: uf(6,0:nx+1)
-    real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
-    integer :: inp, inx, insp, ibc
+    character(len=*) :: dir, file
 
     !filename
     open(11,file=trim(dir)//trim(file),form='unformatted')
-    read(11)it0,inp,inx,insp,ibc,delt,delx,c
-    if((inx /= nx) .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc))then
-       write(6,*) '** parameter mismatch **'
-       stop
+    read(11)it0,np,nx,nsp,bc,delt,delx,c
+
+    if(lflag)then
+       allocate(q(nsp))
+       allocate(r(nsp))
+       allocate(np2(1:nx+bc,nsp))
+       allocate(up(4,np,1:nx+bc,nsp))
+       allocate(uf(6,0:nx+1))
+       lflag = .false.
     endif
+
     read(11)np2
     read(11)q
     read(11)r
@@ -42,11 +48,8 @@ contains
   end subroutine fio__input
 
 
-  subroutine fio__psd(up,np,nx,nsp,np2,bc,it0,dir)
+  subroutine fio__psd(dir)
 
-    integer, intent(in) :: np, nx, nsp, bc, it0
-    integer, intent(in) :: np2(1:nx+bc,nsp) 
-    real(8), intent(in) :: up(4,np,1:nx+bc,nsp)
     character(len=*), intent(in) :: dir
     integer :: i, ii, isp, ieq
     character(len=256) :: filename
@@ -73,16 +76,13 @@ contains
   end subroutine fio__psd
 
 
-  subroutine fio__mom(den,vel,temp,uf,nx,nsp,bc,it0,dir)
+  subroutine fio__mom(den,vel,temp,dir)
 
-    integer, intent(in)    :: nx, nsp, bc, it0
-    real(8), intent(in)    :: uf(6,0:nx+1)
     real(8), intent(inout) :: den(0:nx+1,nsp), vel(0:nx+1,3,nsp), temp(0:nx+1,3,nsp)
     character(len=*), intent(in) :: dir
-    integer :: i,j,n_file
+    integer :: i, j, n_file
     real(8) :: tmp(0:nx+1,6)
     character(len=256) :: filename
-
 
     do i=1,nsp
        n_file=10+i-1

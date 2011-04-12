@@ -54,8 +54,8 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 10240
-    intvl1 = 10
+    itmax  = 200
+    intvl1 = 100
     intvl2 = 100
     dir    = './dat/'
     file9  = 'init_param.dat'
@@ -124,7 +124,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(nxs:nxe+bcp,1) = 5000
+    np2(nxs:nxe+bcp,1) = 500
     np2(nxs:nxe+bcp,2) = np2(nxs:nxe+bcp,1)
 
     if(nrank == nroot)then

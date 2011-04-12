@@ -54,10 +54,10 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 0
-    intvl1 = 4000
+    itmax  = 100
+    intvl1 = 100
     intvl2 = 100
-    intvl3 = 10
+    intvl3 = 100
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'

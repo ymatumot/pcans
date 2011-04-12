@@ -6,37 +6,49 @@ module fio
 
   public :: fio__input, fio__psd, fio__mom
 
+  logical, save                :: lflag=.true.
+  integer, public              :: it0, np, nxgs, nxge, nxs, nxe, nsp, bc, bcp
+  integer, public, allocatable :: np2(:,:)
+  real(8), public, allocatable :: up(:,:,:,:)
+  real(8), public, allocatable :: uf(:,:)
+  real(8), public, allocatable :: q(:), r(:)
+  real(8), public              :: c, delt, delx
+
 
 contains
 
 
-  subroutine fio__input(up,uf,c,q,r,delt,delx,it0,                 &
-                        np,nsp,np2,nxgs,nxge,nxs,nxe,nproc,bc,bcp, &
-                        dir,file)
-                       
-    integer, intent(in)  :: np, nsp, nxgs, nxge, nxs, nxe, nproc, bc, bcp
+  subroutine fio__input(nproc,dir,file)
+
+    integer, intent(in)          :: nproc
     character(len=*), intent(in) :: dir, file
-    integer, intent(out) :: np2(nxgs:nxge+bc,nsp), it0
-    real(8), intent(out) :: up(4,np,nxgs:nxge+bc,nsp)
-    real(8), intent(out) :: uf(6,nxgs-1:nxge+1)
-    real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
-    integer :: inp, inxgs, inxge, insp, inproc, ibc, ibcp
-    integer, allocatable :: np2tmp(:,:)
-    real(8), allocatable :: uptmp(:,:,:,:),uftmp(:,:)
+    integer                      :: inproc, iit0
+    integer, allocatable         :: np2tmp(:,:)
+    real(8), allocatable         :: uptmp(:,:,:,:),uftmp(:,:)
+
+    open(11,file=trim(dir)//trim(file),form='unformatted')
+
+    !parameters
+    read(11)it0,np,nxgs,nxge,nxs,nxe,nsp,inproc,bc,bcp,delt,delx,c
+
+    if(inproc /= nproc)then
+       write(*,*)'error in no. of procs'
+       stop
+    endif
+
+    if(lflag)then
+       allocate(q(nsp))
+       allocate(r(nsp))
+       allocate(np2(nxgs:nxge+bc,nsp))
+       allocate(up(4,np,nxgs:nxge+bc,nsp))
+       allocate(uf(6,nxgs-1:nxge+1))
+       lflag = .false.
+    endif
 
     allocate(np2tmp(nxs:nxe+bcp,nsp))
     allocate(uftmp(6,nxs-1:nxe+1))
     allocate(uptmp(4,np,nxs:nxe+bcp,nsp))
 
-    open(11,file=trim(dir)//trim(file),form='unformatted')
-
-    !parameters
-    read(11)it0,inp,inxgs,inxge,insp,inproc,ibc,ibcp,delt,delx,c
-    if((inxgs /= nxgs) .or. (inxge /= nxge) .or. (inproc /= nproc) &
-       .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc) .or. (ibcp /= bcp))then
-       write(6,*) '** parameter mismatch **'
-       stop
-    endif
     read(11)np2tmp
     read(11)q
     read(11)r
@@ -61,14 +73,11 @@ contains
   end subroutine fio__input
 
 
-  subroutine fio__psd(up,np,nxgs,nxge,nsp,np2,bc,it0,dir)
+  subroutine fio__psd(dir)
 
-    integer, intent(in) :: np, nxgs, nxge, nsp, bc, it0
-    integer, intent(in) :: np2(nxgs:nxge+bc,nsp)
-    real(8), intent(in)  :: up(4,np,nxgs:nxge+bc,nsp)
     character(len=*), intent(in) :: dir
-    integer :: i, ii, isp, ieq
-    character(len=256) :: filename
+    integer                      :: i, ii, isp, ieq
+    character(len=256)           :: filename
 
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'psd_i.dat'
     open(90,file=filename,status='unknown')
@@ -92,12 +101,11 @@ contains
   end subroutine fio__psd
 
 
-  subroutine fio__mom(den,vel,temp,uf,nxgs,nxge,nsp,bc,it0,dir)
+  subroutine fio__mom(den,vel,temp,dir)
 
-    integer, intent(in)    :: nxgs, nxge, nsp, bc, it0
-    real(8), intent(in)    :: uf(6,nxgs-1:nxge+1)
-    real(8), intent(inout) :: den(nxgs-1:nxge+1,nsp), vel(nxgs-1:nxge+1,3,nsp), &
-                              temp(nxgs-1:nxge+1,3,nsp)
+    real(8), intent(inout)       :: den(nxgs-1:nxge+1,nsp),   &
+                                    vel(nxgs-1:nxge+1,3,nsp), &
+                                    temp(nxgs-1:nxge+1,3,nsp)
     character(len=*), intent(in) :: dir
     integer :: i
     real(8) :: tmp(nxgs:nxge,6)

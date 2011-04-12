@@ -8,9 +8,9 @@ module crct
 
 contains
 
-  subroutine crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
+  subroutine crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx,     &
+                      boundary__field, boundary__charge)
 
-    use boundary, only : boundary__charge, boundary__field
     integer, intent(in)    :: np, nx, nsp, bc
     integer, intent(in)    :: np2(1:nx+bc,nsp)
     real(8), intent(in)    :: up(4,np,1:nx+bc,nsp), q(nsp), delx
@@ -20,6 +20,18 @@ contains
     real(8) :: pi
     real(8) :: xx1, xx2, idelx
     real(8) :: cden(-1:nx+2), b(0:nx+1), x(0:nx+1)
+
+    interface 
+       subroutine boundary__field(uf,nx,bc)
+         integer, intent(in)    :: nx, bc
+         real(8), intent(inout) :: uf(6,0:nx+1)
+       end subroutine boundary__field
+
+       subroutine boundary__charge(cden,nx,bc)
+         integer, intent(in)    :: nx, bc
+         real(8), intent(inout) :: cden(-1:nx+2)
+       end subroutine boundary__charge
+    end interface
 
     pi = 4.0*atan(1.0)
     idelx = 1.D0/delx

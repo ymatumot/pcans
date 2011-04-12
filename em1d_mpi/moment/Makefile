@@ -1,7 +1,7 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
 TARGET = mom.out
-OBJS = boundary.o particle.o const.o main.o mom_calc.o fio.o
+OBJS = boundary.o particle.o main.o mom_calc.o fio.o
 .PHONY : all 
 .PHONY : clean
 .SUFFIXES :
@@ -14,7 +14,7 @@ all: $(TARGET)
 $(TARGET) : $(OBJS)
 	$(FC) -o mom.out $(FFLAGS) $(OBJS)
 
-main.o : const.o boundary.o fio.o mom_calc.o particle.o
+main.o : boundary.o fio.o mom_calc.o particle.o
 
 clean :
 	rm -f $(TARGET) $(OBJS)

@@ -10,29 +10,40 @@ module field
 contains
 
   
-  subroutine field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac)
+  subroutine field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac, &
+                           boundary__field,boundary__curre)
 
     !Implicit EM field solver
-    use boundary, only : boundary__field, boundary__curre,  boundary__particle
-
     integer, intent(in)    :: np, nx, nsp, bc
     integer, intent(in)    :: np2(1:nx+bc,nsp)
     real(8), intent(in)    :: q(nsp), c, delx, delt, gfac
     real(8), intent(in)    :: gp(4,np,1:nx+bc,nsp)
     real(8), intent(inout) :: up(4,np,1:nx+bc,nsp)
     real(8), intent(inout) :: uf(6,0:nx+1)
+    logical, save              :: lflag=.true.
     integer                    :: ii, i, isp
-    integer, save              :: flag
     real(8)                    :: uj(3,-1:nx+2), gkl(6,0:nx+1)
     real(8), save, allocatable :: gf(:,:)
     real(8)                    :: pi, f1, f2, f3, rotb2, rotb3, rote2, rote3
 
+    interface
+       subroutine boundary__field(uf,nx,bc)
+         integer, intent(in)    :: nx, bc
+         real(8), intent(inout) :: uf(6,0:nx+1)
+       end subroutine boundary__field
+
+       subroutine boundary__curre(uj,nx,bc)
+         integer, intent(in)    :: nx, bc
+         real(8), intent(inout) :: uj(3,-1:nx+2)
+       end subroutine boundary__curre
+    end interface
+
     pi = 4.0*atan(1.0)
 
-    if(flag /= 1)then
+    if(lflag)then
        allocate(gf(6,0:nx+1))
        gf(1:3,0:nx+1) = 0.0
-       flag = 1
+       lflag = .false.
     endif
        
 !!$    !position at n+1/2
@@ -315,69 +326,69 @@ contains
   end subroutine cgm
 
 
-  subroutine ele_cur2(uj,up,np,nx,nsp,np2,bc,q,c,delx)
-
-    integer, intent(in)  :: np, nx, nsp, bc
-    integer, intent(in)  :: np2(1:nx+bc,nsp)
-    real(8), intent(in)  :: q(nsp), c, delx
-    real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
-    real(8), intent(out) :: uj(3,-1:nx+2)
-    integer :: ii, i, isp, ih
-    real(8) :: dx, dxm, gam, idelx
-
-    !memory clear
-    uj(1:3,-1:nx+2) = 0.0D0
-
-    !caluculate erectric current density
-    do isp=1,nsp
-       do i=1,nx+bc
-          do ii=1,np2(i,isp)
-             gam = 1./dsqrt(1.0+(+up(2,ii,i,isp)*up(2,ii,i,isp) &
-                                 +up(3,ii,i,isp)*up(3,ii,i,isp) &
-                                 +up(4,ii,i,isp)*up(4,ii,i,isp) &
-                                )/(c*c))
-
-             dx = up(1,ii,i,isp)-i
-             dxm = 1.-dx
-             uj(1,i  ) = uj(1,i  )+q(isp)*up(2,ii,i,isp)*gam*dxm
-             uj(1,i+1) = uj(1,i+1)+q(isp)*up(2,ii,i,isp)*gam*dx 
-
-             ih = floor(up(1,ii,i,isp)-0.5)
-             dx = up(1,ii,i,isp)-0.5-ih
-             dxm = 1.-dx
-
-             uj(2,ih  ) = uj(2,ih  )+q(isp)*up(3,ii,i,isp)*gam*dxm
-             uj(3,ih  ) = uj(3,ih  )+q(isp)*up(4,ii,i,isp)*gam*dxm
-             uj(2,ih+1) = uj(2,ih+1)+q(isp)*up(3,ii,i,isp)*gam*dx 
-             uj(3,ih+1) = uj(3,ih+1)+q(isp)*up(4,ii,i,isp)*gam*dx 
-          enddo
-       enddo
-    enddo
-
-    idelx = 1.D0/delx
-    if(bc == 0)then
-       do i=-1,nx+2
-          uj(1:3,i) = uj(1:3,i)*idelx
-       enddo
-    else if(bc == -1)then
-       i=1
-       uj(1,i) = uj(1,i)*2.*idelx
-       do i=2,nx-1
-          uj(1,i) = uj(1,i)*idelx
-       enddo
-       i=nx
-       uj(1,i) = uj(1,i)*2.*idelx
-
-       do i=0,nx
-          uj(2,i) = uj(2,i)*idelx
-          uj(3,i) = uj(3,i)*idelx
-       enddo
-    else
-       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-       stop
-    endif
-
-  end subroutine ele_cur2
+!!$  subroutine ele_cur2(uj,up,np,nx,nsp,np2,bc,q,c,delx)
+!!$
+!!$    integer, intent(in)  :: np, nx, nsp, bc
+!!$    integer, intent(in)  :: np2(1:nx+bc,nsp)
+!!$    real(8), intent(in)  :: q(nsp), c, delx
+!!$    real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
+!!$    real(8), intent(out) :: uj(3,-1:nx+2)
+!!$    integer :: ii, i, isp, ih
+!!$    real(8) :: dx, dxm, gam, idelx
+!!$
+!!$    !memory clear
+!!$    uj(1:3,-1:nx+2) = 0.0D0
+!!$
+!!$    !caluculate erectric current density
+!!$    do isp=1,nsp
+!!$       do i=1,nx+bc
+!!$          do ii=1,np2(i,isp)
+!!$             gam = 1./dsqrt(1.0+(+up(2,ii,i,isp)*up(2,ii,i,isp) &
+!!$                                 +up(3,ii,i,isp)*up(3,ii,i,isp) &
+!!$                                 +up(4,ii,i,isp)*up(4,ii,i,isp) &
+!!$                                )/(c*c))
+!!$
+!!$             dx = up(1,ii,i,isp)-i
+!!$             dxm = 1.-dx
+!!$             uj(1,i  ) = uj(1,i  )+q(isp)*up(2,ii,i,isp)*gam*dxm
+!!$             uj(1,i+1) = uj(1,i+1)+q(isp)*up(2,ii,i,isp)*gam*dx 
+!!$
+!!$             ih = floor(up(1,ii,i,isp)-0.5)
+!!$             dx = up(1,ii,i,isp)-0.5-ih
+!!$             dxm = 1.-dx
+!!$
+!!$             uj(2,ih  ) = uj(2,ih  )+q(isp)*up(3,ii,i,isp)*gam*dxm
+!!$             uj(3,ih  ) = uj(3,ih  )+q(isp)*up(4,ii,i,isp)*gam*dxm
+!!$             uj(2,ih+1) = uj(2,ih+1)+q(isp)*up(3,ii,i,isp)*gam*dx 
+!!$             uj(3,ih+1) = uj(3,ih+1)+q(isp)*up(4,ii,i,isp)*gam*dx 
+!!$          enddo
+!!$       enddo
+!!$    enddo
+!!$
+!!$    idelx = 1.D0/delx
+!!$    if(bc == 0)then
+!!$       do i=-1,nx+2
+!!$          uj(1:3,i) = uj(1:3,i)*idelx
+!!$       enddo
+!!$    else if(bc == -1)then
+!!$       i=1
+!!$       uj(1,i) = uj(1,i)*2.*idelx
+!!$       do i=2,nx-1
+!!$          uj(1,i) = uj(1,i)*idelx
+!!$       enddo
+!!$       i=nx
+!!$       uj(1,i) = uj(1,i)*2.*idelx
+!!$
+!!$       do i=0,nx
+!!$          uj(2,i) = uj(2,i)*idelx
+!!$          uj(3,i) = uj(3,i)*idelx
+!!$       enddo
+!!$    else
+!!$       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+!!$       stop
+!!$    endif
+!!$
+!!$  end subroutine ele_cur2
 
 
 end module field

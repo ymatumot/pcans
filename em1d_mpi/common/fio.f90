@@ -34,7 +34,7 @@ contains
     open(100+nrank,file=filename,form='unformatted')
 
     !time & parameters
-    write(100+nrank)it2,np,nxgs,nxge,nsp,nproc,bc,bcp,delt,delx,c
+    write(100+nrank)it2,np,nxgs,nxge,nxs,nxe,nsp,nproc,bc,bcp,delt,delx,c
     write(100+nrank)np2
     write(100+nrank)q
     write(100+nrank)r
@@ -59,14 +59,15 @@ contains
     real(8), intent(out) :: up(4,np,nxs:nxe+bcp,nsp)
     real(8), intent(out) :: uf(6,nxs1:nxe1)
     real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
-    integer :: inp, inxgs, inxge, insp, inproc, ibc, ibcp
+    integer :: inp, inxgs, inxge, inxs, inxe, inxs1, inxe1, insp, inproc, ibc, ibcp
 
     !filename
     open(101+nrank,file=trim(dir)//trim(file),form='unformatted')
 
     !time & parameters
-    read(101+nrank)it0,inp,inxgs,inxge,insp,inproc,ibc,ibcp,delt,delx,c
+    read(101+nrank)it0,inp,inxgs,inxge,inxs,inxe,insp,inproc,ibc,ibcp,delt,delx,c
     if((inxgs /= nxgs) .or. (inxge /= nxge)  .or. &
+       (inxs /= nxs) .or. (inxe /= nxe)  .or.     &
        (inp /= np) .or. (insp /= nsp) .or. (inproc /= nproc) .or. &
        (ibc /= bc) .or. (ibcp /= bcp))then
        write(6,*) '** parameter mismatch **'
@@ -100,8 +101,7 @@ contains
     integer :: isp
     real(8) :: pi
 
-!    pi = 4.0*atan(1.0)
-    pi = 3.141519
+    pi = 4.0*atan(1.0)
 
     if(nrank == nroot)then
 

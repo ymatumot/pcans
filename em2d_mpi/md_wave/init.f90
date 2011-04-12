@@ -20,7 +20,6 @@ module init
   real(8), allocatable, public :: gp(:,:,:,:)
   character(len=6),  public :: dir
   character(len=10), public :: file12
-  character(len=9),  public :: file13, file14
   real(8)                   :: pi
 
 
@@ -56,22 +55,19 @@ contains
 !           : 10 - for saving all data
 !           : 11 - for starting from saved data
 !           : 12 - for saving energy history
-!           : 13~14 - for w-k diagram
 !   gfac    : implicit factor
 !             gfac < 0.5 : unstable
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 400
+    itmax  = 100
     intvl1 = 100
     intvl2 = 10
     intvl3 = 10
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
-    file13 = 'wk_ex.dat'
-    file14 = 'wk_ey.dat'
     gfac   = 0.505
 
     it0    = 0
@@ -182,7 +178,6 @@ contains
           up(2,ii,j,2) = up(2,ii,j,1)
        enddo
     enddo
-    
 
     !velocity
     !Maxwellian distribution
