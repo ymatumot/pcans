@@ -4,9 +4,10 @@ module boundary
 
   private
 
+  public :: boundary__field
   public :: boundary__particle
-  public :: boundary__den
-  public :: boundary__vel
+  public :: boundary__curre
+  public :: boundary__charge
 
 
 contains
@@ -18,7 +19,7 @@ contains
     integer, intent(inout) :: np2(1:nx+bc,nsp)
     real(8), intent(inout) :: up(4,np,1:nx+bc,nsp)
     integer :: i, ii, iii, isp, ipos
-    integer :: cnt(nx+bc,nsp), flag(np,1:nx+bc,nsp), cnt_tmp
+    integer :: cnt(1:nx+bc,nsp), flag(np,1:nx+bc,nsp), cnt_tmp
 
     cnt(1:nx+bc,1:nsp) = 0
     flag(1:np,1:nx+bc,1:nsp) = 0
@@ -51,13 +52,14 @@ contains
                       up(2,ii,i,isp) = -up(2,ii,i,isp)
                    endif
                 else
-                   write(*,*)'choose bc=0 (periodic) or bc=-1 (bounded)'
+                   write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
                    stop
                 endif
                 cnt(ipos,isp) = cnt(ipos,isp)+1
                 up(1:4,np2(ipos,isp)+cnt(ipos,isp),ipos,isp) = up(1:4,ii,i,isp)
                 flag(ii,i,isp) = 1
              endif
+
           enddo
        enddo
     enddo
@@ -88,44 +90,90 @@ contains
           endif
        enddo
     enddo
-
+          
   end subroutine boundary__particle
 
 
-  subroutine boundary__den(den,nx,bc)
+  subroutine boundary__field(uf,nx,bc)
 
     integer, intent(in)    :: nx, bc
-    real(8), intent(inout) :: den(0:nx+1)
+    real(8), intent(inout) :: uf(6,0:nx+1)
 
     if(bc == 0)then
        !periodic condition
-       den(1)  = den(1)+den(nx+1)
-       den(nx) = den(nx)+den(0)
-    else if(bc==-1)
+       uf(1:6,0) = uf(1:6,nx)
+       uf(1:6,nx+1) = uf(1:6,1)
+    else if(bc == -1)then
        !reflective condition
-       den(1)     = den(1)    +den(0)
-       den(nx+bc) = den(nx+bc)+den(nx+bc+1)
+       uf(1,0)   = +uf(1,1)
+       uf(2:3,0) = +uf(2:3,2)
+       uf(4,0)   = +uf(4,2)
+       uf(5:6,0) = -uf(5:6,1)
+
+       uf(1,nx)     = +uf(1,nx-1)
+       uf(2:3,nx+1) = +uf(2:3,nx-1)
+       uf(4,nx+1)   = +uf(4,nx-1)
+       uf(5:6,nx)   = -uf(5:6,nx-1)
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
     endif
 
-  end subroutine boundary__den
+  end subroutine boundary__field
 
 
-  subroutine boundary__vel(vel,nx,bc)
+  subroutine boundary__curre(uj,nx,bc)
 
     integer, intent(in)    :: nx, bc
-    real(8), intent(inout) :: vel(0:nx+1,3)
+    real(8), intent(inout) :: uj(3,-1:nx+2)
 
     if(bc == 0)then
        !periodic condition
-       vel(1 ,1:3) = vel(1 ,1:3)+vel(nx+1,1:3)
-       vel(nx,1:3) = vel(nx,1:3)+vel(0   ,1:3)
-    else if(bc == -1)
+       uj(1:3,1)    = uj(1:3,1)+uj(1:3,nx+1)
+       uj(1:3,2)    = uj(1:3,2)+uj(1:3,nx+2)
+       uj(1:3,nx-1) = uj(1:3,nx-1)+uj(1:3,-1)
+       uj(1:3,nx)   = uj(1:3,nx)+uj(1:3,0)
+    else if(bc == -1)then
        !reflective condition
-       vel(1    ,1:3) = vel(1    ,1:3)+vel(0      ,1:3)
-       vel(nx+bc,1:3) = vel(nx+bc,1:3)+vel(nx+bc+1,1:3)
+       uj(1  ,2)  = uj(1  ,2)+uj(1  ,0)
+       uj(2:3,1)  = uj(2:3,1)-uj(2:3,0)
+       uj(2:3,2)  = uj(2:3,2)-uj(2:3,-1)
+
+       uj(1  ,nx-1) = uj(1  ,nx-1)+uj(1  ,nx+1)
+       uj(2:3,nx-1) = uj(2:3,nx-1)-uj(2:3,nx)
+       uj(2:3,nx-2) = uj(2:3,nx-2)-uj(2:3,nx+1)
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
     endif
 
-  end subroutine boundary__vel
+  end subroutine boundary__curre
+
+
+  subroutine boundary__charge(cden,nx,bc)
+
+    integer, intent(in)    :: nx, bc
+    real(8), intent(inout) :: cden(-1:nx+2)
+
+    if(bc == 0)then
+       !periodic condition
+       cden(1)    = cden(1)+cden(nx+1)
+       cden(2)    = cden(2)+cden(nx+2)
+       cden(nx-1) = cden(nx-1)+cden(-1)
+       cden(nx)   = cden(nx)+cden(0)
+    else if(bc == -1)then
+       !reflective condition
+       cden(1)  = cden(1)-cden(0)
+       cden(2)  = cden(2)-cden(-1)
+       cden(nx-2) = cden(nx-2)-cden(nx+1)
+       cden(nx-1) = cden(nx-1)-cden(nx)
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
+    endif
+
+  end subroutine boundary__charge
+
 
 
 end module boundary

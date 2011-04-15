@@ -1,7 +1,0 @@
-MODS_DIR = $(LIB_DIR)/mods
-
-#Intel Fortran
-FC = mpif90
-FFLAGS = -O2 -msse3 -heap-arrays 102400 -openmp
-#FFLAGS = -O3 -msse3 -heap-arrays 102400 -par-report=2 -shared-intel -mcmodel=large -fpic
-#FFLAGS = -fast -heap-arrays 10240 -par-report=2 

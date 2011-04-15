@@ -11,3 +11,4 @@ syntax: glob
 *.mod
 *.a
 core*
+*~

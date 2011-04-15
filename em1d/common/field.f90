@@ -10,8 +10,9 @@ module field
 contains
 
   
-  subroutine field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac, &
-                           boundary__field,boundary__curre)
+  subroutine field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac)
+
+    use boundary, only : boundary__curre, boundary__field
 
     !Implicit EM field solver
     integer, intent(in)    :: np, nx, nsp, bc
@@ -25,18 +26,6 @@ contains
     real(8)                    :: uj(3,-1:nx+2), gkl(6,0:nx+1)
     real(8), save, allocatable :: gf(:,:)
     real(8)                    :: pi, f1, f2, f3, rotb2, rotb3, rote2, rote3
-
-    interface
-       subroutine boundary__field(uf,nx,bc)
-         integer, intent(in)    :: nx, bc
-         real(8), intent(inout) :: uf(6,0:nx+1)
-       end subroutine boundary__field
-
-       subroutine boundary__curre(uj,nx,bc)
-         integer, intent(in)    :: nx, bc
-         real(8), intent(inout) :: uj(3,-1:nx+2)
-       end subroutine boundary__curre
-    end interface
 
     pi = 4.0*atan(1.0)
 
