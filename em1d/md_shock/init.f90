@@ -6,7 +6,7 @@ module init
 
   private
 
-  public :: init__set_param
+  public :: init__set_param, init__inject
 
   integer, public :: np2(1:nx+bc,nsp)
   integer, public :: itmax, it0, intvl1, intvl2, intvl3
@@ -20,8 +20,8 @@ module init
   character(len=6),  public :: dir
   character(len=10), public :: file10
   character(len=10), public :: file12
-  character(len=9),  public :: file13, file14
-  real(8)                   :: pi
+  integer                   :: n0
+  real(8)                   :: pi, v0, u0
 
 
 contains
@@ -48,22 +48,18 @@ contains
 !           : 10 - for saving all data
 !           : 11 - for starting from saved data
 !           : 12 - for saving energy history
-!           : 13~14 - for w-k diagram
 !   gfac    : implicit factor
 !             gfac < 0.5 : unstable
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 0
-    intvl1 = 4000
+    itmax  = 10000
+    intvl1 = 100
     intvl2 = 100
-    intvl3 = 10
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
-    file13 = 'wk_ex.dat'
-    file14 = 'wk_ey.dat'
     gfac   = 0.505
 
     it0    = 0
@@ -97,8 +93,8 @@ contains
     r(1) = 16.0
     r(2) = 1.0
 
-    alpha = 2.0
-    beta  = 0.04
+    alpha = 4.0
+    beta  = 0.01
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -114,8 +110,8 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 5000
-    np2(1:nx+bc,2) = np2(1:nx+bc,1)
+    n0  = 100
+    np2(1:nx+bc,1:2) = n0
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
@@ -123,7 +119,7 @@ contains
     endif
 
     !charge
-    q(1) = fpi*dsqrt(r(1)/(4.0*pi*np2(1,1)))
+    q(1) = fpi*dsqrt(r(1)/(4.0*pi*n0))
     q(2) = -q(1)
 
     !Magnetic field strength
@@ -141,10 +137,7 @@ contains
     use boundary, only : boundary__particle
 
     integer :: i, ii, isp
-    real(8) :: sd, aa, bb, v0, u0
-
-    v0 = 0.0*c
-    u0 = v0/dsqrt(1.-(v0/c)**2)
+    real(8) :: sd, aa, bb
 
     call random_seed()
 
@@ -157,6 +150,9 @@ contains
           up(1,ii,i,2) = up(1,ii,i,1) 
        enddo
     enddo
+
+    v0 = 0.1*c
+    u0 = v0/dsqrt(1.-(v0/c)**2)
 
     !velocity
     !Maxwellian distribution
@@ -173,11 +169,11 @@ contains
              call random_number(aa)
              call random_number(bb)
              up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
+             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
 
              call random_number(aa)
              call random_number(bb)
-             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
           enddo
        enddo
     enddo
@@ -207,7 +203,7 @@ contains
        uf(4,i) = 0.0
     enddo
     do i=1,nx+bc
-       uf(5,i) = 0.0
+       uf(5,i) = v0*b0/c
        uf(6,i) = 0.0
     enddo
 
@@ -215,5 +211,60 @@ contains
 
   end subroutine init__set_field
 
+
+  subroutine init__inject
+
+    use boundary, only : boundary__particle
+
+    integer :: isp, i, ii, ii2, ii3, dn
+    real(8) :: sd, aa, bb
+    !Inject particles at x=1
+
+    i   = 1
+    isp = 1
+    dn  = n0-max(np2(i,1),np2(i,2))
+
+    do ii=1,dn
+       ii2 = np2(i,1)+ii
+       ii3 = np2(i,2)+ii
+       call random_number(aa)
+       up(1,ii2,i,1) = dble(i)+delx*aa
+       up(1,ii3,i,2) = up(1,ii2,i,1)
+    enddo
+
+    !velocity
+    !Maxwellian distribution
+    do isp=1,nsp
+       if(isp == 1) then 
+          sd = vti/dsqrt(2.0D0)
+       endif
+       if(isp == 2) then
+          sd = vte/dsqrt(2.0D0)
+       endif
+
+       do ii=np2(i,isp)+1,n0
+          call random_number(aa)
+          call random_number(bb)
+          up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
+          up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+
+          call random_number(aa)
+          call random_number(bb)
+          up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+       enddo
+    enddo
+
+    do isp=1,nsp
+       np2(i,isp) = np2(i,isp)+max(dn,0)
+    enddo
+
+    !set Ex and Bz
+    i=1
+    uf(3,i) = b0
+    uf(5,i) = v0*b0/c
+
+    call boundary__particle(up,np,nx,nsp,np2,bc)
+
+  end subroutine init__inject
 
 end module init

@@ -15,5 +15,7 @@ OBJS = fio.o particle.o field.o crct.o boundary.o
 	ar -r $(TARGET) $(OBJS)
 	touch .update
 
+field.o : boundary.o
+crct.o  : boundary.o 
 clean :
 	rm -f $(OBJS)

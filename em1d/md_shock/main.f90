@@ -6,8 +6,6 @@ program main
   use fio
   use particle
   use field
-  use crct
-  use wk
 
   implicit none
 
@@ -25,24 +23,21 @@ program main
 !**********************************************************************c
 
   call init__set_param
-!!$  call crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
   call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
   call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,0,it0,dir,file10)
-  call wk_f(uf(4:6,0:nx+1),nx,dir,file13,file14)
 
   do it=1,itmax-it0
 
      call particle__solv(gp,up,uf,c,q,r,delt,np,nx,nsp,np2,bc)
      call field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac)
      call boundary__particle(up,np,nx,nsp,np2,bc)
-!!$     call crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
+
+     call init__inject
 
      if(mod(it+it0,intvl1) == 0) &
           call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,it,it0,dir,file10)
      if(mod(it+it0,intvl2) == 0) &
           call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
-     if(mod(it+it0,intvl3) == 0) &
-          call wk_f(uf(4:6,0:nx+1),nx,dir,file13,file14)
 
   enddo
 
