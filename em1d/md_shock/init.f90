@@ -53,9 +53,9 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 10000
-    intvl1 = 100
-    intvl2 = 100
+    itmax  = 35000
+    intvl1 = 1000
+    intvl2 = 1000
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -93,8 +93,8 @@ contains
     r(1) = 16.0
     r(2) = 1.0
 
-    alpha = 4.0
-    beta  = 0.01
+    alpha = 5.0
+    beta  = 0.1
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -222,13 +222,13 @@ contains
 
     i   = 1
     isp = 1
-    dn  = n0-max(np2(i,1),np2(i,2))
+    dn  = n0-min(np2(i,1),np2(i,2))
 
     do ii=1,dn
        ii2 = np2(i,1)+ii
        ii3 = np2(i,2)+ii
        call random_number(aa)
-       up(1,ii2,i,1) = dble(i)+delx*aa
+       up(1,ii2,i,1) = dble(i)
        up(1,ii3,i,2) = up(1,ii2,i,1)
     enddo
 
@@ -242,7 +242,7 @@ contains
           sd = vte/dsqrt(2.0D0)
        endif
 
-       do ii=np2(i,isp)+1,n0
+       do ii=np2(i,isp)+1,np2(i,isp)+dn
           call random_number(aa)
           call random_number(bb)
           up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
@@ -264,6 +264,7 @@ contains
     uf(5,i) = v0*b0/c
 
     call boundary__particle(up,np,nx,nsp,np2,bc)
+    call boundary__field(uf,nx,bc)
 
   end subroutine init__inject
 

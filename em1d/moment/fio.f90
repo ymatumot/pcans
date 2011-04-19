@@ -62,14 +62,14 @@ contains
     isp=1
     do i=1,nx+bc
        do ii=1,np2(i,isp)
-          write(90,'(4e15.3)')(up(ieq,ii,i,isp),ieq=1,4)
+          write(90,'(4e20.5)')(up(ieq,ii,i,isp),ieq=1,4)
        enddo
     enddo
 
     isp=2
     do i=1,nx+bc
        do ii=1,np2(i,isp)
-          write(91,'(4e15.3)')(up(ieq,ii,i,isp),ieq=1,4)
+          write(91,'(4e20.5)')(up(ieq,ii,i,isp),ieq=1,4)
        enddo
     enddo
 
