@@ -16,11 +16,11 @@ module init
   real(8), public :: c
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
-  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: q(nsp), r(nsp)
   real(8), allocatable, public :: gp(:,:,:,:)
-  character(len=6),  public :: dir
-  character(len=10), public :: file12
-  real(8)                   :: pi
+  character(len=64), public :: dir
+  character(len=64), public :: file12
+  real(8)                   :: pi, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
 
 
 contains
@@ -30,8 +30,8 @@ contains
 
     use fio, only : fio__input, fio__param
     real(8) :: fgi, fpi, alpha, beta, n0
-    character(len=14) :: file9 
-    character(len=19) :: file11
+    character(len=64) :: file9 
+    character(len=64) :: file11
 
 !************** MPI settings  *******************!
     call mpi_set__init(nxgs,nxge,nygs,nyge,nproc)

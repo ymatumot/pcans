@@ -102,7 +102,7 @@ contains
     write(9,670) va,vti,vte,(vti/va)**2,rtemp,vti/(fge*r(2)/r(1))
     write(9,*)
 610 format(' grid size, debye lngth =======> ',i6,f8.4)
-620 format(' particle number in cell=======> ',i4,i4,'/',i4)
+620 format(' particle number in cell=======> ',i6,i6,'/',i6)
 630 format(' dx, dt, c ====================> ',f8.4,3x,f8.4,3x,f8.4)
 640 format(' Mi, Me  ======================> ',2(1p,e10.2,1x))
 650 format(' Qi, Qe  ======================> ',2(1p,e10.2,1x))
@@ -126,8 +126,7 @@ contains
     real(8) :: efield, bfield, gam, total, u2
     real(8) :: pi
 
-!    pi = 4.0*atan(1.0)
-    pi=3.141516
+    pi = 4.0*atan(1.0)
 
     !filename
     if(it == 0) open(12,file=trim(dir)//trim(file),status='unknown')

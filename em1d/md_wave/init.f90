@@ -14,14 +14,14 @@ module init
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
-  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: q(nsp), r(nsp)
   !gx, gv, are temporal spaces used for the time integration
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=6),  public :: dir
-  character(len=10), public :: file10
-  character(len=10), public :: file12
-  character(len=9),  public :: file13, file14
-  real(8)                   :: pi
+  character(len=64), public :: dir
+  character(len=64), public :: file10
+  character(len=64), public :: file12
+  character(len=64), public :: file13, file14
+  real(8)                   :: pi, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
 
 
 contains
@@ -32,8 +32,8 @@ contains
     use fio, only : fio__input, fio__param
 
     real(8) :: fgi, fpi, alpha, beta
-    character(len=14) :: file9 
-    character(len=21) :: file11
+    character(len=64) :: file9 
+    character(len=64) :: file11
 
 !*********************************************************************
 !   time0   : start time (if time0 < 0, initial data from input.f)
@@ -54,10 +54,10 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 100
-    intvl1 = 100
-    intvl2 = 100
-    intvl3 = 100
+    itmax  = 500
+    intvl1 = 500
+    intvl2 = 1000
+    intvl3 = 1000
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -91,14 +91,14 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 1.0
+    delt = 5.0
     ldb  = delx
 
     r(1) = 16.0
     r(2) = 1.0
 
-    alpha = 2.0
-    beta  = 0.04
+    alpha = 10.0
+    beta  = 0.1
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -182,8 +182,6 @@ contains
        enddo
     enddo
 
-    call boundary__particle(up,np,nx,nsp,np2,bc)
-
   end subroutine init__loading
 
 
@@ -211,7 +209,7 @@ contains
        uf(6,i) = 0.0
     enddo
 
-    call boundary__field(uf,nx,bc)
+    call boundary__field(uf)
 
   end subroutine init__set_field
 

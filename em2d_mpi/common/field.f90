@@ -25,7 +25,7 @@ contains
     real(8), intent(in)    :: gp(5,np,nys:nye,nsp)
     real(8), intent(inout) :: up(5,np,nys:nye,nsp)
     real(8), intent(inout) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
-    integer                    :: ii, i, j, isp, ieq
+    integer                    :: ii, i, j, isp
     integer, save              :: flag
     real(8)                    :: pi, f1, f2, f3
     real(8)                    :: uj(3,nxs-2:nxe+2,nys-2:nye+2), gkl(6,nxs-1:nxe+1,nys-1:nye+1)
@@ -49,8 +49,6 @@ contains
     !< gkl(4:6) =  (c*delt)*rot(b) - (4*pi*delt)*j >
     f1 = c*delt/delx
     f2 = 4.0*pi*delt
-!$OMP PARALLEL PRIVATE(i,j)
-!$OMP DO 
     do j=nys,nye
     do i=nxs,nxe+bc
        gkl(1,i,j) = -f1*(+(-uf(6,i,j-1)+uf(6,i,j)))
@@ -61,26 +59,20 @@ contains
        gkl(6,i,j) = +f1*(-(-uf(1,i,j)+uf(1,i,j+1))+(-uf(2,i,j)+uf(2,i+1,j)))-f2*uj(3,i,j)
     enddo
     enddo
-!$OMP END DO
     if(bc == -1)then
        i=nxe
-!$OMP DO
        do j=nys,nye
           gkl(2,i,j) = -f1*(-(-uf(6,i-1,j)+uf(6,i,j)))
           gkl(3,i,j) = -f1*(-(-uf(4,i,j-1)+uf(4,i,j))+(-uf(5,i-1,j)+uf(5,i,j)))
           gkl(4,i,j) = +f1*(+(-uf(3,i,j)+uf(3,i,j+1)))-f2*uj(1,i,j)
        enddo
-!$OMP END DO
     endif
-!$OMP END PARALLEL
 
     call boundary__field(gkl,                &
                          nxs,nxe,nys,nye,bc, &
                          nup,ndown,mnpr,nstat,ncomw,nerr)
 
     f3 = c*delt*gfac/delx
-!$OMP PARALLEL PRIVATE(i,j)
-!$OMP DO
     do j=nys,nye
     do i=nxs,nxe+bc
        gkl(1,i,j) = gkl(1,i,j)-f3*(-gkl(6,i,j-1)+gkl(6,i,j))
@@ -89,18 +81,14 @@ contains
                                    -gkl(5,i-1,j)+gkl(5,i,j))
     enddo
     enddo
-!$OMP END DO
     if(bc == -1)then
        i=nxe
-!$OMP DO
        do j=nys,nye
           gkl(2,i,j) = gkl(2,i,j)+f3*(-gkl(6,i-1,j)+gkl(6,i,j))
           gkl(3,i,j) = gkl(3,i,j)-f3*(+gkl(4,i,j-1)-gkl(4,i,j) &
                                       -gkl(5,i-1,j)+gkl(5,i,j))
        enddo
-!$OMP END DO
     endif
-!$OMP END PARALLEL
 
     !solve  < bx, by & bz >
     call cgm(gf,gkl,             &
@@ -112,9 +100,7 @@ contains
                          nxs,nxe,nys,nye,bc, &
                          nup,ndown,mnpr,nstat,ncomw,nerr)
 
-!$OMP PARALLEL PRIVATE(i,j)
     !solve  < ex, ey & ez >
-!$OMP DO
     do j=nys,nye
     do i=nxs,nxe+bc
        gf(4,i,j) = gkl(4,i,j)+f3*(-gf(3,i,j)+gf(3,i,j+1))
@@ -123,37 +109,22 @@ contains
                                   +gf(1,i,j)-gf(1,i,j+1))
     enddo
     enddo
-!$OMP END DO
     if(bc == -1)then
        i=nxe
-!$OMP DO
        do j=nys,nye
           gf(4,i,j) = gkl(4,i,j)+f3*(-gf(3,i,j)+gf(3,i,j+1))
        enddo
-!$OMP END DO
     endif
-!$OMP END PARALLEL
 
     call boundary__field(gf,                 &
                          nxs,nxe,nys,nye,bc, &
                          nup,ndown,mnpr,nstat,ncomw,nerr)
 
     !===== Update fields and particles ======
-!!$    uf(1:6,nxs-1:nxe+1,nys-1:nye+1) = uf(1:6,nxs-1:nxe+1,nys-1:nye+1) &
-!!$                                     +gf(1:6,nxs-1:nxe+1,nys-1:nye+1)
-!$OMP PARALLEL PRIVATE(ieq,ii,i,j)
-!$OMP DO
-    do j=nys-1,nye+1
-    do i=nxs-1,nxe+1
-       do ieq=1,6
-          uf(ieq,i,j) = uf(ieq,i,j)+gf(ieq,i,j)
-       enddo
-    enddo
-    enddo
-!$OMP END DO
+    uf(1:6,nxs-1:nxe+1,nys-1:nye+1) = uf(1:6,nxs-1:nxe+1,nys-1:nye+1) &
+                                     +gf(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     do isp=1,nsp
-!$OMP DO
        do j=nys,nye
           do ii=1,np2(j,isp)
              up(1,ii,j,isp) = gp(1,ii,j,isp)
@@ -163,9 +134,7 @@ contains
              up(5,ii,j,isp) = gp(5,ii,j,isp)
           enddo
        enddo
-!$OMP END DO
     enddo
-!$OMP END PARALLEL
 
   end subroutine field__fdtd_i
 
@@ -186,14 +155,11 @@ contains
 
     uj(1:3,nxs-2:nxe+2,nys-2:nye+2) = 0.D0
 
-!$OMP PARALLEL PRIVATE(ii,i,j)
-    
     !----- Charge Conservation Method for Jx, Jy ------!
     !----  Zigzag scheme (Umeda et al., CPC, 2003) ----!
     idelt = 1.D0/delt
     idelx = 1.D0/delx
     do isp=1,nsp
-!$OMP DO
        do j=nys,nye
           do ii=1,np2(j,isp)
 
@@ -270,20 +236,16 @@ contains
              uj(3,ih+1,jh+1) = uj(3,ih+1,jh+1)+q(isp)*gp(5,ii,j,isp)*gam*dx *dy 
           enddo
        enddo
-!$OMP END DO
     enddo
 
     idelx2 = idelx*idelx
     if(bc == 0)then
-!$OMP DO
        do j=nys-2,nye+2
           do i=nxs-2,nxe+2
              uj(1,i,j) = uj(1,i,j)*idelx2
           enddo
        enddo
-!$OMP END DO
     else if(bc == -1)then
-!$OMP DO
        do j=nys-2,nye+2
           i=nxs
           uj(1,i,j) = uj(1,i,j)*2.*idelx2
@@ -293,21 +255,17 @@ contains
           i=nxe
           uj(1,i,j) = uj(1,i,j)*2.*idelx2
        enddo
-!$OMP END DO
-!$OMP DO
        do j=nys-2,nye+2
           do i=nxs-1,nxe
              uj(2,i,j) = uj(2,i,j)*idelx2
              uj(3,i,j) = uj(3,i,j)*idelx2
           enddo
        enddo
-!$OMP END DO
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
        stop
     endif
 
-!OMP END PARALLEL
 
   end subroutine ele_cur
 
@@ -338,14 +296,12 @@ contains
     real(8)            :: ap(nxs:nxe,nys:nye)
     real(8)            :: bff_snd(nxe-nxs+1), bff_rcv(nxe-nxs+1)
 
-!$OMP PARALLEL PRIVATE(i,j)
     do l=1,1
 
        ! initial guess
        ite = 0
        f2 = (delx/(c*delt*gfac))**2
        sum = 0.0
-!$OMP DO
        do j=nys,nye
        do i=nxs,nxe+bc
           x(i,j) = gb(l,i,j)
@@ -353,8 +309,7 @@ contains
           sum = sum+b(i,j)*b(i,j)
        enddo
        enddo
-!$OMP END DO
-!¤³¤³¤Þ¤Ç¡Ê£²¡¿£±£²¡Ë
+
        call MPI_ALLREDUCE(sum,sum_g,1,mnpr,opsum,ncomw,nerr)
 
        eps = dsqrt(sum_g)*err
@@ -364,9 +319,11 @@ contains
           ii = i-nxs+1
           bff_snd(ii) = x(i,nys)
        enddo
+
        call MPI_SENDRECV(bff_snd(1),nxe+bc-nxs+1,mnpr,ndown,101, &
                          bff_rcv(1),nxe+bc-nxs+1,mnpr,nup  ,101, &
                          ncomw,nstat,nerr)
+
        do i=nxs,nxe+bc
           ii = i-nxs+1
           x(i,nye+1) = bff_rcv(ii)
@@ -376,9 +333,11 @@ contains
           ii = i-nxs+1
           bff_snd(ii) = x(i,nye)
        enddo
+
        call MPI_SENDRECV(bff_snd(1),nxe+bc-nxs+1,mnpr,nup  ,100, &
                          bff_rcv(1),nxe+bc-nxs+1,mnpr,ndown,100, &
                          ncomw,nstat,nerr)
+
        do i=nxs,nxe+bc
           ii = i-nxs+1
           x(i,nys-1) = bff_rcv(ii)
@@ -397,6 +356,7 @@ contains
        !------ end of -----
 
        f1 = 2.0+(delx/(c*delt*gfac))**2
+       sumr = 0.0
        do j=nys,nye
        do i=nxs,nxe+bc
           r(i,j) = b(i,j)+x(i,j-1)                    &
@@ -420,6 +380,7 @@ contains
                 ii = i-nxs+1
                 bff_snd(ii) = p(i,nys)
              enddo
+
              call MPI_SENDRECV(bff_snd(1),nxe+bc-nxs+1,mnpr,ndown,101, &
                                bff_rcv(1),nxe+bc-nxs+1,mnpr,nup  ,101, &
                                ncomw,nstat,nerr)

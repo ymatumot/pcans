@@ -14,14 +14,14 @@ module init
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
-  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: q(nsp), r(nsp)
   !gx, gv, are temporal spaces used for the time integration
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=6),  public :: dir
-  character(len=10), public :: file10
-  character(len=10), public :: file12
+  character(len=64),  public :: dir
+  character(len=64), public :: file10
+  character(len=64), public :: file12
   integer                   :: n0
-  real(8)                   :: pi, v0, u0
+  real(8)                   :: pi, v0, u0, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
 
 
 contains
@@ -32,8 +32,8 @@ contains
     use fio, only : fio__input, fio__param
 
     real(8) :: fgi, fpi, alpha, beta
-    character(len=14) :: file9 
-    character(len=21) :: file11
+    character(len=64) :: file9 
+    character(len=64) :: file11
 
 !*********************************************************************
 !   time0   : start time (if time0 < 0, initial data from input.f)
@@ -53,22 +53,15 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 35000
-    intvl1 = 1000
-    intvl2 = 1000
-    dir    = './dat/'
+    itmax  = 200000
+    intvl1 = 2000
+    intvl2 = 2000
+    dir    = './dat_mg/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
     gfac   = 0.505
-
     it0    = 0
-    if(it0 /= 0)then
-       !start from the past calculation
-       file11 = '005000_test10.dat'
-       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
-       return
-    endif
 
 !*********************************************************************
 !   r(1)  : ion mass             r(2)  : electron mass
@@ -87,13 +80,13 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 1.0
+    delt = 2.0
     ldb  = delx
 
-    r(1) = 16.0
+    r(1) = 25.0
     r(2) = 1.0
 
-    alpha = 5.0
+    alpha = 20.0
     beta  = 0.1
     rtemp = 1.0
 
@@ -107,12 +100,15 @@ contains
     vte = rge*fge
     vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
 
+    v0 = 10.*va
+    u0 = v0/dsqrt(1.-(v0/c)**2)
+
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    n0  = 100
+    n0  = 50
     np2(1:nx+bc,1:2) = n0
-    
+
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
        stop
@@ -124,6 +120,13 @@ contains
 
     !Magnetic field strength
     b0 = fgi*r(1)*c/q(1)
+
+    if(it0 /= 0)then
+       !start from the past calculation
+       file11 = '999999_test10.dat'
+       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
+       return
+    endif
 
     call init__loading
     call init__set_field
@@ -151,9 +154,6 @@ contains
        enddo
     enddo
 
-    v0 = 0.1*c
-    u0 = v0/dsqrt(1.-(v0/c)**2)
-
     !velocity
     !Maxwellian distribution
     do isp=1,nsp
@@ -178,7 +178,7 @@ contains
        enddo
     enddo
 
-    call boundary__particle(up,np,nx,nsp,np2,bc)
+    call boundary__particle(up,np2)
 
   end subroutine init__loading
 
@@ -207,28 +207,27 @@ contains
        uf(6,i) = 0.0
     enddo
 
-    call boundary__field(uf,nx,bc)
+    call boundary__field(uf)
 
   end subroutine init__set_field
 
 
   subroutine init__inject
 
-    use boundary, only : boundary__particle
-
     integer :: isp, i, ii, ii2, ii3, dn
-    real(8) :: sd, aa, bb
+    real(8) :: sd, aa, bb, dx
     !Inject particles at x=1
 
     i   = 1
     isp = 1
     dn  = n0-min(np2(i,1),np2(i,2))
+    dx  = v0*delt/delx
 
     do ii=1,dn
        ii2 = np2(i,1)+ii
        ii3 = np2(i,2)+ii
        call random_number(aa)
-       up(1,ii2,i,1) = dble(i)
+       up(1,ii2,i,1) = dble(i)+dx*aa
        up(1,ii3,i,2) = up(1,ii2,i,1)
     enddo
 
@@ -262,9 +261,7 @@ contains
     i=1
     uf(3,i) = b0
     uf(5,i) = v0*b0/c
-
-    call boundary__particle(up,np,nx,nsp,np2,bc)
-    call boundary__field(uf,nx,bc)
+    uf(5,i-1) = uf(5,i)
 
   end subroutine init__inject
 

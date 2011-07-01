@@ -4,60 +4,11 @@ module boundary
 
   private
 
-  public :: boundary__particle
   public :: boundary__den
   public :: boundary__vel
 
+
 contains
-
-  subroutine boundary__particle(up,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2,bc)
-
-    integer, intent(in)    :: np, nys, nye, nxgs, nxge, nygs, nyge, nsp, bc
-    integer, intent(inout) :: np2(nys:nye,nsp)
-    real(8), intent(inout) :: up(5,np,nys:nye,nsp)
-    integer :: j, ii, isp, ipos, jpos
-
-    do isp=1,nsp
-       do j=nys,nye
-          do ii=1,np2(j,isp)
-
-             ipos = floor(up(1,ii,j,isp))
-             jpos = floor(up(2,ii,j,isp))
-
-             if(bc==0)then
-                if(ipos <= nxgs-1)then
-                   up(1,ii,j,isp) = up(1,ii,j,isp)+(nxge-nxgs+1)
-                endif
-                if(ipos >= nxge+1)then
-                   up(1,ii,j,isp) = up(1,ii,j,isp)-(nxge-nxgs+1)
-                endif
-             else if(bc==-1)then
-                if(ipos <= nxgs-1)then
-                   up(1,ii,j,isp) = 2.0*nxgs-up(1,ii,j,isp)
-                   up(3,ii,j,isp) = -up(3,ii,j,isp)
-                endif
-                if(ipos >= nxge)then
-                   up(1,ii,j,isp) = 2.0*nxge-up(1,ii,j,isp)
-                   up(3,ii,j,isp) = -up(3,ii,j,isp)
-                endif
-             else
-                write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-                stop
-             endif
-
-             if(jpos <= nygs-1)then
-                jpos = jpos+(nyge-nygs+1)
-                up(2,ii,j,isp) = up(2,ii,j,isp)+(nyge-nygs+1)
-             endif
-             if(jpos >= nyge+1)then
-                jpos = jpos-(nyge-nygs+1)
-                up(2,ii,j,isp) = up(2,ii,j,isp)-(nyge-nygs+1)
-             endif
-          enddo
-       enddo
-    enddo
-
-  end subroutine boundary__particle
 
 
   subroutine boundary__den(den,nxgs,nxge,nygs,nyge,bc)

@@ -274,7 +274,8 @@ contains
              x(nxe1) = +x(nxe-1)
           endif
        endif
-          
+
+       sumr = 0.0
        do i=nxs,nxe
           r(i) = b(i)+x(i-1)-f1*x(i)+x(i+1)
           p(i) = r(i)

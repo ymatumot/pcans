@@ -14,13 +14,13 @@ module init
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
-  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, t_ani, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: q(nsp), r(nsp)
   !gx, gv, are temporal spaces used for the time integration
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=6),  public :: dir
-  character(len=10), public :: file10
-  character(len=10), public :: file12
-  real(8)                   :: pi
+  character(len=64), public :: dir
+  character(len=64), public :: file10
+  character(len=64), public :: file12
+  real(8)                   :: pi, vti, vte, va, rtemp, t_ani, fpe, fge, rgi, rge, ldb, b0
 
 
 contains
@@ -31,8 +31,8 @@ contains
     use fio, only : fio__input, fio__param
 
     real(8) :: fgi, fpi, alpha, beta
-    character(len=14) :: file9 
-    character(len=21) :: file11
+    character(len=64) :: file9 
+    character(len=64) :: file11
 
 !*********************************************************************
 !   time0   : start time (if time0 < 0, initial data from input.f)

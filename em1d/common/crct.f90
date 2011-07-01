@@ -4,16 +4,37 @@ module crct
 
   private
 
+  public :: crct__init
   public :: crct__ef
+
+  integer, save              :: np, nx, nsp, bc
+  real(8), save              :: delx
+  real(8), save, allocatable :: q(:)
+
 
 contains
 
-  subroutine crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
+
+  subroutine crct__init(npin,nxin,nspin,bcin,qin,delxin)
+    integer, intent(in) :: npin, nxin, nspin, bcin
+    real(8), intent(in) :: qin(nspin), delxin
+
+    np   = npin
+    nx   = nxin
+    nsp  = nspin
+    bc   = bcin
+    allocate(q(nsp))
+    q    = qin
+    delx = delxin
+
+  end subroutine crct__init
+
+
+  subroutine crct__ef(uf,up,np2)
 
     use boundary, only : boundary__charge
-    integer, intent(in)    :: np, nx, nsp, bc
     integer, intent(in)    :: np2(1:nx+bc,nsp)
-    real(8), intent(in)    :: up(4,np,1:nx+bc,nsp), q(nsp), delx
+    real(8), intent(in)    :: up(4,np,1:nx+bc,nsp)
     real(8), intent(inout) :: uf(6,0:nx+1)
     real(8), parameter :: eps = 1.0e-6
     integer :: i
@@ -29,8 +50,8 @@ contains
 !   d2/dx2 p = div E(before) - 4 pi den
 !-----------------------------------------------------------------------
 
-    call charge(cden,up,np,nx,nsp,np2,bc,q,idelx)
-    call boundary__charge(cden,nx,bc)
+    call charge(cden,up,np2,idelx)
+    call boundary__charge(cden)
 
     !div E - 4 pi den
     xx1 = 0.0
@@ -45,23 +66,22 @@ contains
        if(xx1/xx2 <= eps) return
     endif
 
-    call poisn(x,b,nx,bc)
+    call poisn(x,b)
 
     do i=1,nx
        uf(4,i) = uf(4,i)-(-x(i-1)+x(i))*idelx
     enddo
 
-    call boundary__field(uf,nx,bc)
+    call boundary__field(uf)
 
   end subroutine crct__ef
 
 
-  subroutine charge(cden,up,np,nx,nsp,np2,bc,q,idelx)
+  subroutine charge(cden,up,np2,idelx)
 
-    integer, intent(in)  :: np, nx, nsp, bc
     integer, intent(in)  :: np2(1:nx+bc,nsp)
     real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
-    real(8), intent(in)  :: q(nsp), idelx
+    real(8), intent(in)  :: idelx
     real(8), intent(out) :: cden(-1:nx+2)
     integer :: ii, i, isp, ih
     real(8) :: dx, dxm
@@ -99,9 +119,8 @@ contains
   end subroutine charge
 
 
-  subroutine poisn(x,b,nx,bc)
+  subroutine poisn(x,b)
 
-    integer, intent(in)  :: nx, bc
     real(8), intent(in)  :: b(0:nx+1)
     real(8), intent(out) :: x(0:nx+1)
     integer :: i

@@ -32,7 +32,6 @@ contains
        fac2 = fac1/c
        txxx = fac1*fac1
        fac3 = q(isp)*delt/r(isp)
-!$OMP PARALLEL DO PRIVATE(ii,i,j,ih,jh,dx,dxm,dy,dym,fac2r,fac3r,gam,bt2)
        do j=nys,nye
           do ii=1,np2(j,isp)
              i  = floor(up(1,ii,j,isp))
@@ -109,7 +108,6 @@ contains
              gp(2,ii,j,isp) = up(2,ii,j,isp)+gp(4,ii,j,isp)*delt*gam
           enddo
        enddo
-!$OMP END PARALLEL DO
     enddo
 
   end subroutine particle__solv

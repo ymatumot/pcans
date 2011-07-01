@@ -4,26 +4,42 @@ module boundary
 
   private
 
+  public :: boundary__init
   public :: boundary__field
   public :: boundary__particle
   public :: boundary__curre
   public :: boundary__charge
+  public :: boundary__phi
+
+  integer, save :: np, nx, nsp, bc
 
 
 contains
 
 
-  subroutine boundary__particle(up,np,nx,nsp,np2,bc)
+  subroutine boundary__init(npin,nxin,nspin,bcin)
+    integer, intent(in)    :: npin, nxin, nspin, bcin
 
-    integer, intent(in)    :: np, nx, nsp, bc
+    np  = npin
+    nx  = nxin
+    nsp = nspin
+    bc  = bcin
+
+  end subroutine boundary__init
+
+
+  subroutine boundary__particle(up,np2)
+
     integer, intent(inout) :: np2(1:nx+bc,nsp)
     real(8), intent(inout) :: up(4,np,1:nx+bc,nsp)
-    integer :: i, ii, iii, isp, ipos
-    integer :: cnt(1:nx+bc,nsp), flag(np,1:nx+bc,nsp), cnt_tmp
+    logical, save          :: lflag=.true.
+    integer :: i, ii, iii, isp, ipos, cnt_tmp
+    integer :: cnt(1:nx+bc,nsp), flag(np,1:nx+bc,nsp)
+
 
     cnt(1:nx+bc,1:nsp) = 0
     flag(1:np,1:nx+bc,1:nsp) = 0
-
+    
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)
@@ -94,9 +110,8 @@ contains
   end subroutine boundary__particle
 
 
-  subroutine boundary__field(uf,nx,bc)
+  subroutine boundary__field(uf)
 
-    integer, intent(in)    :: nx, bc
     real(8), intent(inout) :: uf(6,0:nx+1)
 
     if(bc == 0)then
@@ -122,9 +137,8 @@ contains
   end subroutine boundary__field
 
 
-  subroutine boundary__curre(uj,nx,bc)
+  subroutine boundary__curre(uj)
 
-    integer, intent(in)    :: nx, bc
     real(8), intent(inout) :: uj(3,-1:nx+2)
 
     if(bc == 0)then
@@ -150,9 +164,8 @@ contains
   end subroutine boundary__curre
 
 
-  subroutine boundary__charge(cden,nx,bc)
+  subroutine boundary__charge(cden)
 
-    integer, intent(in)    :: nx, bc
     real(8), intent(inout) :: cden(-1:nx+2)
 
     if(bc == 0)then
@@ -174,6 +187,25 @@ contains
 
   end subroutine boundary__charge
 
+
+  subroutine boundary__phi(x)
+
+    real(8), intent(inout) :: x(0:nx+1)
+
+    if(bc == 0)then
+       !periodic condition
+       x(0) = x(nx)
+       x(nx+1) = x(1)
+    else if(bc == -1)then
+       !reflective condition
+       x(0)  = x(2)
+       x(nx+1) = x(nx-1)
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
+    endif
+
+  end subroutine boundary__phi
 
 
 end module boundary

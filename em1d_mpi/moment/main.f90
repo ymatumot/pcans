@@ -38,7 +38,6 @@ program main
      call particle__solv(up,uf,                  &
                          c,q,r,0.5*delt,         &
                          np,nsp,np2,nxgs,nxge,bcp)
-     call boundary__particle(up,np,nxgs,nxge,nsp,np2,bc)
 
      call mom_calc__den(den,up(1,1:np,nxgs:nxge+bc,1:nsp),np,nxgs,nxge,nsp,np2,bc)
      do isp=1,nsp

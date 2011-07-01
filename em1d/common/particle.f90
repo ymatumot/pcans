@@ -5,19 +5,40 @@ module particle
 
   private
 
+  public :: particle__init
   public :: particle__solv
+
+  integer, save              :: np, nx, nsp, bc
+  real(8), save              :: c, delt
+  real(8), save, allocatable :: q(:), r(:)
 
 
 contains
 
 
-  subroutine particle__solv(gp,up,uf,c,q,r,delt,np,nx,nsp,np2,bc)
+  subroutine particle__init(npin,nxin,nspin,bcin,qin,rin,cin,deltin)
+    integer, intent(in) :: npin, nxin, nspin, bcin
+    real(8), intent(in) :: qin(nspin), rin(nspin), cin, deltin
 
-    integer, intent(in)  :: np, nx, nsp, bc
+    np   = npin
+    nx   = nxin
+    nsp  = nspin
+    bc   = bcin
+    allocate(q(nsp))
+    allocate(r(nsp))
+    q    = qin
+    r    = rin
+    c    = cin
+    delt = deltin
+
+  end subroutine particle__init
+
+
+  subroutine particle__solv(gp,up,uf,np2)
+
     integer, intent(in)  :: np2(1:nx+bc,nsp)
     real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
     real(8), intent(in)  :: uf(6,0:nx+1)
-    real(8), intent(in)  :: c, q(nsp), r(nsp), delt
     real(8), intent(out) :: gp(4,np,1:nx+bc,nsp)
     integer :: i, ii, isp, ih
     real(8) :: pf(6)
@@ -54,13 +75,14 @@ contains
              uvm(3) = up(4,ii,i,isp)+fac1*pf(6)
 
              gam = dsqrt(1.0+(+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))/(c*c))
+
              fac2r = fac2/gam
              fac3r = fac3/(gam+txxx*bt2/gam)
 
              uvm(4) = uvm(1)+fac2r*(+uvm(2)*pf(3)-uvm(3)*pf(2))
              uvm(5) = uvm(2)+fac2r*(+uvm(3)*pf(1)-uvm(1)*pf(3))
              uvm(6) = uvm(3)+fac2r*(+uvm(1)*pf(2)-uvm(2)*pf(1))
-    
+
              uvm(1) = uvm(1)+fac3r*(+uvm(5)*pf(3)-uvm(6)*pf(2))
              uvm(2) = uvm(2)+fac3r*(+uvm(6)*pf(1)-uvm(4)*pf(3))
              uvm(3) = uvm(3)+fac3r*(+uvm(4)*pf(2)-uvm(5)*pf(1))

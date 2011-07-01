@@ -31,7 +31,6 @@ program main
      endif
      
      call particle__solv(up,uf,c,q,r,0.5*delt,np2,np,nx,nsp,bc)
-     call boundary__particle(up,np,nx,nsp,np2,bc)
 
      call mom_calc__den(den,up(1,1:np,1:nx+bc,1:nsp),np,nx,nsp,np2,bc)
      do isp=1,nsp

@@ -14,7 +14,7 @@ module init
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
-  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: q(nsp), r(nsp), vti, vte, va, rtemp, t_ani,r_hc,fpe, fge, rgi, rge, ldb, b0
   !gx, gv, are temporal spaces used for the time integration
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
   character(len=6),  public :: dir
@@ -51,9 +51,9 @@ contains
 !           : 12 - for saving energy history
 !           : 13~14 - for w-k diagram
 !*********************************************************************
-    itmax  = 10000
-    intvl1 = 200
-    intvl2 = 100
+    itmax  = 50000
+    intvl1 = 100
+    intvl2 = 200
     intvl3 = 10
     dir    = './dat/'
     file9  = 'init_param.dat'
@@ -87,6 +87,8 @@ contains
 !   alpha : wpe/wge
 !   beta  : ion plasma beta
 !   rtemp : Te/Ti
+!   t_ani : Tperp/Tpara
+!   r_hc  : Thot/Tcold
 !*********************************************************************
     gfac = 0.505
     pi   = 4.0*atan(1.0)
@@ -103,6 +105,8 @@ contains
     alpha = 5.0
     beta  = 2.00
     rtemp = 1.0
+    t_ani = 3.0
+    r_hc  = 20.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
     fge = fpe/alpha
@@ -129,6 +133,7 @@ contains
     !charge
     q(1) = fpi*dsqrt(r(1)/(4.0*pi*np2(1,1)))
     q(2) = -q(1)
+    q(3) = -q(1)
 
     !Magnetic field strength
     b0 = fgi*r(1)*c/q(1)
@@ -146,7 +151,7 @@ contains
     use boundary, only : boundary__particle
 
     integer :: i, ii, isp
-    real(8) :: sd, aa, bb, v0, u0,gamma_sd
+    real(8) :: sd, sd2,aa, bb, v0, u0,gamma_sd,gamma_sd2
 
     v0 = 0.0*c
     u0 = v0/dsqrt(1.-(v0/c)**2)
@@ -169,19 +174,9 @@ contains
     do isp=1,nsp
        if(isp == 1) then 
           sd = vti/dsqrt(2.0D0)
-       endif
-       if(isp == 2) then
-          sd = vte/dsqrt(2.0D0)
-          gamma_sd=1./dsqrt(1.0-sd**2)
+          gamma_sd=1./dsqrt(1.0-(sd/c)**2)
 	  sd=sd*gamma_sd
        endif
-       if(isp == 3) then
-          sd = vte/dsqrt(2.0D0)
-          gamma_sd=1./dsqrt(1.0-sd**2)
-	  sd=sd*gamma_sd
-       endif
-
-
        do i=1,nx+bc
           do ii=1,np2(i,isp)
              call random_number(aa)
@@ -190,15 +185,51 @@ contains
 
              call random_number(aa)
              call random_number(bb)
-	     if(isp == 2.or.isp==3) then
-              up(3,ii,i,isp) = sqrt(3.0)*sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-              up(4,ii,i,isp) = sqrt(3.0)*sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
-	     else
-              up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-              up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
-	     endif
+             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
           enddo
        enddo
+
+       if(isp == 2) then
+          sd = vte/dsqrt(2.0D0)
+          gamma_sd=1./dsqrt(1.0-(sd/c)**2)
+	  sd=sd*gamma_sd
+       endif
+       do i=1,nx+bc
+          do ii=1,np2(i,isp)
+             call random_number(aa)
+             call random_number(bb)
+             up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
+
+             call random_number(aa)
+             call random_number(bb)
+             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+          enddo
+       enddo
+
+       if(isp == 3) then
+          sd = dsqrt(r_hc)*vte/dsqrt(2.0D0)
+          sd2=sd*sqrt(t_ani)
+          gamma_sd=1./dsqrt(1.0-(sd/c)**2)
+          gamma_sd2=1./dsqrt(1.0-(sd2/c)**2)
+	  sd=sd*gamma_sd
+          sd2=sd*gamma_sd2
+       endif
+       do i=1,nx+bc
+          do ii=1,np2(i,isp)
+             call random_number(aa)
+             call random_number(bb)
+             up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
+
+             call random_number(aa)
+             call random_number(bb)
+             up(3,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+             up(4,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+          enddo
+       enddo
+
+
     enddo 
 
     call boundary__particle(up,np,nx,nsp,np2,bc)

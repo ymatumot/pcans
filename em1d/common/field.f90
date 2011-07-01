@@ -4,37 +4,56 @@ module field
 
   private
 
+  public :: field__init
   public :: field__fdtd_i
+
+  integer, save              :: np, nx, nsp, bc, mglev
+  real(8), save              :: c, delx, delt, gfac, pi, fac1, fac2, ifac1
+  real(8), save, allocatable :: q(:), gf(:,:)
 
 
 contains
 
+
+  subroutine field__init(npin,nxin,nspin,bcin,qin,cin,delxin,deltin,gfacin)
+    integer, intent(in) :: npin, nxin, nspin, bcin
+    real(8), intent(in) :: qin(nspin), cin, delxin, deltin, gfacin  
+
+    np   = npin
+    nx   = nxin
+    nsp  = nspin
+    bc   = bcin
+    allocate(q(nsp))
+    q    = qin
+    c    = cin
+    delx = delxin
+    delt = deltin
+    gfac = gfacin
+    pi   = 4.0*atan(1.0)
+    allocate(gf(6,0:nx+1))
+    gf(1:3,0:nx+1) = 0.0
+
+    mglev = alog(float(nx))/alog(2.0)
+    fac1  = 2.0+(delx/(c*delt*gfac))**2
+    ifac1 = 1./fac1
+    fac2  = (delx/(c*delt*gfac))**2
+
+  end subroutine field__init
+
   
-  subroutine field__fdtd_i(uf,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt,gfac)
+  subroutine field__fdtd_i(uf,up,gp,np2)
 
     use boundary, only : boundary__curre, boundary__field
 
     !Implicit EM field solver
-    integer, intent(in)    :: np, nx, nsp, bc
     integer, intent(in)    :: np2(1:nx+bc,nsp)
-    real(8), intent(in)    :: q(nsp), c, delx, delt, gfac
     real(8), intent(in)    :: gp(4,np,1:nx+bc,nsp)
     real(8), intent(inout) :: up(4,np,1:nx+bc,nsp)
     real(8), intent(inout) :: uf(6,0:nx+1)
-    logical, save              :: lflag=.true.
-    integer                    :: ii, i, isp
-    real(8)                    :: uj(3,-1:nx+2), gkl(6,0:nx+1)
-    real(8), save, allocatable :: gf(:,:)
-    real(8)                    :: pi, f1, f2, f3, rotb2, rotb3, rote2, rote3
+    integer                :: ii, i, isp
+    real(8)                :: uj(3,-1:nx+2), gkl(6,0:nx+1)
+    real(8)                :: f1, f2, f3, rotb2, rotb3, rote2, rote3
 
-    pi = 4.0*atan(1.0)
-
-    if(lflag)then
-       allocate(gf(6,0:nx+1))
-       gf(1:3,0:nx+1) = 0.0
-       lflag = .false.
-    endif
-       
 !!$    !position at n+1/2
 !!$    do isp=1,nsp
 !!$       do i=1,nx+bc
@@ -45,8 +64,8 @@ contains
 !!$       enddo
 !!$    enddo
 !!$    call ele_cur2(uj,up,np,nx,nsp,np2,bc,q,c,delx)
-    call ele_cur(uj,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt)
-    call boundary__curre(uj,nx,bc)
+    call ele_cur(uj,up,gp,np2)
+    call boundary__curre(uj)
 
     !calculation
     !< gk =  (c*delt)*rot(b) - (4*pi*delt)*j >
@@ -73,7 +92,7 @@ contains
        gkl(6,i) = f1*rotb3-f2*uj(3,i)
     enddo
 
-    call boundary__field(gkl,nx,bc)
+    call boundary__field(gkl)
 
     f3 = c*delt*gfac/delx
     do i=1,nx
@@ -82,8 +101,11 @@ contains
     enddo
 
     !solve  < by & bz;  bx = const >
-    call cgm(gf,gkl,nx,c,delx,delt,gfac,bc)
-    call boundary__field(gf,nx,bc)
+!!$    call cgm(gf,gkl)
+    call mgpsn(gf,gkl)
+
+
+    call boundary__field(gf)
 
     !solve  < ex, ey & ez >
     do i=1,nx
@@ -94,7 +116,7 @@ contains
        gf(6,i) = gkl(6,i)+f3*(-gf(2,i)+gf(2,i+1))
     enddo
 
-    call boundary__field(gf,nx,bc)
+    call boundary__field(gf)
 
     !update fields
     uf(1:6,0:nx+1) = uf(1:6,0:nx+1)+gf(1:6,0:nx+1)
@@ -114,11 +136,9 @@ contains
   end subroutine field__fdtd_i
 
 
-  subroutine ele_cur(uj,up,gp,np,nx,nsp,np2,bc,q,c,delx,delt)
+  subroutine ele_cur(uj,up,gp,np2)
 
-    integer, intent(in)  :: np, nx, nsp, bc
     integer, intent(in)  :: np2(1:nx+bc,nsp)
-    real(8), intent(in)  :: q(nsp), c, delx, delt
     real(8), intent(in)  :: up(4,np,1:nx+bc,nsp), gp(4,np,1:nx+bc,nsp)
     real(8), intent(out) :: uj(3,-1:nx+2)
     integer :: ii, i, isp, ih, i1 ,i2
@@ -209,20 +229,20 @@ contains
   end subroutine ele_cur
 
 
-  subroutine cgm(gb,gl,nx,c,delx,delt,gfac,bc)
+  subroutine cgm(gb,gl)
 
     !-----------------------------------------------------------------------
     !  #  conjugate gradient method 
     !-----------------------------------------------------------------------
 
-    integer, intent(in)    :: nx, bc
-    real(8), intent(in)    :: c, delx, delt, gfac
+    use boundary, only : boundary__phi
+
     real(8), intent(in)    :: gl(6,0:nx+1)
     real(8), intent(inout) :: gb(6,0:nx+1)
-    integer :: ite_max = 100 ! maximum number of interation
+    integer, parameter     :: ite_max = 1000 ! maximum number of interation
     integer :: i, l, ite
-    real(8) :: err = 1d-6 
-    real(8) :: f1, f2, eps, sumr, sum, sum1, sum2, av, bv
+    real(8), parameter     :: err = 1d-9
+    real(8) :: eps, sumr, sum, sum1, sum2, av, bv
     real(8) :: x(0:nx+1), b(0:nx+1), r(0:nx+1), p(0:nx+1), ap(0:nx+1)
 
 
@@ -230,30 +250,19 @@ contains
 
        ! initial guess
        ite = 0
-       f1 = 2.0+(delx/(c*delt*gfac))**2
-       f2 = (delx/(c*delt*gfac))**2
        sum = 0.0
        do i=1,nx
           x(i) = gb(l,i)
-          b(i) = f2*gl(l,i)
+          b(i) = fac2*gl(l,i)
           sum = sum+b(i)*b(i)
        enddo
        eps = dsqrt(sum)*err
        
-       if(bc == 0)then
-          !periodic condition
-          x(0)    = x(nx)
-          x(nx+1) = x(1)
-       else if(bc == -1)then
-          !reflective condition
-          x(0)  = x(2)
-          x(nx+1) = x(nx-1)
-       else
-          write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-       endif
+       call boundary__phi(x)
 
+       sumr = 0.0
        do i=1,nx
-          r(i) = b(i)+x(i-1)-f1*x(i)+x(i+1)
+          r(i) = b(i)+x(i-1)-fac1*x(i)+x(i+1)
           p(i) = r(i)
           sumr = sumr+r(i)*r(i)
        enddo
@@ -264,21 +273,10 @@ contains
              
              ite = ite+1
 
-             if(bc == 0)then
-                !periodic condition
-                p(0)    = p(nx)
-                p(nx+1) = p(1)
-             else if(bc == -1)then
-                !reflective condition
-                p(0)  = p(2)
-                p(nx+1) = p(nx-1)
-             else
-                write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-                stop
-             endif
+             call boundary__phi(p)
        
              do i=1,nx
-                ap(i) = -p(i-1)+f1*p(i)-p(i+1)
+                ap(i) = -p(i-1)+fac1*p(i)-p(i+1)
              enddo
              sumr = 0.0
              sum2 = 0.0
@@ -304,8 +302,9 @@ contains
              bv = sum1/sumr
              
              p(1:nx) = r(1:nx)+bv*p(1:nx)
-             
+
           enddo
+
        endif
 
        gb(l,1:nx) = x(1:nx)
@@ -314,12 +313,259 @@ contains
     
   end subroutine cgm
 
+  
+  subroutine mgpsn(gb,gl)
 
-!!$  subroutine ele_cur2(uj,up,np,nx,nsp,np2,bc,q,c,delx)
+    !-----------------------------------------------------------------------
+    !  # Multi-grid Poisson solver
+    !-----------------------------------------------------------------------
+    use boundary, only : boundary__init, boundary__phi
+
+    real(8), intent(in)            :: gl(6,0:nx+1)
+    real(8), intent(inout)         :: gb(6,0:nx+1)
+    logical, save                  :: lflag=.true.
+    integer, parameter             :: ite_max=1000
+    integer, save, allocatable     :: nxmg(:)
+    integer                        :: i, l, p, ite
+    real(8), parameter             :: err = 1d-9
+    real(8)                        :: sum, sumr, eps
+    real(8)                        :: b(0:nx+1),x(0:nx+1)
+    type mgstr
+       real(8), pointer            :: rmg(:), xmg(:), dxmg(:)
+    end type mgstr
+    type(mgstr), save, allocatable :: mg(:)
+
+    ! Setup for Multigrid     !
+    ! l=0     : finest grid   !
+    ! l=mglev : coarsest grid !
+
+    if(lflag)then
+       allocate(mg(0:mglev))
+       allocate(nxmg(0:mglev))
+
+       nxmg(0)   = nx
+       allocate(mg(0)%rmg(0:nxmg(0)+1))
+       allocate(mg(0)%xmg(0:nxmg(0)+1))
+       allocate(mg(0)%dxmg(0:nxmg(0)+1))
+
+       do l=1,mglev
+          nxmg(l) = (nxmg(l-1)+mod(nxmg(l-1),2))/2
+          allocate(mg(l)%rmg(0:nxmg(l)+1))
+          allocate(mg(l)%xmg(0:nxmg(l)+1))
+          allocate(mg(l)%dxmg(0:nxmg(l)+1))
+       enddo
+
+       lflag=.false.
+    endif
+
+    do p=2,3
+
+       ! initial guess    
+       ite = 0
+       sum = 0.0
+       do i=1,nx
+          x(i) = gb(p,i)
+          b(i) = fac2*gl(p,i)
+          sum = sum+b(i)*b(i)
+       enddo
+       eps = dsqrt(sum)*err
+       
+       call boundary__phi(x)
+
+       sumr = 0.0
+       do i=1,nx
+          sumr = sumr+(b(i)+x(i-1)-fac1*x(i)+x(i+1))**2
+       enddo
+
+       do while(dsqrt(sumr) > eps)
+
+          ite = ite+1
+
+          !Initializations
+          do i=0,nxmg(0)+1
+             mg(0)%xmg(i) = x(i)
+          enddo
+          
+          do l=1,mglev
+             do i=0,nxmg(l)+1
+                mg(l)%xmg(i) = 0.0D0
+                mg(l)%rmg(i) = 0.0D0
+                mg(l)%dxmg(i) = 0.0D0
+             enddo
+          enddo
+          
+          !Initial smoothing by Red-Black Symmetric SOR method
+          call ssor(mg(0)%xmg,nxmg(0),b)
+
+          !residual
+          do i=1,nxmg(0)
+             mg(0)%rmg(i) = +b(i)+mg(0)%xmg(i-1)-fac1*mg(0)%xmg(i)+mg(0)%xmg(i+1)
+          enddo
+          
+          call boundary__phi(mg(0)%rmg)
+
+          !Start Multigrid
+          !From finest to coarsest grids
+          do l=1,mglev
+
+             call boundary__init(np,nxmg(l),nsp,bc)
+             call rstrct(mg(l)%rmg,nxmg(l),nxmg(l-1),mg(l-1)%rmg)
+             call ssor(mg(l)%xmg,nxmg(l),mg(l)%rmg)
+
+             !residual
+             do i=1,nxmg(l)
+                mg(l)%rmg(i) = +mg(l)%rmg(i)                                     &
+                               +mg(l)%xmg(i-1)-fac1*mg(l)%xmg(i)+mg(l)%xmg(i+1)
+             enddo
+             
+             call boundary__phi(mg(l)%rmg)
+             
+          enddo
+
+          !From coarsest to finest grids
+          do l=mglev-1,1,-1
+             
+             call boundary__init(np,nxmg(l),nsp,bc)
+             call prolng(mg(l)%dxmg,nxmg(l),nxmg(l+1),mg(l+1)%xmg)
+             call boundary__phi(mg(l)%dxmg)
+             
+             do i=0,nxmg(l)+1
+                mg(l)%xmg(i) = mg(l)%xmg(i)+mg(l)%dxmg(i)
+             enddo
+             
+             call ssor(mg(l)%xmg,nxmg(l),mg(l)%rmg)
+          enddo
+       
+          l=0
+          call boundary__init(np,nxmg(l),nsp,bc)
+          call prolng(mg(l)%dxmg,nxmg(l),nxmg(l+1),mg(l+1)%xmg)
+          call boundary__phi(mg(l)%dxmg)
+
+          do i=0,nxmg(l)+1
+             mg(l)%xmg(i) = mg(l)%xmg(i)+mg(l)%dxmg(i)
+          enddo
+
+          call ssor(mg(0)%xmg,nx,b)
+
+          x(0:nx+1) = mg(0)%xmg(0:nx+1)
+
+          sumr = 0.0
+          do i=1,nx
+             sumr = sumr+(b(i)+x(i-1)-fac1*x(i)+x(i+1))**2
+          enddo
+       enddo
+
+       !update
+       gb(p,0:nx+1) = x(0:nx+1)
+    enddo
+
+  end subroutine mgpsn
+
+
+  subroutine ssor(x,nx,b)
+
+    !-----------------------------------------------------------------------
+    !  #  Symetric SOR method 
+    !-----------------------------------------------------------------------
+    use boundary, only : boundary__phi
+
+    integer, intent(in)    :: nx
+    real(8), intent(inout) :: x(0:nx+1)
+    real(8), intent(in)    :: b(0:nx+1)
+    integer, parameter     :: ite_max=1
+    integer                :: l, i, ip, im, ite
+    real(8), parameter     :: err = 1d-6 
+    real(8), parameter     :: alpha=1.0D0
+    real(8)                :: sum, sumr, dx, eps
+
+    ! initial guess
+    ite = 0
+!!$    sum = 0.0
+!!$    do i=1,nx
+!!$       sum = sum+b(i)*b(i)
+!!$    enddo
+!!$    eps = dsqrt(sum)*err
+    
+    call boundary__phi(x)
+
+!!$    sumr = 0.0
+!!$    do i=1,nx
+!!$       sumr = sumr+(b(i)+x(i-1)-fac1*x(i)+x(i+1))**2
+!!$    enddo
+    
+!!$    if(dsqrt(sumr) > eps)then
+!!$          do while(dsqrt(sumr) > eps)
+       do while(ite < ite_max)
+
+          ite = ite+1
+
+!!$          sumr = 0.0
+          do i=1,nx
+             dx = b(i)+x(i-1)-fac1*x(i)+x(i+1)
+             x(i) = +x(i)+ifac1*dx*alpha
+!!$             sumr = sumr+dx**2
+          enddo
+
+          call boundary__phi(x)
+
+          do i=nx,1,-1
+             dx = b(i)+x(i-1)-fac1*x(i)+x(i+1)
+             x(i) = +x(i)+ifac1*dx*alpha
+          enddo
+
+          call boundary__phi(x)
+          
+!!$          sumr = 0.0
+!!$          do i=1,nx
+!!$             sumr = sumr+(b(i)+x(i-1)-fac1*x(i)+x(i+1))**2
+!!$          enddo
+          
+       enddo
+!!$    endif
+
+  end subroutine ssor
+
+
+  subroutine rstrct(fout,nx,nxin,fin)
+
+    real(8), intent(out) :: fout(0:nx+1)
+    integer, intent(in)  :: nx, nxin
+    real(8), intent(in)  :: fin(0:nxin+1)
+    integer              :: i, i2
+    real(8), parameter   :: fac=1.D0/4.D0
+
+    do i=1,nx
+       i2 = (i-1)*2+1
+
+       fout(i) = (+fin(i2-1)+2.*fin(i2)+fin(i2+1))*fac
+    enddo
+
+  end subroutine rstrct
+
+
+  subroutine prolng(fout,nx,nxin,fin)
+
+    real(8), intent(out)   :: fout(0:nx+1)
+    integer, intent(in)    :: nx, nxin
+    real(8), intent(in)    :: fin(0:nxin+1)
+    integer                :: i, i2
+
+    do i=1,nx
+       i2 = (i-1)/2+1
+
+       if(mod(i-1,2)==0)then
+          fout(i) = fin(i2)
+       else if(mod(i-1,2)==1)then
+          fout(i) = 0.5*(+fin(i2)+fin(i2+1))
+       endif
+    enddo
+
+  end subroutine prolng
+
+
+!!$  subroutine ele_cur2(uj,up,np2)
 !!$
-!!$    integer, intent(in)  :: np, nx, nsp, bc
 !!$    integer, intent(in)  :: np2(1:nx+bc,nsp)
-!!$    real(8), intent(in)  :: q(nsp), c, delx
 !!$    real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
 !!$    real(8), intent(out) :: uj(3,-1:nx+2)
 !!$    integer :: ii, i, isp, ih
