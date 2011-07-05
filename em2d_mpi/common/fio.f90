@@ -50,8 +50,8 @@ contains
   end subroutine fio__output
 
 
-  subroutine fio__input(up,uf,c,q,r,delt,delx,it0,                                     &
-                        np,np2,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,bc,nproc,nrank, &
+  subroutine fio__input(up,uf,np2,c,q,r,delt,delx,it0,                             &
+                        np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,bc,nproc,nrank, &
                         dir,file)
     integer, intent(in)  :: np, nxgs, nxge, nygs, nyge, nxs, nxe, nys, nye, nsp, bc, nproc, nrank
     character(len=*), intent(in) :: dir, file
