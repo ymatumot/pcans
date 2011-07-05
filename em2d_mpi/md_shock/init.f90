@@ -71,16 +71,14 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 80000
-    intvl1 = 2000
-    intvl2 = 2000
-!!$    dir    = '../../dat/shock/run1/'          !for pc
-!!$    dir    = './pic/shock/run1/'              !for hx600
-    dir    = '/large/m/m082/pic/shock/run1/'   !for fx1@jaxa
+    itmax  = 40000
+    intvl1 = 1000
+    intvl2 = 1000
+    dir    = './dat/'   !for fx1@jaxa
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
     gfac   = 0.505
-    it0    = 1
+    it0    = 0
 
 !*********************************************************************
 !   r(1)  : ion mass             r(2)  : electron mass
@@ -101,7 +99,7 @@ contains
     delt = 1.0
     ldb  = delx
 
-    r(1) = 100.0
+    r(1) = 25.0
     r(2) = 1.0
 
     alpha = 10.0
