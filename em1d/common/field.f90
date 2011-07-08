@@ -31,7 +31,7 @@ contains
     gfac = gfacin
     pi   = 4.0*atan(1.0)
     allocate(gf(6,0:nx+1))
-    gf(1:3,0:nx+1) = 0.0
+    gf(1:6,0:nx+1) = 0.0
 
     mglev = alog(float(nx))/alog(2.0)
     fac1  = 2.0+(delx/(c*delt*gfac))**2

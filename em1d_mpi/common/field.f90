@@ -35,7 +35,7 @@ contains
 
     if(flag /=1)then
        allocate(gf(6,nxs1:nxe1))
-       gf(1:3,nxs1:nxe1) = 0.0
+       gf(1:6,nxs1:nxe1) = 0.0
        flag=1
     endif
 
