@@ -304,8 +304,10 @@ contains
 
     !set Ex and Bz
     do j=nys,nye
-       uf(3,nxs,j)  = b0
-       uf(5,nxs,j)  = v0*b0/c
+       uf(3,nxs,j) = b0
+       uf(5,nxs,j) = v0*b0/c
+       uf(3,nxs+1,j) = b0
+       uf(5,nxs+1,j) = v0*b0/c
     enddo
 
     call boundary__field(uf,                 &

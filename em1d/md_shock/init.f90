@@ -83,11 +83,11 @@ contains
     delt = 2.0
     ldb  = delx
 
-    r(1) = 25.0
+    r(1) = 100.0
     r(2) = 1.0
 
-    alpha = 20.0
-    beta  = 0.1
+    alpha = 10.0
+    beta  = 0.5
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -106,7 +106,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    n0  = 50
+    n0  = 40
     np2(1:nx+bc,1:2) = n0
 
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
@@ -220,8 +220,9 @@ contains
 
     i   = 1
     isp = 1
-    dn  = n0-min(np2(i,1),np2(i,2))
     dx  = v0*delt/delx
+!!$    dn  = n0-min(np2(i,1),np2(i,2))
+    dn  = n0*dx
 
     do ii=1,dn
        ii2 = np2(i,1)+ii
