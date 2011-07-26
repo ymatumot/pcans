@@ -22,7 +22,7 @@ init.o : const.o $(LIB_DIR)/libem1d.a
 
 ##############moment calculation################
 moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./dat/ `cd dat; \ls 006000*_file10.dat`
+	$(LIB_DIR)/moment/mom.out ./dat/ `cd dat; \ls 06*_file10.dat`
 
 $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make

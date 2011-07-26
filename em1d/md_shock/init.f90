@@ -53,9 +53,9 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 200000
-    intvl1 = 2000
-    intvl2 = 2000
+    itmax  = 75000
+    intvl1 = 2500
+    intvl2 = 2500
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -80,10 +80,10 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 2.0
+    delt = 0.5
     ldb  = delx
 
-    r(1) = 100.0
+    r(1) = 25.0
     r(2) = 1.0
 
     alpha = 10.0
@@ -100,7 +100,7 @@ contains
     vte = rge*fge
     vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
 
-    v0 = 10.*va
+    v0 = 20.*va
     u0 = v0/dsqrt(1.-(v0/c)**2)
 
     fgi = fge*r(2)/r(1)

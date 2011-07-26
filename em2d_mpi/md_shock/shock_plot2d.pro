@@ -98,7 +98,7 @@ device,/close
 
 endfor
 
-x
+set_x
 
 end
 

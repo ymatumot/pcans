@@ -8,7 +8,9 @@
 
 pro plot_clcnt, z,xax=xax,yax=yax,ct=ct,sym=sym,maxz=maxz,minz=minz,$
                 keep_aspect=keep_aspect,pos=pos,nocolbar=nocolbar,$
-                noerase=noerase,_Extra=_Extra,charsize=charsize
+                noerase=noerase,_Extra=_Extra,charsize=charsize,$
+                ver_colbar=ver_colbar
+
 common wdw, px,py,sx,sy
 
 ;; CHECK INPUT VARIABLE
@@ -19,14 +21,12 @@ if(not(keyword_set(z)))then begin
     endif
 endif
 
-
 ;; CHECK COLOR TABLE
 if(not(keyword_set(ct)))then ct=0
 if(ct gt 40) then begin
     print,'No such color table.'
     return
 endif
-
 
 ;; READ THE SIZE OF THE MATRIX
 z = reform(z)
@@ -60,48 +60,54 @@ yax2=yax2+(max(yax2)-min(yax2))/n_line*0.5
 
 if(not(keyword_set(noerase)))then erase
 
+;; Drawing area
+if(not(keyword_set(ver_colbar)))then begin
+   xs = 0.15
+   ys = 0.18
+   xe = 0.92
+   ye = 0.95
+   ;; for color bar
+   xsc = 0.15
+   ysc = 0.06
+   xec = 0.92
+   yec = 0.08
+endif else begin
+   xs = 0.15
+   ys = 0.15
+   xe = 0.87
+   ye = 0.87
+   ;; for color bar
+   xsc = 0.89
+   ysc = 0.15
+   xec = 0.91
+   yec = 0.87
+endelse
+  
+if(keyword_set(pos) and n_elements(pos) eq 4)then begin
+   xs=pos(0)
+   ys=pos(1)
+   xe=pos(2)
+   ye=pos(3)
+endif
+
 ;; ADD COLOR BAR
 if(not(keyword_set(nocolbar)))then begin
 
-    if(keyword_set(pos) and n_elements(pos) eq 4)then begin
-        xs=pos(0)
-        xe=pos(1)
-        ys=pos(2)-0.05
-        ye=ys+0.01
-    endif else begin
-        xs = 0.15	
-        xe = 0.92
-        ys = 0.06
-        ye = 0.08
-    endelse
-
-    if(keyword_set(sym) and min(z) lt 0.0) then begin
-        color_bar,z,ct=ct,xs,xe,ys,ye,maxz=maxz,minz=minz,/sym,charsize=charsize
-    endif else begin
-        color_bar,z,ct=ct,xs,xe,ys,ye,maxz=maxz,minz=minz,charsize=charsize
-    endelse
+   if(not(keyword_set(ver_colbar)))then begin
+      if(keyword_set(sym) and min(z) lt 0.0) then begin
+         color_bar,z,ct=ct,xsc,ysc,xec,yec,maxz=maxz,minz=minz,/sym,charsize=charsize
+      endif else begin
+         color_bar,z,ct=ct,xsc,ysc,xec,yec,maxz=maxz,minz=minz,charsize=charsize
+      endelse
+   endif else begin
+      if(keyword_set(sym) and min(z) lt 0.0) then begin
+         color_bar,z,ct=ct,xsc,ysc,xec,yec,maxz=maxz,minz=minz,/sym,charsize=charsize,/ver
+      endif else begin
+         color_bar,z,ct=ct,xsc,ysc,xec,yec,maxz=maxz,minz=minz,charsize=charsize,/ver
+      endelse
+   endelse
 
 endif
-
-;; SET THE SIZE OF THE WINDOW
-if(keyword_set(pos) and n_elements(pos) eq 4)then begin
-    xs=pos(0)
-    xe=pos(1)
-    ys=pos(2)
-    ye=pos(3)
-endif else begin
-    if(keyword_set(nocolbar))then begin
-        xs = 0.15
-        xe = 0.92
-        ys = 0.06
-        ye = 0.95
-    endif else begin
-        xs = 0.15
-        xe = 0.92
-        ys = 0.18
-        ye = 0.95
-    endelse
-endelse
 
 set_window, xs, xe, ys, ye
 
