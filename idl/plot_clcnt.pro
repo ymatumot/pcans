@@ -91,7 +91,7 @@ if(keyword_set(pos) and n_elements(pos) eq 4)then begin
 endif
 
 ;; ADD COLOR BAR
-if(not(keyword_set(nocolbar)))then begin
+if(not(keyword_set(nocolbar)) and not(keyword_set(pos)))then begin
 
    if(not(keyword_set(ver_colbar)))then begin
       if(keyword_set(sym) and min(z) lt 0.0) then begin
