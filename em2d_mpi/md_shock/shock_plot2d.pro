@@ -67,38 +67,38 @@ xrange = [max([xpos-8.*L,0]),min([xpos+5.*L,nx-1])]
 plot_clcnt,dni[xrange[0]:xrange[1],*]/n0,title='!6N!Ii!N/N!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.95,0.87,0.97],/keep,ct=ct,$
+           pos=[0.1,0.87,0.95,0.97],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax
 
 plot_clcnt,dne[xrange[0]:xrange[1],*]/n0,title='!6N!Ie!N/N!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.95,0.67,0.77],/keep,ct=ct,$
+           pos=[0.1,0.67,0.95,0.77],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
 
 plot_clcnt,bz[xrange[0]:xrange[1],*]/b0,title='!6B!Iz!N/B!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.95,0.47,0.57],/keep,ct=ct,$
+           pos=[0.1,0.47,0.95,0.57],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
 
 plot_clcnt,ex[xrange[0]:xrange[1],*]/e0,title='!6E!Ix!N/E!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.95,0.27,0.37],/keep,ct=ct,$
+           pos=[0.1,0.27,0.95,0.37],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
 
 plot_clcnt,ey[xrange[0]:xrange[1],*]/e0,title='!6E!Iy!N/E!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.95,0.07,0.17],/keep,ct=ct,$
+           pos=[0.1,0.07,0.95,0.17],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
 
 device,/close
 
 endfor
 
-set_x
+x
 
 end
 
