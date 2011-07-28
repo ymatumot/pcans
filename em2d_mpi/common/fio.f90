@@ -67,7 +67,7 @@ contains
     !time & parameters
     read(101+nrank)it0,inp,inxgs,inxge,inygs,inyge,inxs,inxe,inys,inye,insp,inproc,ibc,delt,delx,c
     if((inxgs /= nxgs) .or. (inxge /= nxge)  .or.(inygs /= nygs) .or. (inyge /= nyge) &
-       (inxs /= nxs) .or. (inxe /= nxe)  .or.(inys /= nys) .or. (inye /= nye)         &
+       .or. (inxs /= nxs) .or. (inxe /= nxe)  .or.(inys /= nys) .or. (inye /= nye)         &
        .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc) .or. (inproc /= nproc))then
        write(6,*) '** parameter mismatch **'
        stop
