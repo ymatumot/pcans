@@ -59,14 +59,15 @@ contains
     real(8), intent(out) :: up(5,np,nys:nye,nsp)
     real(8), intent(out) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
     real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
-    integer :: inp, inxgs, inxge, inygs, inyge, insp, ibc, inproc
+    integer :: inp, inxgs, inxge, inygs, inyge, inxs, inxe, inys, inye, insp, ibc, inproc
 
     !filename
     open(101+nrank,file=trim(dir)//trim(file),form='unformatted')
 
     !time & parameters
-    read(101+nrank)it0,inp,inxgs,inxge,inygs,inyge,insp,inproc,ibc,delt,delx,c
+    read(101+nrank)it0,inp,inxgs,inxge,inygs,inyge,inxs,inxe,inys,inye,insp,inproc,ibc,delt,delx,c
     if((inxgs /= nxgs) .or. (inxge /= nxge)  .or.(inygs /= nygs) .or. (inyge /= nyge) &
+       (inxs /= nxs) .or. (inxe /= nxe)  .or.(inys /= nys) .or. (inye /= nye)         &
        .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc) .or. (inproc /= nproc))then
        write(6,*) '** parameter mismatch **'
        stop
