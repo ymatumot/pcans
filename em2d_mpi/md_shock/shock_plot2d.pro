@@ -67,32 +67,37 @@ xrange = [max([xpos-8.*L,0]),min([xpos+5.*L,nx-1])]
 plot_clcnt,dni[xrange[0]:xrange[1],*]/n0,title='!6N!Ii!N/N!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.87,0.95,0.97],/keep,ct=ct,$
+           pos=[0.1,0.83,0.85,0.95],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax
+color_bar,dni[xrange[0]:xrange[1],*]/n0,ct=ct,0.88,0.83,0.90,0.95,charsize=chars,/ver
 
 plot_clcnt,dne[xrange[0]:xrange[1],*]/n0,title='!6N!Ie!N/N!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.67,0.95,0.77],/keep,ct=ct,$
+           pos=[0.1,0.64,0.85,0.76],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
+color_bar,dne[xrange[0]:xrange[1],*]/n0,ct=ct,0.88,0.64,0.90,0.76,charsize=chars,/ver
 
 plot_clcnt,bz[xrange[0]:xrange[1],*]/b0,title='!6B!Iz!N/B!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.47,0.95,0.57],/keep,ct=ct,$
+           pos=[0.1,0.45,0.85,0.57],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
+color_bar,bz[xrange[0]:xrange[1],*]/b0,ct=ct,0.88,0.45,0.90,0.57,charsize=chars,/ver
 
 plot_clcnt,ex[xrange[0]:xrange[1],*]/e0,title='!6E!Ix!N/E!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.27,0.95,0.37],/keep,ct=ct,$
+           pos=[0.1,0.26,0.85,0.38],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
+color_bar,ex[xrange[0]:xrange[1],*]/e0,ct=ct,0.88,0.26,0.90,0.38,charsize=chars,/ver
 
 plot_clcnt,ey[xrange[0]:xrange[1],*]/e0,title='!6E!Iy!N/E!I0!N',$
            xtitle='!6 X c/!7x!I!6pi!N',$
            ytitle='!6 Y c/!7x!I!6pi!N',chars=chars,$
-           pos=[0.1,0.07,0.95,0.17],/keep,ct=ct,$
+           pos=[0.1,0.07,0.85,0.19],/keep,ct=ct,$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
+color_bar,ey[xrange[0]:xrange[1],*]/e0,ct=ct,0.88,0.07,0.90,0.19,charsize=chars,/ver
 
 device,/close
 
