@@ -9,7 +9,7 @@ OBJS = fio.o particle.o field.o crct.o boundary.o
 .SUFFIXES :
 .SUFFIXES : .o .f90
 .f90.o:
-	$(FC) $(FFLAGS) -c $< -module $(MODS_DIR) 
+	$(FC) $(FFLAGS) -c $<
 
 '.update' : $(OBJS)
 	ar -r $(TARGET) $(OBJS)

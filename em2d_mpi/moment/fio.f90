@@ -146,12 +146,6 @@ contains
     vel(nxgs:nxge+bc,nygs:nyge,3,1:nsp) = vel(nxgs:nxge+bc,nygs:nyge,3,1:nsp) &
                                          /den(nxgs:nxge+bc,nygs:nyge,1:nsp)
 
-!!$    temp(nxgs:nxge+bc,nygs:nyge,1,1:nsp) = temp(nxgs:nxge+bc,nygs:nyge,1,1:nsp) &
-!!$                                           /den(nxgs:nxge+bc,nygs:nyge,1:nsp)
-!!$    temp(nxgs:nxge+bc,nygs:nyge,2,1:nsp) = temp(nxgs:nxge+bc,nygs:nyge,2,1:nsp) &
-!!$                                           /den(nxgs:nxge+bc,nygs:nyge,1:nsp)
-!!$    temp(nxgs:nxge+bc,nygs:nyge,3,1:nsp) = temp(nxgs:nxge+bc,nygs:nyge,3,1:nsp) &
-!!$                                           /den(nxgs:nxge+bc,nygs:nyge,1:nsp)
     temp(nxgs:nxge+bc,nygs:nyge,1,1:nsp) = +temp(nxgs:nxge+bc,nygs:nyge,1,1:nsp) &
                                             /den(nxgs:nxge+bc,nygs:nyge,1:nsp)   &
                                            -vel(nxgs:nxge+bc,nygs:nyge,1,1:nsp)**2

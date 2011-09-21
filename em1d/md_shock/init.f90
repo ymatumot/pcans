@@ -53,15 +53,15 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 75000
-    intvl1 = 2500
-    intvl2 = 2500
-    dir    = './dat/'
+    itmax  = 200000
+    intvl1 = 20000
+    intvl2 = 20000
+    dir    = './dat1/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
     gfac   = 0.505
-    it0    = 0
+    it0    = 1
 
 !*********************************************************************
 !   r(1)  : ion mass             r(2)  : electron mass
@@ -80,13 +80,13 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 0.5
+    delt = 0.25
     ldb  = delx
 
     r(1) = 25.0
     r(2) = 1.0
 
-    alpha = 10.0
+    alpha = 20.0
     beta  = 0.5
     rtemp = 1.0
 
@@ -100,7 +100,7 @@ contains
     vte = rge*fge
     vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
 
-    v0 = 20.*va
+    v0 = -20.*va
     u0 = v0/dsqrt(1.-(v0/c)**2)
 
     fgi = fge*r(2)/r(1)
@@ -123,7 +123,7 @@ contains
 
     if(it0 /= 0)then
        !start from the past calculation
-       file11 = '999999_test10.dat'
+       file11 = '020000_test10.dat'
        call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
        return
     endif
@@ -220,8 +220,7 @@ contains
 
     i   = 1
     isp = 1
-    dx  = v0*delt/delx
-!!$    dn  = n0-min(np2(i,1),np2(i,2))
+    dn  = n0-min(np2(i,1),np2(i,2))
     dn  = n0*dx
 
     do ii=1,dn
@@ -259,10 +258,11 @@ contains
     enddo
 
     !set Ex and Bz
-    i=1
+    i=nx
     uf(3,i) = b0
+    i=nx-1
     uf(5,i) = v0*b0/c
-    uf(5,i-1) = uf(5,i)
+    uf(5,i+1) = uf(5,i)
 
   end subroutine init__inject
 

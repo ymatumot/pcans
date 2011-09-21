@@ -155,6 +155,7 @@ contains
 
        uj(1  ,nx-1) = uj(1  ,nx-1)+uj(1  ,nx+1)
        uj(2:3,nx-1) = uj(2:3,nx-1)-uj(2:3,nx)
+       uj(1  ,nx-2) = uj(1  ,nx-2)+uj(1  ,nx+2)
        uj(2:3,nx-2) = uj(2:3,nx-2)-uj(2:3,nx+1)
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'

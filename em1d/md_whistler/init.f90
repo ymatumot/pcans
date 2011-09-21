@@ -199,7 +199,7 @@ contains
        endif
     enddo
 
-    call boundary__particle(up,np,nx,nsp,np2,bc)
+    call boundary__particle(up,np2)
 
   end subroutine init__loading
 
@@ -228,7 +228,7 @@ contains
        uf(6,i) = 0.0
     enddo
 
-    call boundary__field(uf,nx,bc)
+    call boundary__field(uf)
 
   end subroutine init__set_field
 

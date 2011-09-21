@@ -5,15 +5,15 @@ va  = 2.0E-2
 wgi = 2.0E-4
 Mm  = 25
 q   = 2.23d-3
-v0  = va*10.
+v0  = va*20.
 u0  = v0/sqrt(1.-v0^2)
 L   = u0/wgi
 n0  = 40
 b0  = wgi*Mm/q
 e0  = v0*b0/c
 dt  = 2500.*0.5*wgi
-ui_range = [-0.5*c,0.5*c]
-ue_range = [-0.75*c,0.75*c]
+ui_range = [-0.8*c,0.8*c]
+ue_range = [-0.95*c,0.95*c]
 
 ct  = 2
 chars = 0.8 
@@ -43,7 +43,7 @@ time = (findgen(nt)+1)*dt
 dir   = 'img/'
 fname = 'shock'
 
-for i=23,nt-1 do begin
+for i=1,1 do begin
 
 set_ps,dir+fname+strcompress(string(i,format='(I03)'),/remove)+'.eps'
 
@@ -66,7 +66,8 @@ x = (findgen(nx)+0.5)/L
 
 max_n = max(dne[0:nx*9./10],xpos)
 xpos = xpos/L
-xrange = [xpos-0.8,xpos+0.4]
+;; xrange = [xpos-0.8,xpos+0.4]
+xrange = [min(fi[0,*]),max(fi[0,*])]/L
 
 ;; psd calculation
 psd_calc,psdi,xax_i,yax_i,fi[0,*]/L,fi[1,*],$

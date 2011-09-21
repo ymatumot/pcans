@@ -7,12 +7,12 @@ OBJS = const.o init.o main.o
 .SUFFIXES :
 .SUFFIXES : .o .f90
 .f90.o:
-	$(FC) -L$(LIB_DIR) $(FFLAGS) -I $(LIB_DIR)/mods -c $< -lem2d
+	$(FC) -L$(LIB_DIR) $(FFLAGS) -I $(LIB_DIR)/common -c $< -lem2d
 
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(FC) -L$(LIB_DIR) -o a.out $(FFLAGS) $(OBJS) -I $(LIB_DIR)/mods -lem2d 
+	$(FC) -L$(LIB_DIR) -o a.out $(FFLAGS) $(OBJS) -lem2d 
 
 $(LIB_DIR)/libem2d.a : 
 	cd $(LIB_DIR) ; make

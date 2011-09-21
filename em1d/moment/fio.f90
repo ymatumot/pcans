@@ -80,59 +80,54 @@ contains
 
     real(8), intent(inout) :: den(0:nx+1,nsp), vel(0:nx+1,3,nsp), temp(0:nx+1,3,nsp)
     character(len=*), intent(in) :: dir
-    integer :: i, j, n_file
+    integer :: i
     real(8) :: tmp(0:nx+1,6)
     character(len=256) :: filename
 
-    do i=1,nsp
-       n_file=10+i-1
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'den_',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-    enddo
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_i.dat'
+    open(10,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_e.dat'
+    open(11,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_i.dat'
+    open(12,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_i.dat'
+    open(13,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_i.dat'
+    open(14,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_e.dat'
+    open(15,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_e.dat'
+    open(16,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_e.dat'
+    open(17,file=filename,status='unknown')
 
-    do i=1,nsp
-       n_file=10+nsp+(i-1)*3
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Txx_',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-       n_file=10+nsp+(i-1)*3+1
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tyy_',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-       n_file=10+nsp+(i-1)*3+2
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'Tzz_',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-    enddo
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxi.dat'
+    open(18,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vyi.dat'
+    open(19,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vzi.dat'
+    open(20,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxe.dat'
+    open(21,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vye.dat'
+    open(22,file=filename,status='unknown')
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vze.dat'
+    open(23,file=filename,status='unknown')
 
-    do i=1,nsp
-       n_file=10+nsp+3*nsp+(i-1)*3
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vx',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-       n_file=10+nsp+3*nsp+(i-1)*3+1
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vy',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-       n_file=10+nsp+3*nsp+(i-1)*3+2
-       write(filename,'(a,i6.6,a,i1,a)')trim(dir),it0,'_'//'vz',i,'.dat'
-       open(n_file,file=filename,status='unknown')
-    enddo
-
-    n_file=10+nsp+3*nsp+3*nsp
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bx.dat'
-    open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+1
+    open(24,file=filename,status='unknown')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'by.dat'
-    open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+2
+    open(25,file=filename,status='unknown')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bz.dat'
-    open(n_file,file=filename,status='unknown')
+    open(26,file=filename,status='unknown')
 
-    n_file=10+nsp+3*nsp+3*nsp+3
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ex.dat'
-    open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+3+1
+    open(27,file=filename,status='unknown')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ey.dat'
-    open(n_file,file=filename,status='unknown')
-    n_file=10+nsp+3*nsp+3*nsp+3+2
+    open(28,file=filename,status='unknown')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ez.dat'
-    open(n_file,file=filename,status='unknown')
+    open(29,file=filename,status='unknown')
+
 
     !fields at x=i+1/2
     do i=1,nx+bc
@@ -155,40 +150,48 @@ contains
     temp(1:nx+bc,3,1:nsp) = dsqrt(+temp(1:nx+bc,3,1:nsp)/den(1:nx+bc,1:nsp) &
                                   -vel(1:nx+bc,3,1:nsp)*vel(1:nx+bc,3,1:nsp))
 
-    do j=1,nsp
-       n_file=10+j-1
-       write(n_file,99)(den(i,j),i=1,nx+bc)
-    enddo
-
-    do j=1,nsp
-       n_file=10+nsp+(j-1)*3
-       write(n_file,99)(temp(i,1,j),i=1,nx+bc)
-       n_file=10+nsp+(j-1)*3+1
-       write(n_file,99)(temp(i,2,j),i=1,nx+bc)
-       n_file=10+nsp+(j-1)*3+2
-       write(n_file,99)(temp(i,3,j),i=1,nx+bc)
-    enddo
-
-    do j=1,nsp
-       n_file=10+nsp+nsp*3+(j-1)*3
-       write(n_file,99)(vel(i,1,j),i=1,nx+bc)
-       n_file=10+nsp+nsp*3+(j-1)*3+1
-       write(n_file,99)(vel(i,2,j),i=1,nx+bc)
-       n_file=10+nsp+nsp*3+(j-1)*3+2
-       write(n_file,99)(vel(i,3,j),i=1,nx+bc)
-    enddo
-
-    do j=1,6
-       n_file=10+nsp+nsp*3+nsp*3+(j-1)
-       write(n_file,99)(tmp(i,j),i=1,nx+bc)
-    enddo
-
+    write(10,99)(den(i,1),i=1,nx+bc)
+    write(11,99)(den(i,2),i=1,nx+bc)
+    write(12,99)(temp(i,1,1),i=1,nx+bc)
+    write(13,99)(temp(i,2,1),i=1,nx+bc)
+    write(14,99)(temp(i,3,1),i=1,nx+bc)
+    write(15,99)(temp(i,1,2),i=1,nx+bc)
+    write(16,99)(temp(i,2,2),i=1,nx+bc)
+    write(17,99)(temp(i,3,2),i=1,nx+bc)
+    write(18,99)(vel(i,1,1),i=1,nx+bc)
+    write(19,99)(vel(i,2,1),i=1,nx+bc)
+    write(20,99)(vel(i,3,1),i=1,nx+bc)
+    write(21,99)(vel(i,1,2),i=1,nx+bc)
+    write(22,99)(vel(i,2,2),i=1,nx+bc)
+    write(23,99)(vel(i,3,2),i=1,nx+bc)
+    write(24,99)(tmp(i,1),i=1,nx+bc)
+    write(25,99)(tmp(i,2),i=1,nx+bc)
+    write(26,99)(tmp(i,3),i=1,nx+bc)
+    write(27,99)(tmp(i,4),i=1,nx+bc)
+    write(28,99)(tmp(i,5),i=1,nx+bc)
+    write(29,99)(tmp(i,6),i=1,nx+bc)
 99  format(100000E15.5)
 
-    n_file=10+nsp+nsp*3+nsp*3+5
-    do j=10,n_file
-       close(j)
-    enddo
+    close(10)
+    close(11)
+    close(12)
+    close(13)
+    close(14)
+    close(15)
+    close(16)
+    close(17)
+    close(18)
+    close(19)
+    close(20)
+    close(21)
+    close(22)
+    close(23)
+    close(24)
+    close(25)
+    close(26)
+    close(27)
+    close(28)
+    close(29)
 
   end subroutine fio__mom
 
