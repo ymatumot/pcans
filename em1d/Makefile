@@ -11,5 +11,5 @@ clean :
 	cd md_wave; make clean
 	cd md_whistler; make clean
 	cd md_shock; make clean
-	rm -f $(TARGET) $(LIB_DIR)/mods/*
+	rm -f $(TARGET)
 

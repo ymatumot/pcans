@@ -18,4 +18,4 @@ OBJS = fio.o particle.o field.o crct.o boundary.o
 field.o : boundary.o
 crct.o  : boundary.o 
 clean :
-	rm -f $(OBJS)
+	rm -f $(OBJS) *.mod

@@ -10,5 +10,4 @@ clean :
 	cd moment; make clean
 	cd md_wave; make clean
 	cd md_whistler; make clean
-	rm -f $(TARGET) $(LIB_DIR)/mods/*
-
+	rm -f $(TARGET)

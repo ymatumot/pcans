@@ -18,4 +18,4 @@ OBJS = fio.o particle.o field.o boundary.o mpi_set.o
 field.o : boundary.o
 
 clean :
-	rm -f $(OBJS)
+	rm -f $(OBJS) *.mod
