@@ -56,12 +56,12 @@ contains
     itmax  = 200000
     intvl1 = 20000
     intvl2 = 20000
-    dir    = './dat1/'
+    dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
     gfac   = 0.505
-    it0    = 1
+    it0    = 0
 
 !*********************************************************************
 !   r(1)  : ion mass             r(2)  : electron mass

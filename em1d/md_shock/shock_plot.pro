@@ -18,10 +18,10 @@ ue_range = [-0.95*c,0.95*c]
 ct  = 2
 chars = 0.8 
 
-pat = 'mom/*den_1.dat'
+pat = 'mom/*den_i.dat'
 pattern = '\ls '+pat
 spawn, pattern, list1
-pat = 'mom/*den_2.dat'
+pat = 'mom/*den_e.dat'
 pattern = '\ls '+pat
 spawn, pattern, list2
 pat = 'mom/*bz.dat'

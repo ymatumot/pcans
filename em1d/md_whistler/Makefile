@@ -1,7 +1,7 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
 TARGET = a.out
-OBJS = const.o init.o main.o
+OBJS = const.o init.o main.o wk.o
 .PHONY : all 
 .PHONY : clean
 .SUFFIXES :
@@ -17,10 +17,10 @@ $(TARGET) : $(OBJS)
 $(LIB_DIR)/libem1d.a : 
 	cd $(LIB_DIR) ; make
 
-main.o : init.o const.o $(LIB_DIR)/libem1d.a
+main.o : init.o const.o wk.o $(LIB_DIR)/libem1d.a
 init.o : const.o $(LIB_DIR)/libem1d.a
 
-##############moment calculation################
+############## moment calculation ################
 moment : $(LIB_DIR)/moment/mom.out
 	$(LIB_DIR)/moment/mom.out ./dat/ `cd dat; \ls *_file10.dat`
 
@@ -29,5 +29,5 @@ $(LIB_DIR)/moment/mom.out :
 ###############################################
 
 clean :
-	rm -f $(TARGET) $(OBJS) dat/*.dat mom/*.dat psd/*.dat
+	rm -f $(TARGET) $(OBJS) *.mod dat/*.dat mom/*.dat psd/*.dat
 

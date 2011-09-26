@@ -29,10 +29,6 @@ contour, reform(z), /noerase, /follow, xstyle=5, ystyle=5,$
          max_value=maxd, min_value=mind, /device,         $
          _Extra=_Extra
 
-;; reset
-reset_window
-
-
 end
 
 
