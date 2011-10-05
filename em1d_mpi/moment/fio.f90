@@ -57,7 +57,7 @@ contains
     read(11)uftmp
 
     !particle data
-    read(11)uptmp
+!!$    read(11)uptmp
 
     close(11)
 

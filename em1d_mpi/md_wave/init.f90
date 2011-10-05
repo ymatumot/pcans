@@ -54,9 +54,9 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 200
-    intvl1 = 100
-    intvl2 = 100
+    itmax  = 10240
+    intvl1 = 10
+    intvl2 = 1024
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
@@ -124,7 +124,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(nxs:nxe+bcp,1) = 500
+    np2(nxs:nxe+bcp,1) = 12500
     np2(nxs:nxe+bcp,2) = np2(nxs:nxe+bcp,1)
 
     if(nrank == nroot)then
@@ -219,11 +219,11 @@ contains
 
     !magnetic field
     do i=nxs,nxe+bcp
-       uf(1,i) = 0.0
+       uf(1,i) = b0
     enddo
     do i=nxs,nxe
        uf(2,i) = 0.0
-       uf(3,i) = b0
+       uf(3,i) = 0.0
     enddo
 
     !electric field

@@ -54,22 +54,22 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 500
-    intvl1 = 500
-    intvl2 = 1000
-    intvl3 = 1000
+    itmax  = 10240
+    intvl1 = 512
+    intvl2 = 20
+    intvl3 = 20
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
-    file13 = 'wk_ex.dat'
-    file14 = 'wk_ey.dat'
+    file13 = 'wk_by.dat'
+    file14 = 'wk_bz.dat'
     gfac   = 0.505
 
     it0    = 0
     if(it0 /= 0)then
        !start from the past calculation
-       file11 = '005000_test10.dat'
+       file11 = '002048_file10.dat'
        call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
        return
     endif
@@ -91,14 +91,14 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 5.0
+    delt = 1.0
     ldb  = delx
 
     r(1) = 16.0
     r(2) = 1.0
 
-    alpha = 10.0
-    beta  = 0.1
+    alpha = 2.0
+    beta  = 0.04
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -114,7 +114,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 5000
+    np2(1:nx+bc,1) = 12500
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
@@ -193,11 +193,11 @@ contains
 
     !magnetic field
     do i=1,nx+bc
-       uf(1,i) = 0.0
+       uf(1,i) = b0
     enddo
     do i=1,nx
        uf(2,i) = 0.0
-       uf(3,i) = b0
+       uf(3,i) = 0.0
     enddo
 
     !electric field

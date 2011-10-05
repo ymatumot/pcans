@@ -101,8 +101,8 @@ contains
     enddo
 
     !solve  < by & bz;  bx = const >
-!!$    call cgm(gf,gkl)
-    call mgpsn(gf,gkl)
+    call cgm(gf,gkl)
+!!$    call mgpsn(gf,gkl)
 
 
     call boundary__field(gf)

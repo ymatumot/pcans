@@ -19,8 +19,8 @@ contains
     open(14,file=trim(dir)//trim(file14),status='unknown')
 
     !save data for w-k diagram
-    write(13,'(100000e13.4)')(uf(1,i),i=1,nx)
-    write(14,'(100000e13.4)')(uf(2,i),i=1,nx)
+    write(13,'(100000e13.4)')(uf(2,i),i=1,nx)
+    write(14,'(100000e13.4)')(uf(3,i),i=1,nx)
 
   end subroutine wk_f
 
