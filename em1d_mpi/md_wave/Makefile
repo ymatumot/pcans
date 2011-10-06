@@ -29,5 +29,5 @@ $(LIB_DIR)/moment/mom.out :
 ###############################################
 
 clean :
-	rm -f $(TARGET) $(OBJS) dat/*.dat mom/*.dat psd/*.dat
+	rm -f $(TARGET) $(OBJS) *.mod dat/*.dat mom/*.dat psd/*.dat
 
