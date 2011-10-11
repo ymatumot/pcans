@@ -12,3 +12,4 @@ syntax: glob
 *.a
 core*
 *~
+doc/build
