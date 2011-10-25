@@ -17,5 +17,5 @@ $(TARGET) : $(OBJS)
 main.o : boundary.o fio.o mom_calc.o particle.o
 
 clean :
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) *.mod
 

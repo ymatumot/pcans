@@ -1,5 +1,4 @@
 #Intel Fortran
-FC = ifort
-#FC = gfortran
-#FFLAGS = -O2 -msse3 
-FFLAGS = -O3 -msse3 -par-report=2 -mcmodel=large -heap-arrays 102400
+#FC = ifort
+FC = gfortran
+FFLAGS = -O2 
