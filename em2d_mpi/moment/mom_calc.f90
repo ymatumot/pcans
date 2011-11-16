@@ -97,7 +97,7 @@ contains
     integer :: ii, i, j, ih, jh, isp
     real(8) :: dx, dxm, dy, dym, gam
 
-    !caluculate velocity at (i+1/2, j+1/2)
+    !caluculate temperature at (i+1/2, j+1/2)
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)

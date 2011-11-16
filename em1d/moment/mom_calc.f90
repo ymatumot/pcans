@@ -20,7 +20,7 @@ contains
     !memory clear
     den(0:nx+1,1:nsp)=0.0D0
 
-    !caluculate number density at x=i
+    !caluculate number density at x=i+1/2
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)
@@ -50,7 +50,7 @@ contains
     !memory clear
     vel(0:nx+1,1:3,1:nsp) = 0.0D0
 
-    !caluculate velocity at x=i
+    !caluculate velocity at x=i+1/2
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)
@@ -89,7 +89,7 @@ contains
     !memory clear
     temp(0:nx+1,1:3,1:nsp) = 0.0D0
 
-    !caluculate velocity at i
+    !caluculate temperature at i+1/2
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)

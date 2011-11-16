@@ -10,5 +10,6 @@ clean :
 	cd moment; make clean
 	cd md_wave; make clean
 	cd md_kh; make clean
+	cd md_shock; make clean
 	rm -f $(TARGET)
 

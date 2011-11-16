@@ -89,7 +89,7 @@ contains
     !memory clear
     temp(nxgs-1:nxge+1,1:3,1:nsp) = 0.0D0
 
-    !caluculate velocity at i
+    !caluculate temperature at i+1/2
     do isp=1,nsp
        do i=nxgs,nxge+bc
           do ii=1,np2(i,isp)

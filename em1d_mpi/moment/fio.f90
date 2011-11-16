@@ -169,12 +169,12 @@ contains
     vel(nxgs:nxge+bc,1,1:nsp) = vel(nxgs:nxge+bc,1,1:nsp)/den(nxgs:nxge+bc,1:nsp)
     vel(nxgs:nxge+bc,2,1:nsp) = vel(nxgs:nxge+bc,2,1:nsp)/den(nxgs:nxge+bc,1:nsp)
     vel(nxgs:nxge+bc,3,1:nsp) = vel(nxgs:nxge+bc,3,1:nsp)/den(nxgs:nxge+bc,1:nsp)
-    temp(nxgs:nxge+bc,1,1:nsp) = dsqrt(+temp(nxgs:nxge+bc,1,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
-                                        -vel(nxgs:nxge+bc,1,1:nsp)**2)
-    temp(nxgs:nxge+bc,2,1:nsp) = dsqrt(+temp(nxgs:nxge+bc,2,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
-                                        -vel(nxgs:nxge+bc,2,1:nsp)**2)
-    temp(nxgs:nxge+bc,3,1:nsp) = dsqrt(+temp(nxgs:nxge+bc,3,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
-                                        -vel(nxgs:nxge+bc,3,1:nsp)**2)
+    temp(nxgs:nxge+bc,1,1:nsp) = +temp(nxgs:nxge+bc,1,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
+                                 -vel(nxgs:nxge+bc,1,1:nsp)**2
+    temp(nxgs:nxge+bc,2,1:nsp) = +temp(nxgs:nxge+bc,2,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
+                                 -vel(nxgs:nxge+bc,2,1:nsp)**2
+    temp(nxgs:nxge+bc,3,1:nsp) = +temp(nxgs:nxge+bc,3,1:nsp)/den(nxgs:nxge+bc,1:nsp) &
+                                 -vel(nxgs:nxge+bc,3,1:nsp)**2
 
     write(10,99)(den(i,1),i=nxgs,nxge+bc)
     write(11,99)(den(i,2),i=nxgs,nxge+bc)

@@ -1,3 +1,2 @@
-#Intel Fortran
 FC = mpif90
 FFLAGS = -O2

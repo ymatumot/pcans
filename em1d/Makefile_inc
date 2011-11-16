@@ -1,4 +1,4 @@
-#Intel Fortran
 #FC = ifort
-FC = gfortran
+#FC = gfortran
+FC := $(shell which gfortran)
 FFLAGS = -O2 

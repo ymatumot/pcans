@@ -2,6 +2,9 @@ pro set_x
 
 set_plot,'x'
 
+;; color table
+loadct,12,/si
+
 ;; set background color white
 !p.background = 255
 !p.color = 0
@@ -13,8 +16,5 @@ set_plot,'x'
 !x.thick=2.0
 !y.thick=2.0
 !z.thick=2.0
-
-;; color table
-loadct,12,/si
 
 end
