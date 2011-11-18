@@ -98,7 +98,7 @@ device,/close
 
 endfor
 
-set_x
+set_plot,'x'
 
 end
 
