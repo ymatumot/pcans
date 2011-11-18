@@ -103,7 +103,7 @@ device,/close
 
 endfor
 
-set_plot,'x'
+set_x
 
 end
 
