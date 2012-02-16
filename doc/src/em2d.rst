@@ -3,13 +3,16 @@
 
 2次元電磁粒子コード
 ===================
- :Authors: Yosuke MATSUMOTO
- :Contact: ymatumot@astro.s.chiba-u.ac.jp
-
-これはダミーです。
 
 アルゴリズム
 ------------
+適当です。MPIで並列化されています。これはダミーです。
 
-適当です。MPIで並列化されています。
 
+課題例
+------------
+.. toctree::
+   :maxdepth: 2
+
+   em2d_kh
+   em2d_sk

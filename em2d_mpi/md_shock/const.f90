@@ -2,7 +2,7 @@ module const
 
   implicit none
   integer, parameter :: nx    = 5000+1    ! number of grid points in x
-  integer, parameter :: ny    = 256       ! number of grid points in y
+  integer, parameter :: ny    = 15       ! number of grid points in y
   integer, parameter :: nxgs  = 2         ! start point in x
   integer, parameter :: nxge  = nxgs+nx-1 ! end point
   integer, parameter :: nygs  = 2         ! start point in y

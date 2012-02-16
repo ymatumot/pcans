@@ -71,9 +71,9 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 40000
-    intvl1 = 1000
-    intvl2 = 1000
+    itmax  = 100
+    intvl1 = 100
+    intvl2 = 100
     dir    = './dat/'   !for fx1@jaxa
     file9  = 'init_param.dat'
     file12 = 'energy.dat'

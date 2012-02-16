@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PIC code for CANS'
-copyright = u'2011, Y. Matsumoto'
+copyright = u'2011, Yosuke. MATSUMOTO'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

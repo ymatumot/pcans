@@ -2,23 +2,22 @@
 .. $Id$
 
 ==============================
-PIC code for CANS ドキュメント
+PIC for CANS ドキュメント
 ==============================
-
 Contents:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
+   preface
    em1d
    em2d
    about
 
-.. とりあえずコメントアウト
-.. Indices and tables
-.. ==================
-..
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 
