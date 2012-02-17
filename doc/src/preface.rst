@@ -1,4 +1,17 @@
+.. -*- coding: utf-8 -*-
+.. $Id$
+
 ===================
-Preface
+はじめに
 ===================
-PIC code for CANSは、CANS(Coordinated Astronomical Numeical Software)に含まれる、電磁プラズマ粒子シミュレーションコード（Electromagnetic Particle-in-Cell simulation code）です。PICシミュレーションは無衝突プラズマを記述する第一原理シミュレーション手法で、電磁場中のプラズマ粒子の運動を自己無撞着に記述できるため、宇宙・天文現象での粒子加速・輸送問題を理解するのに役立ちます。 
+**PIC code for CANS** は、 `CANS <http://www.astro.phys.s.chiba-u.ac.jp/netlab/astro>`_ に含まれる、電磁プラズマ粒子シミュレーションコード（Electromagnetic Particle-in-Cell simulation code）です。PICシミュレーションは無衝突プラズマを記述する第一原理シミュレーション手法で、電磁場中のプラズマ粒子の運動を自己無撞着に記述できるため、宇宙・天文現象での粒子加速・輸送問題を理解するのに役立ちます。 
+
+開発者
+=======
+- 松本洋介（千葉大学理学研究科）
+- 天野孝伸（東京大学理学系研究科）
+- 銭谷誠司（国立天文台理論研究部）
+- 高橋博之（国立天文台CfCA）
+- 三好由純（名古屋大学太陽地球環境研究所）
+- 星野真弘（東京大学理学系研究科）
+- 松元亮治（千葉大学理学研究科）

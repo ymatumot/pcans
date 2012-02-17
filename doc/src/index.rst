@@ -10,6 +10,7 @@ Contents:
    :maxdepth: 2
 
    preface
+   introduction
    em1d
    em2d
    about

@@ -4,6 +4,7 @@ syntax: glob
 *.eps
 *.png
 *.jpg
+*.tif
 *.pdf
 *.svg
 *.o
