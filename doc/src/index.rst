@@ -11,9 +11,11 @@ Contents:
 
    preface
    introduction
+   algorithm
    em1d
    em2d
-   about
+   reference
+   appendix
 
 Indices and tables
 ==================

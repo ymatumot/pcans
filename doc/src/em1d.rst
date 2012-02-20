@@ -1,15 +1,17 @@
 .. -*- coding: utf-8 -*-
 .. $Id$
 
+====================
 1次元電磁粒子コード
-===================
- :Authors: Yosuke MATSUMOTO
- :Contact: ymatumot@astro.s.chiba-u.ac.jp
+====================
+ :Authors: Yosuke MATSUMOTO (Chiba Univ.)
 
-これはダミーです。
 
-アルゴリズム
-------------
+シリアル版
+=============
+
+MPI並列版
+=============
 
 適当です。
 
