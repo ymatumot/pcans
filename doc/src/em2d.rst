@@ -2,7 +2,7 @@
 .. $Id$
 
 ===================
-2次元電磁粒子コード
+2次元PICコード
 ===================
  :Authors: Yosuke MATSUMOTO (Chiba Univ.)
 
@@ -17,5 +17,5 @@ MPI並列版
 .. toctree::
    :maxdepth: 2
 
-   em2d_kh
-   em2d_sk
+.. em2d_kh
+.. em2d_sk
