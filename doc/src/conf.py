@@ -38,6 +38,9 @@ else:
     extensions = ['sphinx.ext.jsmath']
     jsmath_path = os.environ['JSMATH_PATH']
 
+extensions = ['sphinxcontrib.blockdiag']
+#blockdiag_fontpath = '/Library/Fonts/Osaka.ttf'
+
 # add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

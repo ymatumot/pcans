@@ -6,4 +6,4 @@
 ===================
 
 
-IDLについてのさらなる詳細は `こちら <http://www.astro.phys.s.chiba-u.ac.jp/~ymatumot/idl/>`_ を参照ください。
+.. [idl] IDLについてのさらなる詳細は `こちら <http://www.astro.phys.s.chiba-u.ac.jp/~ymatumot/idl/>`_ を参照ください。
