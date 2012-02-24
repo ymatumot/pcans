@@ -2,9 +2,6 @@ syntax: glob
 *.dat
 *.ps
 *.eps
-*.png
-*.jpg
-*.tif
 *.pdf
 *.svg
 *.o
