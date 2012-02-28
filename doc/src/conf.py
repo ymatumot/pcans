@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pCANS'
-#copyright = u'2012, Yosuke. MATSUMOTO'
+copyright = u'Yosuke MATSUMOTO and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -130,7 +130,7 @@ html_theme = 'nature'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'CAN.jpg'
+html_logo = 'PECAN.jpg'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -144,7 +144,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -193,18 +193,18 @@ htmlhelp_basename = 'pCANSdoc'
 latex_paper_size = 'a4'
 
 # The font size ('10pt', '11pt' or '12pt').
-#latex_font_size = '10pt'
+latex_font_size = '12pt'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pCANS.tex', u'pCANS Documentation',
+  ('index', 'pCANS.tex', 'pCANS Documentation',
    u'', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'CAN.jpg'
+latex_logo = 'PECAN.jpg'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -220,7 +220,7 @@ latex_logo = 'CAN.jpg'
 #latex_preamble = ''
 
 # Documents to append as an appendix to all manuals.
-#latex_appendices = []
+latex_appendices = ['appendix']
 
 # If false, no module index is generated.
 #latex_domain_indices = True
@@ -230,6 +230,6 @@ latex_logo = 'CAN.jpg'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'piccodeforcans', u'pCANS Documentation',
-     [u'Yosuke MATSUMOTO'], 1)
+    ('index', 'pCANS', u'pCANS Documentation',
+     [u'Yosuke MATSUMOTO and others'], 1)
 ]

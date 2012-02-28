@@ -7,7 +7,20 @@
 
 まずは始めましょう
 ==================
-**pCANS** はMercurialでバージョン管理されています。MercurialはWindows, linux, Mac OSに対応したバージョン管理ソフトウェアです。Mercurialのインストール・詳しい使い方は、 `本家 <http://mercurial.selenic.com/>`_ もしくは `日本語解説 <http://www.lares.dti.ne.jp/~foozy/fujiguruma/scm/mercurial.html>`_ をご覧ください。
+**pCANS** はMercurialでバージョン管理されています。MercurialはWindows, linux, Mac OSに対応したバージョン管理ソフトウェアです。Mercurialのインストールは、FedoraなどRedhat系の場合、
+
+.. code-block:: bash
+
+   $ yum install mercurial
+
+UbuntuなどDebian系の場合、
+
+.. code-block:: bash
+
+   $ sudo apt-get install mercurial
+
+で簡単にできます。
+
 
 まずは、 **pCANS** のレポジトリを以下のようにダウンロードします。
 
@@ -24,6 +37,8 @@
 
 とすれば、最新版の差分情報が反映されます。 **この際、自分で修正を加えたファイルと更新ファイルが重なる場合はマージ（merge）する必要が出てきます。またその結果、衝突（conflict）する可能性もあります。** その場合は出力に従って、text editor等で該当個所を編集してください。
 
+Mercurialによる分散バージョン管理の詳しい解説は、 `本家 <http://mercurial.selenic.com/>`_ もしくは `日本語解説 <http://www.lares.dti.ne.jp/~foozy/fujiguruma/scm/mercurial.html>`_ をご覧ください。
+
 動作環境
 ========
 以下のソフトウェア・ライブラリがシステムにインストールされている必要があります。
@@ -33,6 +48,8 @@
 - Fortranコンパイラ。ソースコードはFortran 90で書かれています。デフォルトはgfortranです。
 - IDL(Interactive Data Language)。可視化ルーチンはIDLで用意されています。 
 - OSはLinuxで動作確認済み。上記ソフト・ライブラリがインストールされていれば、Windows、Mac-OSでもたぶん可だと思います。
+
+不具合等についての問い合わせは `こちら <https://bitbucket.org/ymatumot/pcans/issues/new>`_ まで。
 
 環境変数
 ========
@@ -52,7 +69,7 @@ tcshの場合、
 
 可視化について
 ===============
-IDLによる可視化ルーチンが用意されています。$PCANS_DIR/idl内には共通プロシージャ、各課題内にはそれ用のプロシージャがあります。使うためには、環境変数$IDL_STARTUPに$PCANS_DIR/idl/init.proを設定します。
+IDLによる可視化ルーチンが用意されています。$PCANS_DIR/idl内には共通プロシージャ、各課題内には専用のプロシージャがあります。使うためには、環境変数$IDL_STARTUPに$PCANS_DIR/idl/init.proを設定します。
 
 bashの場合、
 

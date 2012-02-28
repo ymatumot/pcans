@@ -42,7 +42,7 @@ Makefileは本1次元コードのバイナリ生成、削除をコントロー�
    FC = gfortran
    FFLAGS = -O2 
 
-が記述されており、makeする際の環境変数が設定されています。ここでは、"$FC"にはコンパイラ、"$FFLAGS"にはコンパイラオプションが設定されています。コンパイラとコンパイラオプションを変更したい場合は、例えば、
+が記述されており、makeする際の環境変数が設定されています。ここでは、"$FC"にはFortranコンパイラ、"$FFLAGS"にはコンパイラオプションが設定されています。コンパイラとコンパイラオプションを変更したい場合は、例えば、
 
 .. code-block:: makefile
 
@@ -70,17 +70,17 @@ Makefileは本1次元コードのバイナリ生成、削除をコントロー�
 
 .. code-block:: bash
 
-   $ cd $PCANS_DIR/em1d/md_shock/ 
+   $ cd $PCANS_DIR/em1d/md_shock
    $ make
    $ ./a.out
 
-とします。結果は"dat/"内に出力されます。計算終了後にモーメントを計算するには、
+とします。結果はFortran Unformatted形式で"dat/"内に出力されます。計算終了後にモーメントを計算するには、
 
 .. code-block:: bash
 
    $ make moment
 
-とします。自動的に"em1d/moment/"内のモーメント計算用のコードがコンパイルされ、計算が実行されます。結果は"mom/"内に出力されます。
+とします。自動的に"em1d/moment/"内のモーメント計算用のコードがコンパイルされ、計算が実行されます。結果はASCII形式で"mom/"内に出力されます。
 
 パラメタ設定
 -------------
@@ -192,6 +192,8 @@ init.f90:
 
 では、初期のセル当たりの粒子数を設定しています。これは、"const.f90"内で設定している"np"より小さくなるように注意してください。"np2"は計算途中で粒子が移動するに伴い変動し、位置によって値が異なるため、"np"をあらかじめ大きめにとり計算途中でも :math:`{\rm np > max(np2)}` となるようにしてください。
 
+.. _em1d_moment:
+
 モーメント計算
 ---------------
 "moment/"内には、粒子データからモーメントを計算するプログラムが格納されています。各課題で計算が終わったのち、
@@ -236,12 +238,11 @@ init.f90:
 
 に従って計算します。
 
-課題例
--------
+.. _em1d_mpi:
 
 MPI並列版
 =============
-1次元MPI並列版コードは以下のような構成になっていおり、
+1次元MPI並列版コードは以下のような構成になっています。
 
 .. blockdiag::
 
@@ -259,7 +260,91 @@ MPI並列版
     "$PCANS_DIR/em1d_mpi/" -- "md_whistler/" ;
    }
 
-基本的な使い方は :ref:`シリアル版 <em1d>` と同じです。MPI並列化による違いを以下に示します。
+基本的な使い方は :ref:`シリアル版 <em1d>` と同じです。
 
-課題例
--------
+領域分割法による並列化
+-----------------------
+
+.. figure:: parallel1d.png
+   :width: 800px
+   :align: center
+
+MPI並列版では、上図のように、プロセス数に従って1次元（x方向）方向に領域を区分化し、各領域にある粒子の運動と場の発展を各プロセス（Rank）が分担することにより、並列化を行っています。MPI並列化による違いを以下に示します。
+
+.. note::
+      
+   1次元コードに対して領域分割をすると、系の発展に伴う粒子数の不均一化によって各プロセスの計算負荷が大きく異なるケースがあります（例：衝撃波）。その場合、一番大きな負荷のプロセスによって計算時間が決まるため、並列化効率が落ちることが知られています（ロードバランスの非均衡化）。 **pCANS** では、教育目的のため1次元コードでも領域分割した並列化版コードを用意しています。
+
+パラメタ設定
+---------------
+シミュレーション定数の設定（const.f90）は、以下のようになっています。
+
+const.f90:
+
+.. code-block:: fortran
+
+   module const
+   
+     implicit none
+     integer, parameter :: nx    = 2048      ! number of grid points
+     integer, parameter :: nxgs  = 2         ! start point
+     integer, parameter :: nxge  = nxgs+nx-1 ! end point
+     integer, parameter :: np    = 25000     ! number of particles in each cell
+     integer, parameter :: nsp   = 2         ! number of particle species
+     integer, parameter :: nproc = 4         ! number of processors
+     integer, parameter :: bc    = 0         ! boundary condition (periodic:0, reflective:-1)
+   
+   end module
+
+MPI並列版では、"nxgs"と"nxge"が設定されていて、グリッド番号の最初の値（nxgs）を任意に指定しています。"nproc"はプロセス数で、MPIで並列化するプロセス数を指定します（この例では4並列）。各担当領域を表す"nxs"、"nxe"（上図参照）は、init.f90内で、"nxgs"、"nxge"、"nproc"から求めています。
+
+init.f90:
+
+.. code-block:: fortran
+
+   !************** MPI settings  *******************!
+       call mpi_set__init(nxgs,nxge,bc,nproc)
+       if(nrank == nproc-1)then
+          if(bc == -1) bcp = -1
+          if(bc ==  0) bcp = 0
+       else
+          bcp = 0
+       endif
+       allocate(np2(nxs:nxe+bcp,nsp))
+       allocate(uf(6,nxs1:nxe1))
+       allocate(up(4,np,nxs:nxe+bcp,nsp))
+       allocate(gp(4,np,nxs:nxe+bcp,nsp))
+   !*********** End of MPI settings  ***************!
+
+
+その他のユーザーが設定するパラメタは、 :ref:`シリアル版 <em1d>` と同じです。実行手続きは、
+
+.. code-block:: bash
+
+   $ cd $PCANS_DIR/em1d_mpi/md_wave
+   $ make
+   $ mpiexec -n 4 ./a.out
+
+と、最後の実行コマンドがシリアル版と違います。"-n"で並列数をしてしており、ここで与える数と上記の"nproc"の数が一致する必要があります（コード内で両数字が合っているかチェックしており、違う場合は終了します。）
+
+モーメント計算
+---------------
+モーメント計算も、基本的には :ref:`シリアル版 <em1d_moment>` と同じですが、
+
+.. code-block:: bash
+
+   $ make moment
+   cd ../moment ; make
+   make[1]: ディレクトリ ~/pcans/em1d_mpi/moment に入ります
+   mpif90 -O2 -c boundary.f90 
+   mpif90 -O2 -c particle.f90 
+   mpif90 -O2 -c fio.f90 
+   mpif90 -O2 -c mom_calc.f90 
+   mpif90 -O2 -c main.f90 
+   mpif90 -o mom.out -O2 boundary.o particle.o main.o mom_calc.o fio.o
+   make[1]: ディレクトリ ~/pcans/em1d_mpi/moment から出ます
+   ../moment/mom.out ./dat/ `cd dat; \ls *_rank*.dat`
+   No. of processes?
+
+のように、最後にプロセス数（並列数）が聞かれますので、ここで"mpiexec -n"で指定した並列数（上記例の場合は4）を入力して下さい。結果は同様に、"mom/"内に出力されます。
+

@@ -9,6 +9,6 @@ pCANS ドキュメント
    introduction
    em1d
    em2d
-   reference
-   appendix
+   application
+..   appendix
 
