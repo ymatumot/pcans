@@ -10,5 +10,6 @@ pCANS ドキュメント
    em1d
    em2d
    application
+   reference  
 ..   appendix
 

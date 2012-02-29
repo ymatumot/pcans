@@ -1,15 +1,15 @@
 ;; DATA INFORMATION
 dx = 1.0
-dt = 0.5*20.
+dt = 6.0
 c = 1.0D0
 mr = 1.D0/16.D0
 vai = 1.25D-1
 vae = vai/sqrt(mr)
-wgi = 2.21D-3
+wgi = 2.47D-3
 wge = wgi/mr
 wpi = c/vai*wgi
 wpe = c/vae*wge
-beta = 0.04
+beta = 0.05
 rgi = c/wpi*sqrt(beta)
 rge = rgi*sqrt(mr)
 vte = rge*wge
@@ -31,8 +31,8 @@ output = dcomplexarr(col,num)
 output = fft(input,-1)
 
 ;; DRAW W-K DIAGRAM
-hcol = col/25
-hnum = num/2.5
+hcol = col/20.
+hnum = num/3.
 
 z = abs(output(0:hcol,0:hnum))
 z = alog10(z)
@@ -44,14 +44,14 @@ minz = min(z)
 kx = 2.*!pi*(findgen(hcol+1))/(col*dx)
 w = 2.*!pi*(findgen(hnum+1))/(num*dt)
 
-plot_clcnt,z[1:hcol,1:hnum],ct=33,xax=kx[1:hcol]*rge,yax=w[1:hnum]/wge,xtitle='!6k!Ix!N r!Ige!N',ytitle='!7x/x!I!6ge!N',title='!6Parallel waves',/keep,/ver_
+plot_clcnt,z[1:hcol,1:hnum],ct=33,xax=kx[1:hcol]*rge,yax=w[1:hnum]/wge,xtitle='!6k!Ix!N r!Ige!N',ytitle='!7x/x!I!6ge!N',title='!6Parallel waves',/ver_,/keep,chars=1.5
 
 ;;******* add angular frequencies ********;;
 
 loadct,0,/silent
 ;;electromagnetic wave
-;; y = c*kx
-;; oplot,kx/ke,y/wpe
+y = c*kx
+oplot,kx*rge,y/wge
 ;; y = 0.7*c*kx
 ;; oplot,kx/ke,y/wpe
 

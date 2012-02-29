@@ -10,7 +10,7 @@
 ===================
 http://www.astro.phys.s.chiba-u.ac.jp/pcans
 
-**pCANS** 開発者向けサイト
+**pCANS** for developers
 =============================
 http://bitbucket.org/ymatumot/pcans
 

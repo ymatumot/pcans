@@ -19,7 +19,7 @@ UbuntuなどDebian系の場合、
 
    $ sudo apt-get install mercurial
 
-で簡単にできます。
+で簡単にできます。Mercurialのツールを利用してコードのインストール、アップデートを行います。
 
 
 まずは、 **pCANS** のレポジトリを以下のようにダウンロードします。

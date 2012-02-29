@@ -2,7 +2,6 @@
 ; AUTHOR
 ;
 ;   Yosuke Matsumoto
-;   E-mail: ymatumot@ybb.ne.jp
 ;
 ;
 ; LICENSE
@@ -38,24 +37,18 @@
 
 function file_read, filename,format=format,string=string,silent=silent,compress=compress
 
-if(not(keyword_set(filename)))then begin
-    if(not(keyword_set(filename)))then filename=''
-    filename = dialog_pickfile(filter=filename)
-endif
-if(filename eq '')then return,0
+if(not(keyword_set(filename)))then return,0
+flist = file_search(filename,count=count)
 
-list = findfile(filename)
-
-list = list(0)
-if(strlen(list) eq 0) then begin
+if(count eq 0) then begin
     print,'No such file'
     return,0
 endif
 
 if(keyword_set(compress))then begin
-   spawn, 'gzip -cd '+filename+ '|wc -wl', input
+   spawn, 'gzip -cd '+flist[0]+ '|wc -wl', input
 endif else begin
-   spawn, 'wc -wl '+filename, input
+   spawn, 'wc -wl '+flist[0], input
 endelse
 
 input = input(0)
@@ -76,19 +69,24 @@ if(not(keyword_set(silent)))then begin
 endif
 
 if(keyword_set(string))then begin
-    infile = strarr(col,line) 
+   tmp = strarr(col,line)
+   infile = strarr(col,line,count)
 endif else begin
-    infile = dblarr(col,line) 
+   tmp = dblarr(col,line)
+   infile = dblarr(col,line,count)
 endelse
 
-openr, /get_lun, unit, filename, compress=compress
-readf, unit, infile, format=format
-;if(col eq 1) then infile = reform(infile,/overwrite)
 
+for l=0,count-1 do begin
+   print, l, '.  ', flist[l], '  Reading......'
+   openr, /get_lun, unit, flist[l], compress=compress
+   readf, unit, tmp, format=format
+   infile[*,*,l] = tmp
 
-close,unit
-free_lun,unit
+   close,unit
+   free_lun,unit
+endfor
 
-return, infile
+return, reform(infile)
 
 end

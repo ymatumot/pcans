@@ -54,10 +54,10 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 10240
-    intvl1 = 512
-    intvl2 = 20
-    intvl3 = 20
+    itmax  = 2048
+    intvl1 = 1024
+    intvl2 = 1024
+    intvl3 = 6
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -98,7 +98,7 @@ contains
     r(2) = 1.0
 
     alpha = 2.0
-    beta  = 0.04
+    beta  = 0.05
     rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
@@ -114,7 +114,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 12500
+    np2(1:nx+bc,1) = 500
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
