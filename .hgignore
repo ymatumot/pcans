@@ -11,4 +11,3 @@ syntax: glob
 *.pyc
 core*
 *~
-doc/build
