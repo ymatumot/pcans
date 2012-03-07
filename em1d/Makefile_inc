@@ -1,2 +1,2 @@
-FC = ifort
-FFLAGS = -O3 
+FC = gfortran
+FFLAGS = -O2 
