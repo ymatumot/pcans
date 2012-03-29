@@ -1,7 +1,7 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
 TARGET = a.out
-OBJS = const.o init.o main.o
+OBJS = const.o init.o main.o thermal.o random.o 
 .PHONY : all 
 .PHONY : clean
 .SUFFIXES :

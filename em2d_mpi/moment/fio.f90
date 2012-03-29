@@ -81,49 +81,95 @@ contains
     real(8)            :: tmp(nxgs:nxge,nygs:nyge,6)
     character(len=256) :: filename
 
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_i.dat'
+    ! open(10,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_e.dat'
+    ! open(11,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_i.dat'
+    ! open(12,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_i.dat'
+    ! open(13,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_i.dat'
+    ! open(14,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_e.dat'
+    ! open(15,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_e.dat'
+    ! open(16,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_e.dat'
+    ! open(17,file=filename,status='unknown')
+
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxi.dat'
+    ! open(18,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vyi.dat'
+    ! open(19,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vzi.dat'
+    ! open(20,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxe.dat'
+    ! open(21,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vye.dat'
+    ! open(22,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vze.dat'
+    ! open(23,file=filename,status='unknown')
+
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bx.dat'
+    ! open(24,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'by.dat'
+    ! open(25,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bz.dat'
+    ! open(26,file=filename,status='unknown')
+
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ex.dat'
+    ! open(27,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ey.dat'
+    ! open(28,file=filename,status='unknown')
+    ! write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ez.dat'
+    ! open(29,file=filename,status='unknown')
+
+    write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'resol.dat'
+    open(9,file=filename,status='unknown',form='formatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_i.dat'
-    open(10,file=filename,status='unknown')
+    open(10,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'den_e.dat'
-    open(11,file=filename,status='unknown')
+    open(11,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_i.dat'
-    open(12,file=filename,status='unknown')
+    open(12,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_i.dat'
-    open(13,file=filename,status='unknown')
+    open(13,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_i.dat'
-    open(14,file=filename,status='unknown')
+    open(14,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Txx_e.dat'
-    open(15,file=filename,status='unknown')
+    open(15,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tyy_e.dat'
-    open(16,file=filename,status='unknown')
+    open(16,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'Tzz_e.dat'
-    open(17,file=filename,status='unknown')
+    open(17,file=filename,form='unformatted')
 
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxi.dat'
-    open(18,file=filename,status='unknown')
+    open(18,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vyi.dat'
-    open(19,file=filename,status='unknown')
+    open(19,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vzi.dat'
-    open(20,file=filename,status='unknown')
+    open(20,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vxe.dat'
-    open(21,file=filename,status='unknown')
+    open(21,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vye.dat'
-    open(22,file=filename,status='unknown')
+    open(22,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'vze.dat'
-    open(23,file=filename,status='unknown')
+    open(23,file=filename,form='unformatted')
 
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bx.dat'
-    open(24,file=filename,status='unknown')
+    open(24,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'by.dat'
-    open(25,file=filename,status='unknown')
+    open(25,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'bz.dat'
-    open(26,file=filename,status='unknown')
+    open(26,file=filename,form='unformatted')
 
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ex.dat'
-    open(27,file=filename,status='unknown')
+    open(27,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ey.dat'
-    open(28,file=filename,status='unknown')
+    open(28,file=filename,form='unformatted')
     write(filename,'(a,i6.6,a)')trim(dir),it0,'_'//'ez.dat'
-    open(29,file=filename,status='unknown')
+    open(29,file=filename,form='unformatted')
 
     !fields at (i+1/2, j+1/2)
     do j=nygs,nyge
@@ -156,28 +202,73 @@ contains
                                             /den(nxgs:nxge+bc,nygs:nyge,1:nsp)   &
                                            -vel(nxgs:nxge+bc,nygs:nyge,3,1:nsp)**2
 
-    do j=nygs,nyge
-       write(10,99)(den(i,j,1),i=nxgs,nxge+bc)
-       write(11,99)(den(i,j,2),i=nxgs,nxge+bc)
-       write(12,99)(temp(i,j,1,1),i=nxgs,nxge+bc)
-       write(13,99)(temp(i,j,2,1),i=nxgs,nxge+bc)
-       write(14,99)(temp(i,j,3,1),i=nxgs,nxge+bc)
-       write(15,99)(temp(i,j,1,2),i=nxgs,nxge+bc)
-       write(16,99)(temp(i,j,2,2),i=nxgs,nxge+bc)
-       write(17,99)(temp(i,j,3,2),i=nxgs,nxge+bc)
-       write(18,99)(vel(i,j,1,1),i=nxgs,nxge+bc)
-       write(19,99)(vel(i,j,2,1),i=nxgs,nxge+bc)
-       write(20,99)(vel(i,j,3,1),i=nxgs,nxge+bc)
-       write(21,99)(vel(i,j,1,2),i=nxgs,nxge+bc)
-       write(22,99)(vel(i,j,2,2),i=nxgs,nxge+bc)
-       write(23,99)(vel(i,j,3,2),i=nxgs,nxge+bc)
-       write(24,99)(tmp(i,j,1),i=nxgs,nxge+bc)
-       write(25,99)(tmp(i,j,2),i=nxgs,nxge+bc)
-       write(26,99)(tmp(i,j,3),i=nxgs,nxge+bc)
-       write(27,99)(tmp(i,j,4),i=nxgs,nxge+bc)
-       write(28,99)(tmp(i,j,5),i=nxgs,nxge+bc)
-       write(29,99)(tmp(i,j,6),i=nxgs,nxge+bc)
-    enddo
+
+    ! do j=nygs,nyge
+    !    write(10,99)(den(i,j,1),i=nxgs,nxge+bc)
+    !    write(11,99)(den(i,j,2),i=nxgs,nxge+bc)
+    !    write(12,99)(temp(i,j,1,1),i=nxgs,nxge+bc)
+    !    write(13,99)(temp(i,j,2,1),i=nxgs,nxge+bc)
+    !    write(14,99)(temp(i,j,3,1),i=nxgs,nxge+bc)
+    !    write(15,99)(temp(i,j,1,2),i=nxgs,nxge+bc)
+    !    write(16,99)(temp(i,j,2,2),i=nxgs,nxge+bc)
+    !    write(17,99)(temp(i,j,3,2),i=nxgs,nxge+bc)
+    !    write(18,99)(vel(i,j,1,1),i=nxgs,nxge+bc)
+    !    write(19,99)(vel(i,j,2,1),i=nxgs,nxge+bc)
+    !    write(20,99)(vel(i,j,3,1),i=nxgs,nxge+bc)
+    !    write(21,99)(vel(i,j,1,2),i=nxgs,nxge+bc)
+    !    write(22,99)(vel(i,j,2,2),i=nxgs,nxge+bc)
+    !    write(23,99)(vel(i,j,3,2),i=nxgs,nxge+bc)
+    !    write(24,99)(tmp(i,j,1),i=nxgs,nxge+bc)
+    !    write(25,99)(tmp(i,j,2),i=nxgs,nxge+bc)
+    !    write(26,99)(tmp(i,j,3),i=nxgs,nxge+bc)
+    !    write(27,99)(tmp(i,j,4),i=nxgs,nxge+bc)
+    !    write(28,99)(tmp(i,j,5),i=nxgs,nxge+bc)
+    !    write(29,99)(tmp(i,j,6),i=nxgs,nxge+bc)
+    ! enddo
+    write(9,*)nxge+bc-nxgs+1,nyge-nygs+1
+    write(10)real(den(nxgs:nxge+bc,nygs:nyge,1))
+    write(11)real(den(nxgs:nxge+bc,nygs:nyge,2))
+    write(12)real(temp(nxgs:nxge+bc,nygs:nyge,1,1))
+    write(13)real(temp(nxgs:nxge+bc,nygs:nyge,2,1))
+    write(14)real(temp(nxgs:nxge+bc,nygs:nyge,3,1))
+    write(15)real(temp(nxgs:nxge+bc,nygs:nyge,1,2))
+    write(16)real(temp(nxgs:nxge+bc,nygs:nyge,2,2))
+    write(17)real(temp(nxgs:nxge+bc,nygs:nyge,3,2))
+    write(18)real(vel(nxgs:nxge+bc,nygs:nyge,1,1))
+    write(19)real(vel(nxgs:nxge+bc,nygs:nyge,2,1))
+    write(20)real(vel(nxgs:nxge+bc,nygs:nyge,3,1))
+    write(21)real(vel(nxgs:nxge+bc,nygs:nyge,1,2))
+    write(22)real(vel(nxgs:nxge+bc,nygs:nyge,2,2))
+    write(23)real(vel(nxgs:nxge+bc,nygs:nyge,3,2))
+    write(24)real(tmp(nxgs:nxge+bc,nygs:nyge,1))
+    write(25)real(tmp(nxgs:nxge+bc,nygs:nyge,2))
+    write(26)real(tmp(nxgs:nxge+bc,nygs:nyge,3))
+    write(27)real(tmp(nxgs:nxge+bc,nygs:nyge,4))
+    write(28)real(tmp(nxgs:nxge+bc,nygs:nyge,5))
+    write(29)real(tmp(nxgs:nxge+bc,nygs:nyge,6))
+
+    close(9)
+    close(10)
+    close(11)
+    close(12)
+    close(13)
+    close(14)
+    close(15)
+    close(16)
+    close(17)
+    close(18)
+    close(19)
+    close(20)
+    close(21)
+    close(22)
+    close(23)
+    close(24)
+    close(25)
+    close(26)
+    close(27)
+    close(28)
+    close(29)
+
 99  format(100000E15.5)
 
   end subroutine fio__mom

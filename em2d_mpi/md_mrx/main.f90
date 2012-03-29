@@ -34,7 +34,6 @@ program main
                    c,q,r,delt,delx,0,it0,dir)
 
   do it=1,itmax-it0
-
      call particle__solv(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)
@@ -49,12 +48,12 @@ program main
      if(mod(it+it0,intvl1) == 0)                                                                &
           call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
                            c,q,r,delt,delx,it,it0,dir)
+
      if(mod(it+it0,intvl2) == 0)                          &
           call fio__energy(up,uf,                         &
                            np,nsp,np2,nxs,nxe,nys,nye,bc, &
                            c,r,delt,it,it0,dir,file12,    &
                            nroot,nrank,mnpr,opsum,ncomw,nerr)
-
   enddo
 
   call MPI_FINALIZE(nerr)
