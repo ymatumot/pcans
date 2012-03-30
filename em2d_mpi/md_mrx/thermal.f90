@@ -14,20 +14,18 @@
 ! 
 !                                           H. Takahashi
 !========================================================|
-subroutine thermal__r(up,nv,np,nys,nye,nsp,isp,iis,iie,js,je,T,m,id,umax,c,iran)
+subroutine thermal__r(up,nv,np,nys,nye,nsp,isp,iis,iie,js,je,T,m,umax,c,iran)
   implicit none
 
   integer,intent(in)               :: nv, np,nys, nye, nsp
   integer,intent(in)               :: isp, js, je,iran
   integer,intent(in),dimension(nys:nye) :: iis, iie
-  integer,intent(in)               :: id
   real(8),intent(in)               :: T, m, umax, c
   real(8),intent(inout),dimension(nv,np,nys:nye,nsp) :: up
 
   real(8) :: Tem
   real(8) :: uc, fc, uh, fh, wl, wr, w, fu, fstep
   real(8) :: ua, csth, snth, phi, norm
-  real(8) :: aa, bb
   real(8) :: ifc, ifh
   real(8) :: pi  
   integer :: ivs
@@ -111,31 +109,26 @@ end subroutine thermal__r
 
 
 
-subroutine thermal__r_shift(up,nv,np,nys,nye,nsp,isp,iis,iie,js,je,T,m,v0,idir,id,umax,c,iran)
+subroutine thermal__r_shift(up,nv,np,nys,nye,nsp,isp,iis,iie,js,je,T,m,v0,idir,umax,c,iran)
   implicit none
 
   integer,intent(in)               :: nv, np,nys, nye, nsp
   integer,intent(in)               :: isp, js, je, idir, iran
   integer,intent(in),dimension(nys:nye) :: iis, iie
-  integer,intent(in)               :: id
   real(8),intent(in)               :: T, m, v0, umax, c
   real(8),intent(inout),dimension(nv,np,nys:nye,nsp) :: up
 
   real(8) :: Tem
   real(8) :: uc, fc, uh, fh, wl, wr, w, fu, fstep
   real(8) :: ua, csth, snth, phi, norm
-  real(8) :: aa, bb
   real(8) :: ifc, ifh
   real(8) :: gamb, vb,wkuz,wkut, uwk, pwk, ewk
   real(8) :: pi  
   integer :: ivs
   integer :: j, ii
   integer :: id1, id2, id3
-  integer :: nseed
-  integer,allocatable :: seed(:)
   real(8),allocatable :: ran(:)
   integer :: nran, ir
-  integer :: ic
   integer :: tot, mis
   ivs = nv-2
   pi  = 4.d0*atan(1.d0)

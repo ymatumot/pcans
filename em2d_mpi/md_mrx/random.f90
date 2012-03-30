@@ -4,7 +4,6 @@ subroutine random__init(ranflag,id)
   integer, intent(in)  :: id
   integer :: nseed
   integer,allocatable  :: seed(:)
-  integer :: numach
 
   select case(ranflag)
   case(1) 
@@ -28,10 +27,6 @@ subroutine random__generate(N,ran,ranflag)
   integer,intent(in)                 :: N
   integer,intent(in)                 :: ranflag
   real(8),intent(inout),dimension(N) :: ran
-
-  integer :: i
-  integer :: idum
-  idum=3145239
 
   select case(ranflag)
   case(1)

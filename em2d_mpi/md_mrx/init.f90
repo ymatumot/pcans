@@ -332,24 +332,24 @@ contains
     ! *** particle velocity
     ! background plasma
     iis = 1; iie = int(nbg*(nxe+bc-nxs-1))
-    call thermal__r(up,5,np,nys,nye,nsp,1,iis,iie,nys,nye,Ti,r(1),nrank, &
+    call thermal__r(up,5,np,nys,nye,nsp,1,iis,iie,nys,nye,Ti,r(1),&
          Ti*100.d0,c,iran)
-    call thermal__r(up,5,np,nys,nye,nsp,2,iis,iie,nys,nye,Te,r(2),nrank, &
+    call thermal__r(up,5,np,nys,nye,nsp,2,iis,iie,nys,nye,Te,r(2),&
          Te*100.d0,c,iran)
 
     ! 1st current sheet
     iis = iie+1; iie = int(nbg*(nxe+bc-nxs+1))+2*lcs*ncs
     call thermal__r_shift(up,5,np,nys,nye,nsp,1,iis,iie,nys,nye,&
-         Ti,r(1),-v0,3,nrank,Ti*100.d0,c,iran)
+         Ti,r(1),-v0,3,Ti*100.d0,c,iran)
     call thermal__r_shift(up,5,np,nys,nye,nsp,2,iis,iie,nys,nye,&
-         Te,r(2), v0,3,nrank,Te*100.d0,c,iran)
+         Te,r(2), v0,3,Te*100.d0,c,iran)
 
     ! 2nd current sheet
     iis = iie+1;  iie(:) = np2(:,1)
     call thermal__r_shift(up,5,np,nys,nye,nsp,1,iis,iie,nys,nye,&
-         Ti,r(1), v0,3,nrank,Ti*100.d0,c,iran)
+         Ti,r(1), v0,3,Ti*100.d0,c,iran)
     call thermal__r_shift(up,5,np,nys,nye,nsp,2,iis,iie,nys,nye,&
-         Te,r(2),-v0,3,nrank,Te*100.d0,c,iran)
+         Te,r(2),-v0,3,Te*100.d0,c,iran)
 
 
     call boundary__particle(up,                                        &
