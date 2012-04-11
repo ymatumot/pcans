@@ -93,11 +93,11 @@ contains
     integer, intent(in)    :: np, nys, nye, nxgs, nxge, nygs, nyge, nsp, np2(nys:nye,nsp)
     real(8), intent(in)    :: c
     real(8), intent(in)    :: up(5,np,nys:nye,nsp)
-    real(8), intent(inout) :: temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp)
+    real(8), intent(inout) :: temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp)
     integer :: ii, i, j, ih, jh, isp
     real(8) :: dx, dxm, dy, dym, gam
 
-    !caluculate temperature at (i+1/2, j+1/2)
+    !caluculate momentum flux at (i+1/2, j+1/2)
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)
@@ -130,6 +130,24 @@ contains
              temp(ih+1,jh  ,3,isp) = temp(ih+1,jh  ,3,isp)+up(5,ii,j,isp)**2*gam*dx *dym
              temp(ih  ,jh+1,3,isp) = temp(ih  ,jh+1,3,isp)+up(5,ii,j,isp)**2*gam*dxm*dy
              temp(ih+1,jh+1,3,isp) = temp(ih+1,jh+1,3,isp)+up(5,ii,j,isp)**2*gam*dx *dy
+
+             !Txy
+             temp(ih  ,jh  ,4,isp) = temp(ih  ,jh  ,4,isp)+up(3,ii,j,isp)*up(4,ii,j,isp)*gam*dxm*dym
+             temp(ih+1,jh  ,4,isp) = temp(ih+1,jh  ,4,isp)+up(3,ii,j,isp)*up(4,ii,j,isp)*gam*dx *dym
+             temp(ih  ,jh+1,4,isp) = temp(ih  ,jh+1,4,isp)+up(3,ii,j,isp)*up(4,ii,j,isp)*gam*dxm*dy
+             temp(ih+1,jh+1,4,isp) = temp(ih+1,jh+1,4,isp)+up(3,ii,j,isp)*up(4,ii,j,isp)*gam*dx *dy
+
+             !Tyz
+             temp(ih  ,jh  ,5,isp) = temp(ih  ,jh  ,5,isp)+up(4,ii,j,isp)*up(5,ii,j,isp)*gam*dxm*dym
+             temp(ih+1,jh  ,5,isp) = temp(ih+1,jh  ,5,isp)+up(4,ii,j,isp)*up(5,ii,j,isp)*gam*dx *dym
+             temp(ih  ,jh+1,5,isp) = temp(ih  ,jh+1,5,isp)+up(4,ii,j,isp)*up(5,ii,j,isp)*gam*dxm*dy
+             temp(ih+1,jh+1,5,isp) = temp(ih+1,jh+1,5,isp)+up(4,ii,j,isp)*up(5,ii,j,isp)*gam*dx *dy
+
+             !Tzx
+             temp(ih  ,jh  ,6,isp) = temp(ih  ,jh  ,6,isp)+up(5,ii,j,isp)*up(3,ii,j,isp)*gam*dxm*dym
+             temp(ih+1,jh  ,6,isp) = temp(ih+1,jh  ,6,isp)+up(5,ii,j,isp)*up(3,ii,j,isp)*gam*dx *dym
+             temp(ih  ,jh+1,6,isp) = temp(ih  ,jh+1,6,isp)+up(5,ii,j,isp)*up(3,ii,j,isp)*gam*dxm*dy
+             temp(ih+1,jh+1,6,isp) = temp(ih+1,jh+1,6,isp)+up(5,ii,j,isp)*up(3,ii,j,isp)*gam*dx *dy
           enddo
        enddo
     enddo

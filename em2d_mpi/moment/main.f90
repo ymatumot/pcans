@@ -23,7 +23,7 @@ program main
      !memory clear
      den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp) = 0.0D0
      vel(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp) = 0.0D0
-     temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp) = 0.0D0
+     temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp) = 0.0D0
 
      do irank=0,nproc-1
         call getarg(idata+irank,ifile)
@@ -51,6 +51,9 @@ program main
         call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,1,isp),nxgs,nxge,nygs,nyge,bc)
         call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,2,isp),nxgs,nxge,nygs,nyge,bc)
         call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,3,isp),nxgs,nxge,nygs,nyge,bc)
+        call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,4,isp),nxgs,nxge,nygs,nyge,bc)
+        call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,5,isp),nxgs,nxge,nygs,nyge,bc)
+        call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,6,isp),nxgs,nxge,nygs,nyge,bc)
      enddo
 
      call fio__mom(den,vel,temp,uf,nxgs,nxge,nygs,nyge,nsp,bc,it0,trim(dir)//'../mom/')
