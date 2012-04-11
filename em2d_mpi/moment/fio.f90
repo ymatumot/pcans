@@ -41,7 +41,7 @@ contains
        allocate(uf(6,nxgs-1:nxge+1,nygs-1:nyge+1))
        allocate(den(nxgs-1:nxge+1,nygs-1:nyge+1,nsp))
        allocate(vel(nxgs-1:nxge+1,nygs-1:nyge+1,3,nsp))
-       allocate(temp(nxgs-1:nxge+1,nygs-1:nyge+1,3,nsp))
+       allocate(temp(nxgs-1:nxge+1,nygs-1:nyge+1,6,nsp))
 
        lflag = .false.
     endif
@@ -75,7 +75,7 @@ contains
     real(8), intent(in)    :: uf(6,nxgs-1:nxge+1,nygs-1:nyge+1)
     real(8), intent(inout) :: den(nxgs-1:nxge+1,nygs-1:nyge+1,nsp),   &
                               vel(nxgs-1:nxge+1,nygs-1:nyge+1,3,nsp), &
-                              temp(nxgs-1:nxge+1,nygs-1:nyge+1,3,nsp)
+                              temp(nxgs-1:nxge+1,nygs-1:nyge+1,6,nsp)
     character(len=*), intent(in) :: dir
     integer            :: i, j
     real(8)            :: tmp(nxgs:nxge,nygs:nyge,6)
