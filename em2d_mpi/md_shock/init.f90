@@ -2,6 +2,7 @@ module init
 
   use const
   use mpi_set
+  use random_gen
 
   implicit none
 
@@ -28,8 +29,6 @@ contains
   subroutine init__set_param
 
     use fio, only : fio__input, fio__param
-    integer              :: n
-    integer, allocatable :: seed(:)
     real(8)              :: fgi, fpi, alpha, beta, va, fpe, fge, rgi, rge, ldb, rtemp
     character(len=128)   :: file9 
     character(len=128)   :: file11
@@ -42,16 +41,6 @@ contains
     allocate(up(5,np,nys:nye,nsp))
     allocate(gp(5,np,nys:nye,nsp))
 !*********** End of MPI settings  ***************!
-
-!*********** Random seed *************!
-    call random_seed()
-    call random_seed(size=n)
-    allocate(seed(n))
-    call random_seed(get=seed)
-    seed(1:n) = seed(1:n)+nrank
-    call random_seed(put=seed)
-    deallocate(seed)
-!***********   End of    *************!
 
 !*********************************************************************
 !   time0   : start time (if time0 < 0, initial data from input.f)
@@ -149,6 +138,7 @@ contains
        return
     endif
 
+    call random_gen__init(nrank)
     call init__loading
     call fio__param(np,nsp,np2,                             &
                     nxgs,nxge,nygs,nyge,nys,nye,            &
@@ -164,7 +154,7 @@ contains
     use boundary, only : boundary__field
 
     integer :: i, j, ii, isp
-    real(8) :: sd, aa, bb, cc
+    real(8) :: sd, r1, r2
 
     !*** setting of fields ***!
     !magnetic field
@@ -204,12 +194,12 @@ contains
     isp = 1
     do j=nys,nye
        do ii=1,np2(j,isp)
-          call random_number(aa)
-          up(1,ii,j,1) = nxs*delx+aa*delx*(nxe+bc-nxs+1.)
+          call random_number(r1)
+          up(1,ii,j,1) = nxs*delx+r1*delx*(nxe+bc-nxs+1.)
           up(1,ii,j,2) = up(1,ii,j,1)
 
-          call random_number(aa)
-          up(2,ii,j,1) = dble(j)*delx+delx*aa
+          call random_number(r1)
+          up(2,ii,j,1) = dble(j)*delx+delx*r1
           up(2,ii,j,2) = up(2,ii,j,1)
        enddo
     enddo
@@ -226,17 +216,12 @@ contains
                 sd = vte/sqrt(2.)
              endif
 
-             aa = 0.0D0
-             do while(aa == 0.0D0)
-                call random_number(aa)
-             enddo
-             sd = sd*dsqrt(-2.*dlog(aa))
-             call random_number(bb)
-             call random_number(cc)
+             call random_gen__bm(r1,r2)
+             up(3,ii,j,isp) = sd*r1+u0
+             up(4,ii,j,isp) = sd*r2
 
-             up(3,ii,j,isp) = sd*(2.*bb-1)+u0
-             up(4,ii,j,isp) = sd*2.*dsqrt(bb*(1.-bb))*cos(2.*pi*cc)
-             up(5,ii,j,isp) = sd*2.*dsqrt(bb*(1.-bb))*sin(2.*pi*cc)
+             call random_gen__bm(r1,r2)
+             up(5,ii,j,isp) = sd*r1
           enddo
        enddo
     enddo
@@ -249,7 +234,7 @@ contains
     use boundary, only : boundary__field
 
     integer :: isp, ii, ii2, ii3, j, dn
-    real(8) :: sd, aa, bb, cc, dx
+    real(8) :: sd, r1, r2, dx
 
     !Inject particles in x=nxs~nxs+v0*dt
 
@@ -260,12 +245,12 @@ contains
        do ii=1,dn
           ii2 = np2(j,1)+ii
           ii3 = np2(j,2)+ii
-          call random_number(aa)
-          up(1,ii2,j,1) = nxs*delx+aa*dx
+          call random_number(r1)
+          up(1,ii2,j,1) = nxs*delx+r1*dx
           up(1,ii3,j,2) = up(1,ii2,j,1)
 
-          call random_number(aa)
-          up(2,ii2,j,1) = dble(j)*delx+delx*aa
+          call random_number(r1)
+          up(2,ii2,j,1) = dble(j)*delx+delx*r1
           up(2,ii3,j,2) = up(2,ii2,j,1)
        enddo
     enddo
@@ -282,16 +267,12 @@ contains
 
        do j=nys,nye
           do ii=np2(j,isp)+1,np2(j,isp)+dn
-             aa = 0.0D0
-             do while(aa == 0.0D0)
-                call random_number(aa)
-             enddo
-             call random_number(bb)
-             call random_number(cc)
+             call random_gen__bm(r1,r2)
+             up(3,ii,j,isp) = sd*r1+u0
+             up(4,ii,j,isp) = sd*r2
 
-             up(3,ii,j,isp) = sd*dsqrt(-2.*dlog(aa))*(2.*bb-1)+u0
-             up(4,ii,j,isp) = sd*dsqrt(-2.*dlog(aa))*2.*dsqrt(bb*(1.-bb))*cos(2.*pi*cc)
-             up(5,ii,j,isp) = sd*dsqrt(-2.*dlog(aa))*2.*dsqrt(bb*(1.-bb))*sin(2.*pi*cc)
+             call random_gen__bm(r1,r2)
+             up(5,ii,j,isp) = sd*r1
           enddo
        enddo
     enddo

@@ -19,7 +19,7 @@ program main
   do idata=2,ndata
 
      call getarg(idata,ifile)
-     write(*,'(a)')'reading....'//trim(dir)//trim(ifile)
+     write(*,'(a)')'reading....  '//trim(dir)//trim(ifile)
 
      call fio__input(dir,ifile)
 

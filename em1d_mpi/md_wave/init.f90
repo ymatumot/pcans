@@ -2,6 +2,7 @@ module init
 
   use const
   use mpi_set
+  use random_gen
 
   implicit none
 
@@ -143,6 +144,7 @@ contains
     !Magnetic field strength
     b0 = fgi*r(1)*c/q(1)
 
+    call random_gen__init(nrank)
     call init__loading
     call init__set_field
     call fio__param(np,nsp,np2,nxgs,nxge,nxs,nxe,nxs1,nxe1,bcp, &
@@ -157,25 +159,15 @@ contains
 
     use boundary, only : boundary__particle
 
-    integer :: i, ii, isp, n
-    integer, allocatable :: seed(:)
-    real(8) :: sd, aa, bb
-
-    call random_seed()
-    call random_seed(size=n)
-    allocate(seed(n))
-    call random_seed(get=seed)
-!!$    seed(1:n) = seed(1:n)+nrank
-    seed(1:n) = nrank
-    call random_seed(put=seed)
-    deallocate(seed)
+    integer :: i, ii, isp
+    real(8) :: sd, r1, r2
 
     !particle position
     isp=1
     do i=nxs,nxe+bcp
        do ii=1,np2(i,isp)
-          call random_number(aa)
-          up(1,ii,i,1) = dble(i)+delx*aa
+          call random_number(r1)
+          up(1,ii,i,1) = dble(i)+delx*r1
           up(1,ii,i,2) = up(1,ii,i,1)
        enddo
     enddo
@@ -192,14 +184,12 @@ contains
 
        do i=nxs,nxe+bcp
           do ii=1,np2(i,isp)
-             call random_number(aa)
-             call random_number(bb)
-             up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+             call random_gen__bm(r1,r2)
+             up(2,ii,i,isp) = sd*r1
 
-             call random_number(aa)
-             call random_number(bb)
-             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+             call random_gen__bm(r1,r2)
+             up(3,ii,i,isp) = sd*r1
+             up(4,ii,i,isp) = sd*r2
           enddo
        enddo
     enddo

@@ -1,6 +1,7 @@
 module init
 
   use const
+  use random_gen
 
   implicit none
 
@@ -125,6 +126,7 @@ contains
     !Magnetic field strength
     b0 = fgi*r(1)*c/q(1)
 
+    call random_gen__init
     call init__loading
     call init__set_field
     call fio__param(np,nx,nsp,np2,c,q,r,vti,vte,va,rtemp,fpe,fge,ldb,delt,delx,bc,dir,file9)
@@ -137,7 +139,7 @@ contains
     use boundary, only : boundary__particle
 
     integer :: i, ii, isp
-    real(8) :: sd, sd2, aa, bb, v0, u0
+    real(8) :: sd, sd2, r1, r2, v0, u0
 
     v0 = 0.0*c
     u0 = v0/dsqrt(1.-(v0/c)**2)
@@ -148,8 +150,8 @@ contains
     isp = 1
     do i=1,nx+bc
        do ii=1,np2(i,isp)
-          call random_number(aa)
-          up(1,ii,i,1) = dble(i)+delx*aa
+          call random_number(r1)
+          up(1,ii,i,1) = dble(i)+delx*r1
           up(1,ii,i,2) = up(1,ii,i,1) 
        enddo
     enddo
@@ -167,14 +169,12 @@ contains
           
           do i=1,nx+bc
              do ii=1,np2(i,isp)
-                call random_number(aa)
-                call random_number(bb)
-                up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+                call random_gen__bm(r1,r2)
+                up(2,ii,i,isp) = sd*r1
 
-                call random_number(aa)
-                call random_number(bb)
-                up(3,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-                up(4,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+                call random_gen__bm(r1,r2)
+                up(3,ii,i,isp) = sd2*r1
+                up(4,ii,i,isp) = sd2*r2
              enddo
           enddo
        endif
@@ -186,14 +186,12 @@ contains
 
           do i=1,nx+bc
              do ii=1,np2(i,isp)
-                call random_number(aa)
-                call random_number(bb)
-                up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+                call random_gen__bm(r1,r2)
+                up(2,ii,i,isp) = sd*r1
 
-                call random_number(aa)
-                call random_number(bb)
-                up(3,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-                up(4,ii,i,isp) = sd2*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+                call random_gen__bm(r1,r2)
+                up(3,ii,i,isp) = sd2*r1
+                up(4,ii,i,isp) = sd2*r2
              enddo
           enddo
        endif

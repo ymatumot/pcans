@@ -1,6 +1,7 @@
 module init
 
   use const
+  use random_gen
 
   implicit none
 
@@ -100,7 +101,7 @@ contains
     vte = rge*fge
     vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
 
-    v0 = -20.*va
+    v0 = -5.*va
     u0 = v0/dsqrt(1.-(v0/c)**2)
 
     fgi = fge*r(2)/r(1)
@@ -128,6 +129,7 @@ contains
        return
     endif
 
+    call random_gen__init
     call init__loading
     call init__set_field
     call fio__param(np,nx,nsp,np2,c,q,r,vti,vte,va,rtemp,fpe,fge,ldb,delt,delx,bc,dir,file9)
@@ -140,16 +142,14 @@ contains
     use boundary, only : boundary__particle
 
     integer :: i, ii, isp
-    real(8) :: sd, aa, bb
-
-    call random_seed()
+    real(8) :: sd, r1, r2
 
     !particle position
     isp = 1
     do i=1,nx+bc
        do ii=1,np2(i,isp)
-          call random_number(aa)
-          up(1,ii,i,1) = dble(i)+delx*aa
+          call random_number(r1)
+          up(1,ii,i,1) = dble(i)+delx*r1
           up(1,ii,i,2) = up(1,ii,i,1) 
        enddo
     enddo
@@ -166,14 +166,12 @@ contains
 
        do i=1,nx+bc
           do ii=1,np2(i,isp)
-             call random_number(aa)
-             call random_number(bb)
-             up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
-             up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+             call random_gen__bm(r1,r2)
+             up(2,ii,i,isp) = sd*r1+u0
+             up(3,ii,i,isp) = sd*r2
 
-             call random_number(aa)
-             call random_number(bb)
-             up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+             call random_gen__bm(r1,r2)
+             up(4,ii,i,isp) = sd*r1
           enddo
        enddo
     enddo
@@ -215,7 +213,7 @@ contains
   subroutine init__inject
 
     integer :: isp, i, ii, ii2, ii3, dn
-    real(8) :: sd, aa, bb, dx
+    real(8) :: sd, r1, r2, dx
     !Inject particles at x=1
 
     i   = 1
@@ -226,8 +224,8 @@ contains
     do ii=1,dn
        ii2 = np2(i,1)+ii
        ii3 = np2(i,2)+ii
-       call random_number(aa)
-       up(1,ii2,i,1) = dble(i)+dx*aa
+       call random_number(r1)
+       up(1,ii2,i,1) = dble(i)+dx*r1
        up(1,ii3,i,2) = up(1,ii2,i,1)
     enddo
 
@@ -242,14 +240,12 @@ contains
        endif
 
        do ii=np2(i,isp)+1,np2(i,isp)+dn
-          call random_number(aa)
-          call random_number(bb)
-          up(2,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)+u0
-          up(3,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+          call random_gen__bm(r1,r2)
+          up(2,ii,i,isp) = sd*r1+u0
+          up(3,ii,i,isp) = sd*r2
 
-          call random_number(aa)
-          call random_number(bb)
-          up(4,ii,i,isp) = sd*dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
+          call random_gen__bm(r1,r2)
+          up(4,ii,i,isp) = sd*r1
        enddo
     enddo
 

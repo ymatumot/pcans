@@ -2,6 +2,7 @@ module init
 
   use const
   use mpi_set
+  use random_gen
 
   implicit none
 
@@ -148,6 +149,7 @@ contains
     !half shear width
     delv = rgi
     
+    call random_gen__init(nrank)
     call init__loading
     call fio__param(np,nsp,np2,                             &
                     nxgs,nxge,nygs,nyge,nys,nye,            &
@@ -163,11 +165,10 @@ contains
     use boundary, only : boundary__particle, boundary__field
 
     integer, parameter   :: nbin=nx*20, nchart=nbin, nbin_min=nbin/20
-    integer              :: i, j, k, l, ii, isp, isn, nseed
-    integer, allocatable :: seed(:)
+    integer              :: i, j, k, l, ii, isp, isn
     real(8), parameter   :: eps=1d-2
     real(8)              :: dn, dnmax
-    real(8)              :: sd, aa, bb, cc, dd, left, right, dx, intf0
+    real(8)              :: sd, r1, r2, left, right, dx, intf0
     real(8)              :: e0, tp, vfnc, efnc, bfnc, dfnc, gamp, tmp, vd
     real(8)              :: intf(nchart), cx(nchart)
     real(8)              :: bfabs, cdf_n, dcn, vy, gam0, dxvy, dvx, dvy, den, x, y
@@ -238,15 +239,6 @@ contains
                          nup,ndown,mnpr,nstat,ncomw,nerr)
     !*** end of ***!
 
-    call random_seed()
-    call random_seed(size=nseed)
-    allocate(seed(nseed))
-    call random_seed(get=seed)
-    seed(1:nseed) = seed(1:nseed)+nrank
-!!$    seed(1:n) = nrank
-    call random_seed(put=seed)
-    deallocate(seed)
-
     !additional charge to satisfy div(-Vy x Bz) = 4\pi(ni-ne)
     dn = (-uf(4,nxgs,nys)+uf(4,nxge,nys))/(4.*pi*q(1))
     dnmax = 0.0
@@ -258,12 +250,12 @@ contains
     !particle position - background particles
     do j=nys,nye
        do ii=1,np2(j,1)-dnmax*(nxge+bc-nxgs+1)*delx
-          call random_number(aa)
+          call random_number(r1)
           left  = nxgs*delx
           right = nxge*delx
           do while(right-left > eps)
              dx = (right+left)/2.
-             if(cdf_n(dx) >= aa)then
+             if(cdf_n(dx) >= r1)then
                 right = dx
              else
                 left = dx
@@ -274,8 +266,8 @@ contains
           up(1,ii,j,2) = up(1,ii,j,1)
           
           !y position
-          call random_number(bb)
-          up(2,ii,j,1) = dble(j)*delx+bb*delx
+          call random_number(r1)
+          up(2,ii,j,1) = dble(j)*delx+r1*delx
           up(2,ii,j,2) = up(2,ii,j,1)
        enddo
     enddo
@@ -314,11 +306,11 @@ contains
 
        do j=nys,nye
           do ii=np2(j,isp)-dnmax*(nxge+bc-nxgs+1)*delx+1,np2(j,isp)-isn*dn/2
-             call random_number(aa)
+             call random_number(r1)
              left  = 1
              right = nchart
              do while(right-left > 2.)
-                if(intf((left+right)/2.+0.5) > aa)then
+                if(intf((left+right)/2.+0.5) > r1)then
                    right = (left+right)/2.
                 else
                    left = (left+right)/2.
@@ -326,8 +318,8 @@ contains
              enddo
              up(1,ii,j,isp) = cx((left+right)/2.+0.5)
 
-             call random_number(bb)
-             up(2,ii,j,isp) = dble(j)*delx+delx*bb
+             call random_number(r1)
+             up(2,ii,j,isp) = dble(j)*delx+delx*r1
           enddo
        enddo
        np2(nys:nye,isp) = np2(nys:nye,isp)-isn*dn/2.
@@ -354,39 +346,32 @@ contains
              endif
 
              !non-relativistic Maxwellian
-             call random_number(aa)
-             call random_number(bb)
-             call random_number(cc)
-             ut1 = sd*dsqrt(-2.*dlog(aa))
-             ut2 = sd*dsqrt(-2.*dlog(bb))
-             ut3 = sd*dsqrt(-2.*dlog(cc))
+             call random_gen__bm(r1,r2)
+             up(3,ii,j,isp) = sd*r1
+             up(4,ii,j,isp) = sd*r2
 
-             call random_number(aa)
-             call random_number(bb)
-             call random_number(cc)
-             up(3,ii,j,isp) = ut1*cos(2.*pi*aa)
-             up(4,ii,j,isp) = ut2*cos(2.*pi*bb)
-             up(5,ii,j,isp) = ut3*cos(2.*pi*cc)
+             call random_gen__bm(r1,r2)
+             up(5,ii,j,isp) = sd*r1
 
              gamp = dsqrt(1.D0+(ut1*ut1+ut2*ut2+ut3*ut3)/(c*c))
              vd = dvy(up(1,ii,j,isp))
              if(isp == 2) vd = -vd*rtemp
 
-             call random_number(dd)
+             call random_number(r1)
              if(up(3,ii,j,isp)*dvx(up(1,ii,j,isp),up(2,ii,j,isp)) >= 0.)then
                 up(3,ii,j,isp) = up(3,ii,j,isp)+dvx(up(1,ii,j,isp),up(2,ii,j,isp))*gamp
              else
-                if(dd < (-dvx(up(1,ii,j,isp),up(2,ii,j,isp))*up(3,ii,j,isp)/gamp))then
+                if(r1 < (-dvx(up(1,ii,j,isp),up(2,ii,j,isp))*up(3,ii,j,isp)/gamp))then
                    up(3,ii,j,isp) = -up(3,ii,j,isp)+dvx(up(1,ii,j,isp),up(2,ii,j,isp))*gamp
                 else
                    up(3,ii,j,isp) = up(3,ii,j,isp)+dvx(up(1,ii,j,isp),up(2,ii,j,isp))*gamp
                 endif
              endif
-             call random_number(dd)
+             call random_number(r1)
              if(up(4,ii,j,isp)*(+vy(up(1,ii,j,isp))+vd) >= 0.)then
                 up(4,ii,j,isp) = +up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
              else
-                if(dd < (-(+vy(up(1,ii,j,isp))+vd)*up(4,ii,j,isp)/gamp))then
+                if(r1 < (-(+vy(up(1,ii,j,isp))+vd)*up(4,ii,j,isp)/gamp))then
                    up(4,ii,j,isp) = -up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
                 else
                    up(4,ii,j,isp) = +up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
