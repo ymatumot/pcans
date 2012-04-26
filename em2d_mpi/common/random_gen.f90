@@ -46,7 +46,7 @@ contains
   end subroutine random_gen__bm
 
 
-  subroutine random_gen__sobol(T,u1,u2,u3)
+  subroutine random_gen__sobol(u1,u2,u3,T)
     !! Sobol's algorithm
 
     real(8), intent(in)  :: T
