@@ -4,7 +4,7 @@ module random_gen
 
   private
 
-  public :: random_gen__init, random_gen__bm, random_gen__sobol
+  public :: random_gen__init, random_gen__bm, random_gen__sobol, random_gen__LLT
 
   real(8), save :: pi
 
@@ -81,6 +81,28 @@ contains
     u3 = e3 * bb * sin(2.*pi*cc)
 
   end subroutine random_gen__sobol
+
+
+  subroutine random_gen__LLT(u1,u2,u3,ubulk)
+    !! Lossless Lorentz Transformation (specific case only)
+
+    real(8), intent(in)    :: u1, u2, ubulk
+    real(8), intent(inout) :: u3
+    real(8)                :: u0, dice
+    real(8)                :: beta, bgamma
+
+    bgamma = sqrt( 1.d0 + ubulk**2 )
+    beta = ubulk / bgamma
+    u0 = sqrt(1.d0+u1**2+u2**2+u3**2)
+    if( (u3*beta) .lt. 0.d0 ) then
+       call random_number(dice)
+       if( (u0*dice).lt.( -beta*u3 ) )then
+          u3 = - u3
+       endif
+    endif
+    u3 = bgamma*u3 + u0*ubulk
+       
+  end subroutine random_gen__LLT
 
 
 end module random_gen
