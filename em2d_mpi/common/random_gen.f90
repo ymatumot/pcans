@@ -91,9 +91,9 @@ contains
     real(8)                :: u0, dice
     real(8)                :: beta, bgamma
 
-    bgamma = sqrt( 1.d0 + ubulk**2 )
-    beta = ubulk / bgamma
-    u0 = sqrt(1.d0+u1**2+u2**2+u3**2)
+    bgamma = dsqrt( 1.d0 + ubulk**2 )
+    beta   = ubulk / bgamma
+    u0     = dsqrt(1.d0+u1**2+u2**2+u3**2)
     if( (u3*beta) .lt. 0.d0 ) then
        call random_number(dice)
        if( (u0*dice).lt.( -beta*u3 ) )then
