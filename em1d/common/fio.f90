@@ -8,6 +8,7 @@ module fio
   public :: fio__input
   public :: fio__param
   public :: fio__energy
+  public :: fio__progress_bar
 
 contains
 
@@ -161,6 +162,21 @@ contains
 610 format(f8.2,5(e12.4))
 
   end subroutine fio__energy
+
+
+  subroutine fio__progress_bar(it,itmax)
+    integer, intent(in) :: it, itmax
+    integer :: k
+    character(len=1) :: back
+    character(len=128) :: bar
+
+    write(bar,'(i3,a,x,a,32a,32a)')100*it/itmax,'%','|',('*',k=1,32*it/itmax),&
+                                   (' ',k=1,32-32*it/itmax),'|'
+    back=char(8)
+    write(6,'(128a)',advance='no')trim(bar)
+    write(6,'(128a)',advance='no')(back,k=1,64)
+
+  end subroutine fio__progress_bar
 
 
 end module fio

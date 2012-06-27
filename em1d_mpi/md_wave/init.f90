@@ -125,7 +125,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(nxs:nxe+bcp,1) = 12500
+    np2(nxs:nxe+bcp,1) = 100
     np2(nxs:nxe+bcp,2) = np2(nxs:nxe+bcp,1)
 
     if(nrank == nroot)then

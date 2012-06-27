@@ -34,6 +34,7 @@ program main
                    c,q,r,delt,delx,0,it0,dir)
 
   do it=1,itmax-it0
+
      call particle__solv(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)
