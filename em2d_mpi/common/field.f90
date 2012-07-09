@@ -645,7 +645,7 @@ contains
 !!$    !memory clear
 !!$    uj(1:3,nxs-2:nxe+2,nys-2:nye+2) = 0.0D0
 !!$
-!!$    !caluculate erectric current density
+!!$    !calculate erectric current density
 !!$    do isp=1,nsp
 !!$       do j=nys,nye
 !!$          do ii=1,np2(j,isp)

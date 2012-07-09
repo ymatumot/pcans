@@ -365,7 +365,7 @@ contains
     !memory clear
     uj(1:3,nxs1-1:nxe1+1) = 0.0D0
 
-    !caluculate erectric current density
+    !calculate erectric current density
     do isp=1,nsp
        do i=nxs,nxe+bcp
           do ii=1,np2(i,isp)
