@@ -246,7 +246,7 @@
     !memory clear
     uj(1:3,0:nx+1) = 0.0D0
 
-    !caluculate erectric current density
+    !calculate erectric current density
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)
