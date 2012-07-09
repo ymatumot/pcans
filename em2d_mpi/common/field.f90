@@ -277,7 +277,7 @@ contains
 
     !-----------------------------------------------------------------------
     !  #  conjugate gradient method 
-    !  #  this routine will be stoped after itaration number = ite_max
+    !  #  this routine will be stopped after iteration number = ite_max
     !-----------------------------------------------------------------------
 
     integer, intent(in)    :: nxs, nxe, nys, nye, bc
@@ -286,7 +286,7 @@ contains
     real(8), intent(in)    :: c, delx, delt, gfac
     real(8), intent(in)    :: gkl(6,nxs-1:nxe+1,nys-1:nye+1)
     real(8), intent(inout) :: gb(6,nxs-1:nxe+1,nys-1:nye+1)
-    integer, parameter :: ite_max = 100 ! maximum number of interation
+    integer, parameter :: ite_max = 100 ! maximum number of iteration
     integer            :: i, ii, j, l, ite
     real(8), parameter :: err = 1d-6 
     real(8)            :: f1, f2, eps, sumr, sum, sum1, sum2, av, bv

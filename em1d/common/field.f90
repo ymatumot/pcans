@@ -239,7 +239,7 @@ contains
 
     real(8), intent(in)    :: gl(6,0:nx+1)
     real(8), intent(inout) :: gb(6,0:nx+1)
-    integer, parameter     :: ite_max = 1000 ! maximum number of interation
+    integer, parameter     :: ite_max = 1000 ! maximum number of iteration
     integer :: i, l, ite
     real(8), parameter     :: err = 1d-9
     real(8) :: eps, sumr, sum, sum1, sum2, av, bv
@@ -465,7 +465,7 @@ contains
   subroutine ssor(x,nx,b)
 
     !-----------------------------------------------------------------------
-    !  #  Symetric SOR method 
+    !  #  Symmetric SOR method 
     !-----------------------------------------------------------------------
     use boundary, only : boundary__phi
 
