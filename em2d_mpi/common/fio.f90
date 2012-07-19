@@ -203,7 +203,7 @@ contains
        total=vene_g(1)+vene_g(2)+efield_g+bfield_g
        
        write(12,610) (it+it0)*delt,vene_g(1),vene_g(2),efield_g,bfield_g,total
-610    format(f8.2,5(e12.4))
+610    format(f8.2,5(1p,e12.4))
     endif
 
   end subroutine fio__energy
