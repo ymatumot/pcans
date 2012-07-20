@@ -87,7 +87,7 @@ contains
     pi   = 4.0*atan(1.0)
     delx = 1.0
     c    = 1.0
-    delt = 0.5
+    delt = 0.5*delx/c
     ldb  = delx
 
     r(1) = 16.0
