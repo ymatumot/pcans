@@ -22,6 +22,7 @@ program main
 !    re-written in F90   (by Y. Matsumoto, STEL)  2008/10/21
 !    MPI parallelization (by Y. Matsumoto, STEL)  2009/4/1
 !    2-D code            (by Y. Matsumoto, STEL)  2009/6/5
+!    Reconnection setup  (by S. Zenitani, NAOJ)   2012/7/19
 !
 !**********************************************************************c
 
@@ -35,6 +36,10 @@ program main
 
   do it=1,itmax-it0
 
+    if(nrank == nroot)then
+       write(6,*) ' t = ', (it+it0)*delt
+    endif
+
      call particle__solv(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)
@@ -46,15 +51,16 @@ program main
                              np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &
                              nup,ndown,nstat,mnpi,mnpr,ncomw,nerr)
 
-     if(mod(it+it0,intvl1) == 0)                                                                &
-          call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
-                           c,q,r,delt,delx,it,it0,dir)
-
-     if(mod(it+it0,intvl2) == 0)                          &
-          call fio__energy(up,uf,                         &
-                           np,nsp,np2,nxs,nxe,nys,nye,bc, &
-                           c,r,delt,it,it0,dir,file12,    &
-                           nroot,nrank,mnpr,opsum,ncomw,nerr)
+     if (mod(it+it0,intvl1) == 0) then
+        call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
+             c,q,r,delt,delx,it,it0,dir)
+     endif
+     if (mod(it+it0,intvl2) == 0) then
+        call fio__energy(up,uf,                         &
+                         np,nsp,np2,nxs,nxe,nys,nye,bc, &
+                         c,r,delt,it,it0,dir,file12,    &
+                         nroot,nrank,mnpr,opsum,ncomw,nerr)
+     endif
   enddo
 
   call MPI_FINALIZE(nerr)

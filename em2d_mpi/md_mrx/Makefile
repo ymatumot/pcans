@@ -1,7 +1,7 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
-TARGET = a.out
-OBJS = const.o init.o main.o thermal.o random.o 
+TARGET = rx.out
+OBJS = const.o init.o main.o
 .PHONY : all 
 .PHONY : clean
 .SUFFIXES :
@@ -12,7 +12,7 @@ OBJS = const.o init.o main.o thermal.o random.o
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(FC) -L$(LIB_DIR) -o a.out $(FFLAGS) $(OBJS) -lem2d 
+	$(FC) -L$(LIB_DIR) -o $(TARGET) $(FFLAGS) $(OBJS) -lem2d 
 
 $(LIB_DIR)/libem2d.a : 
 	cd $(LIB_DIR) ; make
@@ -20,12 +20,20 @@ $(LIB_DIR)/libem2d.a :
 main.o : init.o const.o $(LIB_DIR)/libem2d.a
 init.o : const.o $(LIB_DIR)/libem2d.a
 
-############# moment calculation ###############
+##############moment calculation################
 moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./dat/ `cd dat; \ls *_rank*.dat`
+	$(LIB_DIR)/moment/mom.out ./dat/ `\ls dat/00*_rank*.dat | perl -pe 's/.*\///'`
 
 $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make
+###############################################
+
+##############PSD calculation################
+psdcalc : $(LIB_DIR)/psd/psd.out
+	$(LIB_DIR)/psd/psd.out 300 100 ./dat/ `\ls dat/00*_rank*.dat | perl -pe 's/.*\///'`
+
+$(LIB_DIR)/psd/psd.out :
+	cd $(LIB_DIR)/psd ; make
 ###############################################
 
 clean :
