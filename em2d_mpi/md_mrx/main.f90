@@ -36,10 +36,6 @@ program main
 
   do it=1,itmax-it0
 
-    if(nrank == nroot)then
-       write(6,*) ' t = ', (it+it0)*delt
-    endif
-
      call particle__solv(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)

@@ -141,15 +141,6 @@ contains
     np2(nys:nye,1:nsp) = ceiling( nbg*(nxge-nxgs)*delx + ncs*2*lcs + 0.5)
 
     if(nrank == nroot)then
-       write(6,*) 'r_Le ==> ', rge, rgi
-       write(6,*) 'debye => ', ldb, vte/fpe/dsqrt(2.d0)
-       write(6,*) 'd_e  ==> ', c/fpe, c/fpi, lcs
-       write(6,*) 'freq ==> ', fpe, fge, fpi, fgi
-       write(6,*) 'v_dr ==> ', vdi, vde, vti, vte
-       write(6,*) 'j    ==> ', ncs*(q(1)*vdi+q(2)*vde), b0/(4*pi*lcs)
-       write(6,*) 'P    ==> ', 0.5d0*ncs*(r(1)*(vti**2)+r(2)*vte**2), b0**2/(8*pi)
-       write(6,*) "particle #'s ==> ", np2(nys,1), np
-       write(6,*) "system size  ==> ", delx*(nxge-nxgs)/(c/fpi), delx*(nyge-nygs)/(c/fpi)
        if(np2(nys,1) > np)then
           write(*,*)'Too large number of particles'
           stop
@@ -230,10 +221,6 @@ contains
     ! ---------------- Particles ------------------
     f1 =  1.d0 / ( (1.d0+rtemp) * q(1) )
     f2 = rtemp / ( (1.d0+rtemp) * q(2) )
-    if(nrank == nroot)then
-       write(6,*) 'artificial drift (i) ==> ', -f1*e1*b0/(2*pi*lcs), vdi
-       write(6,*) 'artificial drift (e) ==> ', -f2*e1*b0/(2*pi*lcs), vde
-    endif
 
     do j=nys,nye
 
