@@ -22,16 +22,15 @@ contains
     real(8), intent(out) :: gp(5,np,nys:nye,nsp)
     integer :: i, j, ii, isp, ih, jh
     real(8) :: dx, dxm, dy, dym
-    real(8) :: fac1, fac2, fac2r, fac3, fac3r, gam, txxx, bt2
+    real(8) :: fac1, fac1r, fac2, fac2r, gam, txxx, bt2
     real(8) :: pf(6)
     real(8) :: uvm(6)
 
     do isp=1,nsp
 
        fac1 = q(isp)/r(isp)*0.5*delt
-       fac2 = fac1/c
        txxx = fac1*fac1
-       fac3 = q(isp)*delt/r(isp)
+       fac2 = q(isp)*delt/r(isp)
        do j=nys,nye
           do ii=1,np2(j,isp)
              i  = floor(up(1,ii,j,isp))
@@ -86,16 +85,17 @@ contains
              uvm(2) = up(4,ii,j,isp)+fac1*pf(5)
              uvm(3) = up(5,ii,j,isp)+fac1*pf(6)
 
-             gam = dsqrt(1.0+(+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))/(c*c))
-             fac2r = fac2/gam
-             fac3r = fac3/(gam+txxx*bt2/gam)
-             uvm(4) = uvm(1)+fac2r*(+uvm(2)*pf(3)-uvm(3)*pf(2))
-             uvm(5) = uvm(2)+fac2r*(+uvm(3)*pf(1)-uvm(1)*pf(3))
-             uvm(6) = uvm(3)+fac2r*(+uvm(1)*pf(2)-uvm(2)*pf(1))
+             gam = dsqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
+             fac1r = fac1/gam
+             fac2r = fac2/(gam+txxx*bt2/gam)
+
+             uvm(4) = uvm(1)+fac1r*(+uvm(2)*pf(3)-uvm(3)*pf(2))
+             uvm(5) = uvm(2)+fac1r*(+uvm(3)*pf(1)-uvm(1)*pf(3))
+             uvm(6) = uvm(3)+fac1r*(+uvm(1)*pf(2)-uvm(2)*pf(1))
     
-             uvm(1) = uvm(1)+fac3r*(+uvm(5)*pf(3)-uvm(6)*pf(2))
-             uvm(2) = uvm(2)+fac3r*(+uvm(6)*pf(1)-uvm(4)*pf(3))
-             uvm(3) = uvm(3)+fac3r*(+uvm(4)*pf(2)-uvm(5)*pf(1))
+             uvm(1) = uvm(1)+fac2r*(+uvm(5)*pf(3)-uvm(6)*pf(2))
+             uvm(2) = uvm(2)+fac2r*(+uvm(6)*pf(1)-uvm(4)*pf(3))
+             uvm(3) = uvm(3)+fac2r*(+uvm(4)*pf(2)-uvm(5)*pf(1))
 
              gp(3,ii,j,isp) = uvm(1)+fac1*pf(4)
              gp(4,ii,j,isp) = uvm(2)+fac1*pf(5)

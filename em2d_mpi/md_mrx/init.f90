@@ -68,7 +68,7 @@ contains
     itmax  = 20000
     intvl1 = 500
     intvl2 = 50
-    dir    = './data/'
+    dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
     gfac   = 0.501
