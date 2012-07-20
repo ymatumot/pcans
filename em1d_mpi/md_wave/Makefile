@@ -12,7 +12,7 @@ OBJS = const.o init.o main.o
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(FC) -L$(LIB_DIR) -o a.out $(FFLAGS) $(OBJS) -lem1d 
+	$(FC) -L$(LIB_DIR) -o $(TARGET) $(FFLAGS) $(OBJS) -lem1d 
 
 $(LIB_DIR)/libem1d.a : 
 	cd $(LIB_DIR) ; make

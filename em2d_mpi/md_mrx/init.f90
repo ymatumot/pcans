@@ -24,7 +24,7 @@ module init
   real(8) :: ncs, nbg  ! Harris sheet density and the background density
   real(8) :: vdi, vde  ! drift speed
   real(8) :: b0   ! B0 for harris fields
-  real(8) :: lcs  ! current sheet thickness
+  real(8) :: lcs  ! current sheet half thickness
 
 
 contains
@@ -34,7 +34,7 @@ contains
 
     use fio, only : fio__input, fio__param
     real(8) :: fgi, fpi, alpha, va, fpe, fge, rgi, rge
-    real(8) :: ldb       ! deby length
+    real(8) :: ldb       ! Debye length
     character(len=64) :: file9 
     character(len=64) :: file11
 
@@ -119,7 +119,7 @@ contains
     rge = vte/fge
     rgi = vti/fgi
 
-    ! current sheet half thickness
+    ! current sheet half thickness (fixed to 0.5 d_i)
     lcs = 0.5d0 * c/fpi
     ! current sheet density
     ncs = 250
@@ -131,14 +131,14 @@ contains
     q(2) = -q(1)  ! -fpe*dsqrt(r(2)/(4.d0*pi*ncs))
     ! Magnetic field amplitude
     b0  = fgi*r(1)*c/q(1)
-    vdi = 1.d0  / (1.d0 + rtemp ) * b0 / ( 4*pi*lcs*q(1)*ncs )
+    vdi = 1.d0 / ( 1.d0+rtemp ) * b0/(4*pi*lcs*q(1)*ncs)
     vde = -rtemp * vdi ! rtemp / (1.d0 + rtemp ) * b0 / ( 8*pi*lcs*q(1)*ncs )
     
-    ! position of the neutral sheet center
+    ! position of the X-point
     x0 = 0.5*(nxge+nxgs)*delx 
     y0 = 0.5*(nyge-nygs)*delx
-    !number of particles in each cell in y
-    np2(nys:nye,1:nsp) = ceiling( nbg*(nxge-nxgs)*delx + ncs*2*lcs + 0.5)
+    ! number of particles in each cell in y
+    np2(nys:nye,1:nsp) = ceiling( nbg*(nxge-nxgs)*delx + ncs*2*lcs + 1d-6)
 
     if(nrank == nroot)then
        if(np2(nys,1) > np)then
@@ -162,7 +162,6 @@ contains
 
     use boundary, only : boundary__particle, boundary__field
 
-    integer, parameter   :: nbin=nx*20, nchart=nbin, nbin_min=nbin/20
     integer              :: i, j, ii, ibg
     real(8)              :: r1, r2
     real(8)              :: b_harris, bx_pert, by_pert, jz, density
@@ -224,7 +223,7 @@ contains
 
     do j=nys,nye
 
-       ibg = floor( nbg*(nxe+bc-nxs+1) +0.0000001)
+       ibg = floor( nbg*(nxe+bc-nxs+1) + 1d-6)
        ! Background density: Uniform distribution
        do ii=1,ibg
           call random_number(r1)

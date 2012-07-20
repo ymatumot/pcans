@@ -80,7 +80,7 @@ contains
     it0    = 0
     if(it0 /= 0)then
        !start from the past calculation
-       write(file11,'(a,i3.3,a)')'002400_rank=',nrank,'.dat'
+       write(file11,'(i6.6,a,i3.3,a)') it0,'_rank=',nrank,'.dat'
        call fio__input(up,uf,np2,c,q,r,delt,delx,it0, &
                        np,nxgs,nxge,nxs,nxe,nxs1,nxe1,nsp,bc,bcp,nproc,nrank,dir,file11)
        return
