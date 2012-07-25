@@ -36,8 +36,7 @@ program main
 
   do it=1,itmax-it0
 
-     !if(mod(it+it0,10) == 0) call fio__progress_bar(it+it0,itmax)
-     if(mod(it+it0,100) == 0) write(*,*) it+it0
+     if(mod(it+it0,100) == 0) call fio__progress_bar(it+it0,itmax)
 
      call particle__solv(gp,up,uf,np2)
      call field__fdtd_i(uf,up,gp,np2)

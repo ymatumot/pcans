@@ -21,10 +21,10 @@ module init
   character(len=64), public :: dir
   character(len=64), public :: file10
   character(len=64), public :: file12
-  character(len=64), public :: file13, file14
-  real(8)                   :: pi, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8)                   :: pi
 
-  real(8) :: nbeam, vbeam, tbeam ! for beam setup
+  integer :: n0
+  real(8) :: b0, vt0(nsp), nbeam, vbeam, tbeam
 
 contains
 
@@ -33,7 +33,8 @@ contains
 
     use fio, only : fio__input, fio__param
 
-    real(8) :: fgi, fpi, rmass, betae, betai, sigma, vae, vai
+    real(8) :: rmass, fpe, fpi, fge, fgi, vte, vti, vae, vai, betae, betai
+    real(8) :: sigma, Ma, theta
     character(len=64) :: file9 
     character(len=64) :: file11
 
@@ -73,23 +74,10 @@ contains
        return
     endif
 
-!*********************************************************************
-!   r(1)  : ion mass             r(2)  : electron mass
-!   q(1)  : ion charge           q(2)  : electron charge
-!   c     : speed of light       ldb   : debye length
-!
-!   rgi   : ion Larmor radius    rge   : electron Larmor radius
-!   fgi   : ion gyro-frequency   fge   : electron gyro-frequency
-!   vti   : ion thermal speed    vte   : electron thermal speed
-!   b0    : magnetic field
-!
-!*********************************************************************
     pi   = 4.0*atan(1.0)
-    delx = 1.0
-    c    = 10.0
-    delt = 0.02
 
     !
+    ! n0    : number of particles / cell
     ! rmass : mass ratio
     ! sigma : (wce/wpe)^2
     ! betae : electron beta
@@ -98,47 +86,75 @@ contains
     ! vbeam : relative streaming velocity
     ! tbeam : temperature ratio (beam / core)
     !
+    n0    = 250
     rmass = 25.0
     sigma = 0.04
-    vae   = dsqrt(sigma) * c
-    vai   = dsqrt(sigma/rmass) * c
     betae = 0.5
     betai = 0.03125
-    nbeam = 0.2
-    vbeam = 3.0 * vai
-    tbeam = 1.0
 
+    vte   = 1.0
+    vti   = vte * dsqrt(betai/(betae*rmass))
+    c     = vte / dsqrt(sigma * 0.5*betae)
     fpe   = 1.0
     fge   = dsqrt(sigma)
     fpi   = fpe / dsqrt(rmass)
     fgi   = fge / rmass
-    va    = vai
-    vte   = dsqrt(0.5*betae) * vae
-    vti   = dsqrt(0.5*betai) * vai
-    rtemp = (vte**2) / (rmass*vti**2)
-    ldb   = vte / fpe
+    vae   = dsqrt(sigma) * c
+    vai   = dsqrt(sigma/rmass) * c
+    b0    = dsqrt(4*pi*n0) * vae
+    delx  = vte / fpe
+    delt  = 0.5*delx/c
 
-    np2(1:nx+bc,1) = 250
-    np2(1:nx+bc,2) = np2(1:nx+bc,1)
+    ! beam parameters
+    nbeam = 0.2
+    vbeam = 3.0 * vai
+    tbeam = 1.0
+    vt0(1) = vti
+    vt0(2) = vte
+
+    np2(1:nx+bc,1:2) = n0
 
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
        stop
     endif
 
-    !charge
+    ! mass and charge
     r(1) = rmass
     r(2) = 1.0
-    q(1) = fpi*dsqrt(r(1)/(4.0*pi*np2(1,1)))
+    q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
     q(2) = -q(1)
-
-    !Magnetic field strength
-    b0 = fgi*r(1)*c/q(1)
 
     call random_gen__init
     call init__loading
     call init__set_field
-    call fio__param(np,nx,nsp,np2,c,q,r,vti,vte,va,rtemp,fpe,fge,ldb,delt,delx,bc,dir,file9)
+
+    ! output parameters
+    open(9,file=trim(dir)//trim(file9),status='unknown')
+
+    write(9,"(A30, 2x, i10)") "number of grids : ", nx
+    write(9,"(A30, 2x, i10)") "number of particles/cell : ", n0
+    write(9,"(A30, 2x, es10.3)") "speed of light : ", c
+    write(9,"(A30, 2x, es10.3)") "time step : ", delt
+    write(9,"(A30, 2x, es10.3)") "grid size : ", delx
+    write(9,"(A30, 2x, es10.3)") "beam density ratio : ", nbeam
+    write(9,"(A30, 2x, es10.3)") "relative velocity : ", vbeam
+    write(9,"(A30, 2x, es10.3)") "beam temperature ratio : ", tbeam
+    write(9,"(A30, 2x, es10.3)") "Debye length : ", vte/fpe
+    write(9,"(A30, 2x, es10.3)") "ion mass : ", r(1)
+    write(9,"(A30, 2x, es10.3)") "electron mass : ", r(2)
+    write(9,"(A30, 2x, es10.3)") "ion charge : ", q(1)
+    write(9,"(A30, 2x, es10.3)") "electron charge : ", q(2)
+    write(9,"(A30, 2x, es10.3)") "ion plasma freq : ", fpi
+    write(9,"(A30, 2x, es10.3)") "electron plasma freq : ", fpe
+    write(9,"(A30, 2x, es10.3)") "ion gyro freq : ", fgi
+    write(9,"(A30, 2x, es10.3)") "electron gyro freq : ", fge
+    write(9,"(A30, 2x, es10.3)") "ion thermal velocity : ", vti
+    write(9,"(A30, 2x, es10.3)") "electron thermal velocity : ", vte
+    write(9,"(A30, 2x, es10.3)") "ion Alfven velocity : ", vai
+    write(9,"(A30, 2x, es10.3)") "electron Alfven velocity : ", vae
+
+    close(9)
 
   end subroutine init__set_param
 
@@ -169,8 +185,8 @@ contains
        nb  = int( np2(i,isp) * nbeam )
        vb1 =+vbeam * (1 - nbeam)
        vb2 =-vbeam * nbeam
-       vt1 = dsqrt(2.0 * tbeam / (1.0 + tbeam)) * vti
-       vt2 = dsqrt(2.0         / (1.0 + tbeam)) * vti
+       vt1 = dsqrt(2.0 * tbeam / (1.0 + tbeam)) * vt0(isp)
+       vt2 = dsqrt(2.0         / (1.0 + tbeam)) * vt0(isp)
        ! beam componennt
        do ii=1,nb
           call random_gen__bm(r1,r2)
@@ -196,11 +212,11 @@ contains
     do i=1,nx+bc
        do ii=1,np2(i,isp)
           call random_gen__bm(r1,r2)
-          up(2,ii,i,isp) = vte*r1
+          up(2,ii,i,isp) = vt0(isp)*r1
 
           call random_gen__bm(r1,r2)
-          up(3,ii,i,isp) = vte*r1
-          up(4,ii,i,isp) = vte*r2
+          up(3,ii,i,isp) = vt0(isp)*r1
+          up(4,ii,i,isp) = vt0(isp)*r2
        end do
     end do
 
