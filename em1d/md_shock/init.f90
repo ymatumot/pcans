@@ -18,21 +18,23 @@ module init
   real(8), public :: q(nsp), r(nsp)
   !gx, gv, are temporal spaces used for the time integration
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=64),  public :: dir
+  character(len=64), public :: dir
   character(len=64), public :: file10
   character(len=64), public :: file12
-  integer                   :: n0
-  real(8)                   :: pi, v0, u0, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8)                   :: pi
 
+  integer :: n0
+  real(8) :: v0, u0, b0, bx0, by0, bz0, vt0(nsp)
 
 contains
 
-  
+
   subroutine init__set_param
 
     use fio, only : fio__input, fio__param
 
-    real(8) :: fgi, fpi, alpha, beta
+    real(8) :: rmass, fpe, fpi, fge, fgi, vte, vti, vae, vai, betae, betai
+    real(8) :: sigma, Ma, theta
     character(len=64) :: file9 
     character(len=64) :: file11
 
@@ -55,8 +57,8 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     itmax  = 200000
-    intvl1 = 20000
-    intvl2 = 20000
+    intvl1 = 500
+    intvl2 = 500
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -64,50 +66,48 @@ contains
     gfac   = 0.505
     it0    = 0
 
-!*********************************************************************
-!   r(1)  : ion mass             r(2)  : electron mass
-!   q(1)  : ion charge           q(2)  : electron charge
-!   c     : speed of light       ldb   : debye length
-!
-!   rgi   : ion Larmor radius    rge   : electron Larmor radius
-!   fgi   : ion gyro-frequency   fge   : electron gyro-frequency
-!   vti   : ion thermal speed    vte   : electron thermal speed
-!   b0    : magnetic field       
-!  
-!   alpha : wpe/wge
-!   beta  : ion plasma beta
-!   rtemp : Te/Ti
-!*********************************************************************
     pi   = 4.0*atan(1.0)
-    delx = 1.0
-    c    = 1.0
-    delt = 0.25*delx/c
-    ldb  = delx
 
-    r(1) = 25.0
-    r(2) = 1.0
+    !
+    ! n0    : number of particles / cell
+    ! rmass : mass ratio
+    ! sigma : (wce/wpe)^2
+    ! betae : electron beta
+    ! betai : ion beta
+    ! Ma    : Mach number of the flow (in the simulation frame)
+    ! theta : upstream magnetic field angle normal to the x axis
+    !
+    n0    = 64
+    rmass = 25.0
+    sigma = 0.04
+    betae = 1.0/8.0
+    betai = 1.0/8.0
+    Ma    = 3.0
+    theta = 90.0 * pi/180.0
 
-    alpha = 20.0
-    beta  = 0.5
-    rtemp = 1.0
+    vte   = 1.0
+    vti   = vte * dsqrt(betai/(betae*rmass))
+    c     = vte / dsqrt(sigma * 0.5*betae)
+    fpe   = 1.0
+    fge   = dsqrt(sigma)
+    fpi   = fpe / dsqrt(rmass)
+    fgi   = fge / rmass
+    vae   = dsqrt(sigma) * c
+    vai   = dsqrt(sigma/rmass) * c
+    b0    = dsqrt(4*pi*n0) * vae
+    delx  = vte / fpe
+    delt  = 0.5*delx/c
 
-    fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
-    fge = fpe/alpha
+    ! for upstream boundary condition
+    vt0(1) = vti
+    vt0(2) = vte
+    v0   = Ma * vai
+    u0   = v0/dsqrt(1.0-(v0/c)**2)
+    bx0  = b0 * dcos(theta)
+    by0  = 0.0
+    bz0  = b0 * dsin(theta)
 
-    va  = fge/fpe*c*dsqrt(r(2)/r(1))
-    rge = fpe/fge*ldb*dsqrt(2.D0)
-    rgi = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
-
-    vte = rge*fge
-    vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
-
-    v0 = -5.*va
-    u0 = v0/dsqrt(1.-(v0/c)**2)
-
-    fgi = fge*r(2)/r(1)
-    fpi = fpe*dsqrt(r(2)/r(1))
-
-    n0  = 40
+    ! number of particles
     np2(1:nx+bc,1:2) = n0
 
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
@@ -115,12 +115,11 @@ contains
        stop
     endif
 
-    !charge
-    q(1) = fpi*dsqrt(r(1)/(4.0*pi*n0))
+    ! mass and charge
+    r(1) = rmass
+    r(2) = 1.0
+    q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
     q(2) = -q(1)
-
-    !Magnetic field strength
-    b0 = fgi*r(1)*c/q(1)
 
     if(it0 /= 0)then
        !start from the past calculation
@@ -132,7 +131,32 @@ contains
     call random_gen__init
     call init__loading
     call init__set_field
-    call fio__param(np,nx,nsp,np2,c,q,r,vti,vte,va,rtemp,fpe,fge,ldb,delt,delx,bc,dir,file9)
+
+    ! output parameters
+    open(9,file=trim(dir)//trim(file9),status='unknown')
+
+    write(9,"(A30, 2x, i10)") "number of grids : ", nx
+    write(9,"(A30, 2x, i10)") "number of particles/cell : ", n0
+    write(9,"(A30, 2x, es10.3)") "speed of light : ", c
+    write(9,"(A30, 2x, es10.3)") "time step : ", delt
+    write(9,"(A30, 2x, es10.3)") "grid size : ", delx
+    write(9,"(A30, 2x, es10.3)") "Alfven Mach number : ", Ma
+    write(9,"(A30, 2x, es10.3)") "Shock angle : ", theta / pi * 180.0
+    write(9,"(A30, 2x, es10.3)") "Debye length : ", vte/fpe
+    write(9,"(A30, 2x, es10.3)") "ion mass : ", r(1)
+    write(9,"(A30, 2x, es10.3)") "electron mass : ", r(2)
+    write(9,"(A30, 2x, es10.3)") "ion charge : ", q(1)
+    write(9,"(A30, 2x, es10.3)") "electron charge : ", q(2)
+    write(9,"(A30, 2x, es10.3)") "ion plasma freq : ", fpi
+    write(9,"(A30, 2x, es10.3)") "electron plasma freq : ", fpe
+    write(9,"(A30, 2x, es10.3)") "ion gyro freq : ", fgi
+    write(9,"(A30, 2x, es10.3)") "electron gyro freq : ", fge
+    write(9,"(A30, 2x, es10.3)") "ion thermal velocity : ", vti
+    write(9,"(A30, 2x, es10.3)") "electron thermal velocity : ", vte
+    write(9,"(A30, 2x, es10.3)") "ion Alfven velocity : ", vai
+    write(9,"(A30, 2x, es10.3)") "electron Alfven velocity : ", vae
+
+    close(9)
 
   end subroutine init__set_param
 
@@ -150,28 +174,21 @@ contains
        do ii=1,np2(i,isp)
           call random_number(r1)
           up(1,ii,i,1) = dble(i)+delx*r1
-          up(1,ii,i,2) = up(1,ii,i,1) 
+          up(1,ii,i,2) = up(1,ii,i,1)
        enddo
     enddo
 
     !velocity
     !Maxwellian distribution
     do isp=1,nsp
-       if(isp == 1) then 
-          sd = vti/dsqrt(2.0D0)
-       endif
-       if(isp == 2) then
-          sd = vte/dsqrt(2.0D0)
-       endif
-
        do i=1,nx+bc
           do ii=1,np2(i,isp)
              call random_gen__bm(r1,r2)
-             up(2,ii,i,isp) = sd*r1+u0
-             up(3,ii,i,isp) = sd*r2
+             up(2,ii,i,isp) = vt0(isp)*r1 - u0
+             up(3,ii,i,isp) = vt0(isp)*r2
 
              call random_gen__bm(r1,r2)
-             up(4,ii,i,isp) = sd*r1
+             up(4,ii,i,isp) = vt0(isp)*r1
           enddo
        enddo
     enddo
@@ -189,11 +206,11 @@ contains
 
     !magnetic field
     do i=1,nx+bc
-       uf(1,i) = 0.0
+       uf(1,i) = bx0
     enddo
     do i=1,nx
-       uf(2,i) = 0.0
-       uf(3,i) = b0
+       uf(2,i) = by0
+       uf(3,i) = bz0
     enddo
 
     !electric field
@@ -201,8 +218,8 @@ contains
        uf(4,i) = 0.0
     enddo
     do i=1,nx+bc
-       uf(5,i) = v0*b0/c
-       uf(6,i) = 0.0
+       uf(5,i) =-v0*bz0/c
+       uf(6,i) =+v0*by0/c
     enddo
 
     call boundary__field(uf)
@@ -211,54 +228,62 @@ contains
 
 
   subroutine init__inject
+    integer :: isp, i, ii, ii1, ii2, ii3, dn
+    real(8) :: rr, r1, r2, ninj, iinj, finj, x0
 
-    integer :: isp, i, ii, ii2, ii3, dn
-    real(8) :: sd, r1, r2, dx
-    !Inject particles at x=1
+    i  = nx-1
+    x0 =-v0*delt + dble(nx)
 
-    i   = 1
-    isp = 1
-    dn  = n0-min(np2(i,1),np2(i,2))
-    dn  = n0*dx
+    ! number of particles to be injected
+    call random_number(rr)
+    ninj = n0*v0*delt
+    iinj = floor(ninj)
+    finj = ninj - iinj
+    dn   = int(iinj) + ceiling(finj-rr)
 
-    do ii=1,dn
-       ii2 = np2(i,1)+ii
-       ii3 = np2(i,2)+ii
-       call random_number(r1)
-       up(1,ii2,i,1) = dble(i)+dx*r1
-       up(1,ii3,i,2) = up(1,ii2,i,1)
-    enddo
+    ! inject particles
+    do ii = 1, dn
+       ii1 = np2(i,1) + ii
+       ii2 = np2(i,2) + ii
+       ! position
+       call random_number(rr)
+       rr =-rr*v0*delt + dble(i+1)
+       up(1,ii1,i,1) = rr
+       up(1,ii2,i,2) = rr
 
-    !velocity
-    !Maxwellian distribution
-    do isp=1,nsp
-       if(isp == 1) then 
-          sd = vti/dsqrt(2.0D0)
-       endif
-       if(isp == 2) then
-          sd = vte/dsqrt(2.0D0)
-       endif
-
-       do ii=np2(i,isp)+1,np2(i,isp)+dn
+       ! velocity
+       do isp = 1, nsp
+          ii3 = np2(i,isp) + ii
           call random_gen__bm(r1,r2)
-          up(2,ii,i,isp) = sd*r1+u0
-          up(3,ii,i,isp) = sd*r2
+          up(2,ii3,i,isp) = vt0(isp)*r1 - u0
+          up(3,ii3,i,isp) = vt0(isp)*r2
 
           call random_gen__bm(r1,r2)
-          up(4,ii,i,isp) = sd*r1
-       enddo
+          up(4,ii3,i,isp) = vt0(isp)*r1
+
+          ! folding back
+          if( delt*up(2,ii3,i,isp) > up(1,ii3,i,isp)-dble(i+1) ) then
+             up(1,ii3,i,isp) = 2*x0 - up(1,ii3,i,isp)
+             up(2,ii3,i,isp) = 2*v0 - up(2,ii3,i,isp)
+          end if
+       end do
+    end do
+
+    ! increase number of particles
+    do isp = 1, nsp
+       np2(i,isp) = np2(i,isp) + dn
     enddo
 
-    do isp=1,nsp
-       np2(i,isp) = np2(i,isp)+max(dn,0)
-    enddo
-
-    !set Ex and Bz
-    i=nx
-    uf(3,i) = b0
-    i=nx-1
-    uf(5,i) = v0*b0/c
-    uf(5,i+1) = uf(5,i)
+    ! ex, by, bz
+    i = nx
+    uf(2,i) = by0
+    uf(3,i) = bz0
+    uf(4,i) = 0.0
+    ! ey, ez, bx
+    i = nx-1
+    uf(1,i) = bx0
+    uf(5,i) =-v0*bz0/c
+    uf(6,i) =+v0*by0/c
 
   end subroutine init__inject
 
