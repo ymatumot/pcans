@@ -170,11 +170,17 @@ contains
     character(len=1) :: back
     character(len=128) :: bar
 
-    write(bar,'(i3,a,x,a,32a,32a)')100*it/itmax,'%','|',('*',k=1,32*it/itmax),&
-                                   (' ',k=1,32-32*it/itmax),'|'
-    back=char(8)
-    write(6,'(128a)',advance='no')trim(bar)
-    write(6,'(128a)',advance='no')(back,k=1,64)
+    write(bar,'(i3,1a,1x,1a,32a,32a)') &
+         & 100*it/itmax, '%', '|', &
+         & ('*', k=1,32*it/itmax), &
+         & (' ', k=1,32-32*it/itmax), &
+         & '|'
+
+    back = char(8)
+    write(6,'(128a)',advance='no') trim(bar)
+    write(6,'(128a)',advance='no') (back,k=1,len(trim(bar)))
+
+    call flush(6)
 
   end subroutine fio__progress_bar
 
