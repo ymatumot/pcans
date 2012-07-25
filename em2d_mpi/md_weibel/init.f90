@@ -21,7 +21,8 @@ module init
   real(8), allocatable, public :: gp(:,:,:,:)
   character(len=64), public :: dir
   character(len=64), public :: file12
-  real(8)                   :: pi, vti, vte, va, rtemp, fpe, fge, rgi, rge, ldb, b0
+  real(8)                   :: pi, vti, vte, va, rtemp, fpe, fge, ldb, b0
+  real(8) :: alp
 
 
 contains
@@ -30,7 +31,8 @@ contains
   subroutine init__set_param
 
     use fio, only : fio__input, fio__param
-    real(8) :: fgi, fpi, alpha, beta, n0
+    real(8) :: fpi, n0
+    real(8) :: L, rm, qw, q0(nsp)
     character(len=64) :: file9 
     character(len=64) :: file11
 
@@ -62,10 +64,10 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 100
-    intvl1 = 100
-    intvl2 = 10
-    intvl3 = 10
+    itmax  = 1000
+    intvl1 = 50
+    intvl2 = 5
+    intvl3 = 5
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
@@ -82,44 +84,51 @@ contains
     endif
 
 !*********************************************************************
+!   L     : size of simulation box in electron skin depth
+!
 !   r(1)  : ion mass             r(2)  : electron mass
+!   q0(1) : ion charge in e      q0(2) : electron charge in e
 !   q(1)  : ion charge           q(2)  : electron charge
 !   c     : speed of light       ldb   : debye length
 !
-!   rgi   : ion Larmor radius    rge   : electron Larmor radius
-!   fgi   : ion gyro-frequency   fge   : electron gyro-frequency
+!   fpi   : ion plasma frequency fpe   : electron plasma frequency
 !   vti   : ion thermal speed    vte   : electron thermal speed
 !   b0    : magnetic field       
+!   
+!   alp   : anisotropy in thermal velocity (vthz/vth)
 !  
-!   alpha : wpe/wge
-!   beta  : ion plasma beta
 !   rtemp : Te/Ti
 !*********************************************************************
+    L = 20.0    ! system length in electron skin depth
     delx = 1.0
     c    = 1.0
-    delt = 0.2*delx/c
-    ldb  = delx
+    delt = 0.4*delx/c
+    
 
-    r(1) = 16.0
-    r(2) = 1.0
+    !-- electron-positron plasma --
 
-    alpha = 2.0
-    beta  = 0.1
-    rtemp = 1.0
+    ! positron
+    r(1) = 1.0
+    q0(1) = 1.0
+    ! electron
+    r(2) =  1.0
+    q0(2) = -1.0
+    
+    rm = r(1)/r(2)
+            
+    ! freqency
+    fpe = L*c/(nx*delx)
+    fpi = fpe / dsqrt(rm)
+    fge = 0
+    
+    ! thermal velocity
+    vte = 0.1 * c
+    vti = 0.1 * c
+    alp = 5.0   ! anisotropy (= vz/vx)
+    rtemp = (vte*vte)/(vti*vti)
+    ldb = vte/(dsqrt(2.0D0)*fpe)
 
-    fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
-    fge = fpe/alpha
-
-    va  = fge/fpe*c*dsqrt(r(2)/r(1))
-    rge = fpe/fge*ldb*dsqrt(2.D0)
-    rgi = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
-
-    vte = rge*fge
-    vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
-
-    fgi = fge*r(2)/r(1)
-    fpi = fpe*dsqrt(r(2)/r(1))
-
+    ! number of particles
     np2(nys:nye,1) = 50*(nxe+bc-nxs+1)
     np2(nys:nye,2) = np2(nys:nye,1)
 
@@ -130,14 +139,15 @@ contains
        endif
     endif
 
-    !charge
+    ! charge
     if(nrank == nroot) n0 = dble(np2(nys,1))/dble((nxge-nxgs+1))
     call MPI_BCAST(n0,1,mnpr,nroot,ncomw,nerr)
-    q(1) = fpi*dsqrt(r(1)/(4.0*pi*n0))
-    q(2) = -q(1)
+    qw = fpe*dsqrt(r(2)/(4.0*pi*n0))
+    q(1) = qw * q0(1)
+    q(2) = qw * q0(2)
 
-    !Magnetic field strength
-    b0 = fgi*r(1)*c/q(1)
+    ! Magnetic field strength
+    b0 = 0
 
     call random_gen__init(nrank)
     call init__loading
@@ -151,6 +161,8 @@ contains
   end subroutine init__set_param
 
 
+  
+  
   subroutine init__loading
 
     use boundary, only : boundary__particle
@@ -188,7 +200,7 @@ contains
 
              call random_gen__bm(r1,r2)
              up(4,ii,j,isp) = sd*r1
-             up(5,ii,j,isp) = sd*r2
+             up(5,ii,j,isp) = sd*r2*alp
           enddo
        enddo
     enddo
@@ -200,6 +212,7 @@ contains
   end subroutine init__loading
 
 
+  
   subroutine init__set_field
 
     use boundary, only : boundary__field
