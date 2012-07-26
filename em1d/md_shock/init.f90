@@ -24,7 +24,7 @@ module init
   real(8)                   :: pi
 
   integer :: n0
-  real(8) :: v0, u0, b0, bx0, by0, bz0, vt0(nsp)
+  real(8) :: v0, u0, b0, bx0, by0, bz0, vt0(nsp), lbuf
 
 contains
 
@@ -56,9 +56,9 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 200000
-    intvl1 = 500
-    intvl2 = 500
+    itmax  = 40000
+    intvl1 = 1000
+    intvl2 = 1000
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
@@ -76,14 +76,16 @@ contains
     ! betai : ion beta
     ! Ma    : Mach number of the flow (in the simulation frame)
     ! theta : upstream magnetic field angle normal to the x axis
+    ! lbuf  : initial buffer within which flow smoothly decreases to zero
     !
     n0    = 64
     rmass = 25.0
     sigma = 0.04
-    betae = 1.0/8.0
+    betae = 1.0/2.0
     betai = 1.0/8.0
     Ma    = 3.0
     theta = 90.0 * pi/180.0
+    lbuf  = 500.0
 
     vte   = 1.0
     vti   = vte * dsqrt(betai/(betae*rmass))
@@ -166,7 +168,7 @@ contains
     use boundary, only : boundary__particle
 
     integer :: i, ii, isp
-    real(8) :: sd, r1, r2
+    real(8) :: r1, r2, uu
 
     !particle position
     isp = 1
@@ -182,9 +184,14 @@ contains
     !Maxwellian distribution
     do isp=1,nsp
        do i=1,nx+bc
+          if( dble(i-1) < lbuf ) then
+             uu = u0 * dble(i-1)/lbuf
+          else
+             uu = u0
+          end if
           do ii=1,np2(i,isp)
              call random_gen__bm(r1,r2)
-             up(2,ii,i,isp) = vt0(isp)*r1 - u0
+             up(2,ii,i,isp) = vt0(isp)*r1 - uu
              up(3,ii,i,isp) = vt0(isp)*r2
 
              call random_gen__bm(r1,r2)
@@ -203,6 +210,7 @@ contains
     use boundary, only : boundary__field
 
     integer :: i
+    real(8) :: uu, vv
 
     !magnetic field
     do i=1,nx+bc
@@ -218,8 +226,14 @@ contains
        uf(4,i) = 0.0
     enddo
     do i=1,nx+bc
-       uf(5,i) =-v0*bz0/c
-       uf(6,i) =+v0*by0/c
+       if( dble(i-1) < lbuf ) then
+          uu = u0 * dble(i-1)/lbuf
+          vv = uu/dsqrt(1.0+(uu/c)**2)
+       else
+          vv = v0
+       end if
+       uf(5,i) =-vv*bz0/c
+       uf(6,i) =+vv*by0/c
     enddo
 
     call boundary__field(uf)
@@ -264,7 +278,7 @@ contains
           ! folding back
           if( delt*up(2,ii3,i,isp) > up(1,ii3,i,isp)-dble(i+1) ) then
              up(1,ii3,i,isp) = 2*x0 - up(1,ii3,i,isp)
-             up(2,ii3,i,isp) = 2*v0 - up(2,ii3,i,isp)
+             up(2,ii3,i,isp) =-2*v0 - up(2,ii3,i,isp)
           end if
        end do
     end do
