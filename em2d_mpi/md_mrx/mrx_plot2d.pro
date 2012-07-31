@@ -5,8 +5,8 @@ info = size(d)
 nx = info[1]
 ny = info[2]
 
-v0 = 0.5/4.0 ; typical Alfven speed
-b0 = 28.025  ; reference mag field
+v0 = 0.5/4.0 ; typical Alfven speed : 1/(alpha*sqrt[me/mi])
+b0 = 28.025  ; reference mag field  : manual input
 e0 = v0*b0   ; typical electric field
 
 ;plot_clcnt,d[*,*,8]/28.025,ct=33
