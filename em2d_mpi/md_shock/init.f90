@@ -60,8 +60,8 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 100
-    intvl1 = 100
+    itmax  = 30000
+    intvl1 = 5000
     intvl2 = 100
     dir    = './dat/'   !for fx1@jaxa
     file9  = 'init_param.dat'
@@ -110,7 +110,7 @@ contains
     fpi = fpe*dsqrt(r(2)/r(1))
 
     !average number density at x=nxgs (magnetosheath)
-    n0 = 40.
+    n0 = 20.
 
     if(nrank == nroot)then
        if(n0*(nxge+bc-nxgs+1) > np)then

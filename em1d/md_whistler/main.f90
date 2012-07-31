@@ -6,7 +6,8 @@ program main
   use fio
   use particle
   use field
-  
+  use wk
+
   implicit none
 
   integer :: it=0
@@ -45,6 +46,8 @@ program main
           call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,it,it0,dir,file10)
      if(mod(it+it0,intvl2) == 0) &
           call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
+     if(mod(it+it0,intvl3) == 0) &
+          call wk_f(uf,nx,dir,file13,file14)
 
   enddo
 

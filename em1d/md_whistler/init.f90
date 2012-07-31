@@ -10,7 +10,7 @@ module init
   public :: init__set_param
 
   integer, public :: np2(1:nx+bc,nsp)
-  integer, public :: itmax, it0, intvl1, intvl2
+  integer, public :: itmax, it0, intvl1, intvl2, intvl3
   real(8), public :: delx, delt, gfac
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
@@ -20,7 +20,7 @@ module init
   real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
   character(len=64), public :: dir
   character(len=64), public :: file10
-  character(len=64), public :: file12
+  character(len=64), public :: file12, file13, file14
   real(8)                   :: pi, vti, vte, va, rtemp, t_ani, fpe, fge, rgi, rge, ldb, b0
 
 
@@ -41,6 +41,7 @@ contains
 !   it0     : base count
 !   intvl1  : storage interval for particles & fields
 !   intvl2  : printing interval for energy variation
+!   intvl3  : printing interval for EM fields for FFT
 !   dir     : directory name for data output
 !   file??  : output file name for unit number ??
 !           :  9 - initial parameters
@@ -53,13 +54,16 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 0
-    intvl1 = 50
+    itmax  = 3000
+    intvl1 = 3000
     intvl2 = 500
+    intvl3 = 10
     dir    = './dat/'
     file9  = 'init_param.dat'
     file10 = 'file10.dat'
     file12 = 'energy.dat'
+    file13 = 'wk_by.dat'
+    file14 = 'wk_bz.dat'
     gfac   = 0.505
 
     it0    = 0
@@ -90,11 +94,11 @@ contains
     delt = 0.5*delx/c
     ldb  = delx
 
-    r(1) = 16.0
+    r(1) = 1837.0
     r(2) = 1.0
 
     alpha = 5.0
-    beta  = 2.0
+    beta  = 1.0
     rtemp = 1.0
     t_ani = 3.0
 
