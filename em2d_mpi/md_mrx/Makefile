@@ -20,17 +20,17 @@ $(LIB_DIR)/libem2d.a :
 main.o : init.o const.o $(LIB_DIR)/libem2d.a
 init.o : const.o $(LIB_DIR)/libem2d.a
 
-##############moment calculation################
+############# moment calculation ###############
 moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./dat/ `\ls dat/00*_rank*.dat | perl -pe 's/.*\///'`
+	$(LIB_DIR)/moment/mom.out ./dat/ `\ls dat/*_rank*.dat | perl -pe 's/.*\///'`
 
 $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make
 ###############################################
 
-##############PSD calculation################
-psdcalc : $(LIB_DIR)/psd/psd.out
-	$(LIB_DIR)/psd/psd.out 300 100 ./dat/ `\ls dat/00*_rank*.dat | perl -pe 's/.*\///'`
+############# PSD calculation ###############
+psd : $(LIB_DIR)/psd/psd.out
+	$(LIB_DIR)/psd/psd.out ./dat/ 300 100 `\ls dat/*_rank*.dat | perl -pe 's/.*\///'`
 
 $(LIB_DIR)/psd/psd.out :
 	cd $(LIB_DIR)/psd ; make

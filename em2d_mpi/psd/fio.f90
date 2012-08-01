@@ -6,34 +6,46 @@ module fio
 
   public :: fio__input, fio__psd
 
+  logical                      :: lflag=.true.
+  integer, public              :: np, nsp, nxgs, nxge, nygs, nyge, nxs, nxe, nys, nye, bc, it0
+  integer, public, allocatable :: np2(:,:)
+  real(8), public, allocatable :: up(:,:,:,:)
+  real(8), public, allocatable :: uf(:,:,:)
+  real(8), public, allocatable :: q(:), r(:)
+  real(8), public              :: c, delt, delx
+
 
 contains
 
 
-  subroutine fio__input(up,uf,c,q,r,delt,delx,it0,                               &
-                        np,np2,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,nproc,bc, &
-                        dir,file)
+  subroutine fio__input(nproc,dir,file)
                        
-    integer, intent(in)  :: np, nsp, nxgs, nxge, nygs, nyge, nxs, nxe, nys, nye, nproc, bc
+    integer                      :: inproc
+    integer, intent(in)          :: nproc
     character(len=*), intent(in) :: dir, file
-    integer, intent(out) :: np2(nys:nye,nsp), it0
-    real(8), intent(out) :: up(5,np,nys:nye,nsp)
-    real(8), intent(out) :: uf(6,nxgs-1:nxge+1,nygs-1:nyge+1)
-    real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
-    integer              :: inp, inxgs, inxge, inygs, inyge, insp, inproc, ibc
-    real(8), allocatable :: uftmp(:,:,:)
-
-    allocate(uftmp(6,nxs-1:nxe+1,nys-1:nye+1))
+    real(8), allocatable         :: uftmp(:,:,:)
 
     open(11,file=trim(dir)//trim(file),form='unformatted')
 
     !parameters
-    read(11)it0,inp,inxgs,inxge,inygs,inyge,insp,inproc,ibc,delt,delx,c
-    if((inxgs /= nxgs) .or. (inxge /= nxge) .or. (inygs /= nygs) .or. (inyge /= nyge) &
-       .or. (inproc /= nproc) .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc))then
-       write(6,*) '** parameter mismatch **'
+    read(11)it0,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,inproc,bc,delt,delx,c
+    if(inproc /= nproc)then
+       write(*,*)'error in no. of procs'
        stop
     endif
+
+    if(lflag)then
+       allocate(q(nsp))
+       allocate(r(nsp))
+       allocate(uf(6,nxgs-1:nxge+1,nygs-1:nyge+1))
+
+       lflag = .false.
+    endif
+
+    allocate(np2(nys:nye,nsp))
+    allocate(up(5,np,nys:nye,nsp))
+    allocate(uftmp(6,nxs-1:nxe+1,nys-1:nye+1))
+
     read(11)np2
     read(11)q
     read(11)r
@@ -55,7 +67,8 @@ contains
 
   subroutine fio__psd(up,x0,y0,dx,dy,np,nys,nye,nsp,np2,it0,dir)
 
-    integer, intent(in) :: np, nys, nye, nsp, np2(nys:nye,nsp), it0
+    integer, intent(in) :: np, nys, nye, nsp, it0
+    integer, intent(in) :: np2(nys:nye,nsp)
     real(8), intent(in) :: up(5,np,nys:nye,nsp)
     real(8), intent(in) :: x0, y0, dx, dy
     character(len=*), intent(in) :: dir

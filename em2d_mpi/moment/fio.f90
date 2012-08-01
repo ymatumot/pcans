@@ -43,6 +43,10 @@ contains
        allocate(vel(nxgs-1:nxge+1,nygs-1:nyge+1,3,nsp))
        allocate(temp(nxgs-1:nxge+1,nygs-1:nyge+1,6,nsp))
 
+       den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp) = 0.0D0
+       vel(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp) = 0.0D0
+       temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp) = 0.0D0
+
        lflag = .false.
     endif
 

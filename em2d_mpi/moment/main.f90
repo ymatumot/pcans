@@ -7,10 +7,10 @@ program main
 
   implicit none
 
-  logical              :: lflag=.true.
-  integer              :: nproc, ndata, idata, isp, irank
-  character(len=64)    :: dir
-  character(len=64)    :: ifile
+  logical           :: lflag=.true.
+  integer           :: nproc, ndata, idata, isp, irank
+  character(len=64) :: dir
+  character(len=64) :: ifile
 
   ndata = iargc()
   call getarg(1,dir)
@@ -19,11 +19,6 @@ program main
   read(*,*)nproc
 
   do idata=2,ndata,nproc
-
-     !memory clear
-     den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp) = 0.0D0
-     vel(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp) = 0.0D0
-     temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp) = 0.0D0
 
      do irank=0,nproc-1
         call getarg(idata+irank,ifile)
@@ -57,6 +52,11 @@ program main
      enddo
 
      call fio__mom(den,vel,temp,uf,nxgs,nxge,nygs,nyge,nsp,bc,it0,trim(dir)//'../mom/')
+
+     !memory clear
+     den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp) = 0.0D0
+     vel(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp) = 0.0D0
+     temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp) = 0.0D0
 
   enddo
 

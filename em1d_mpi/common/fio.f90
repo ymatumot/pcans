@@ -8,7 +8,6 @@ module fio
   public :: fio__input
   public :: fio__param
   public :: fio__energy
-!  public :: fio__progress_bar
 
 
 contains

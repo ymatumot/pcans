@@ -28,6 +28,14 @@ $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make
 ###############################################
 
+############# PSD calculation ###############
+psd : $(LIB_DIR)/psd/psd.out
+	$(LIB_DIR)/psd/psd.out ./dat/ 100 100 `cd dat; \ls *_rank*.dat`
+
+$(LIB_DIR)/psd/psd.out :
+	cd $(LIB_DIR)/psd ; make
+###############################################
+
 clean :
 	rm -f $(TARGET) $(OBJS) *.mod dat/*.dat mom/*.dat psd/*.dat
 

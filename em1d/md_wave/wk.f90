@@ -11,7 +11,7 @@ contains
   subroutine wk_f(uf,nx,dir,file13,file14)
 
     integer, intent(in)          :: nx
-    real(8), intent(in)          :: uf(3,0:nx+1)
+    real(8), intent(in)          :: uf(6,0:nx+1)
     character(len=*), intent(in) :: dir, file13, file14
     integer :: i
 

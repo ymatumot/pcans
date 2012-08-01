@@ -34,7 +34,7 @@ program main
 !!$  call crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
   call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
   call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,0,it0,dir,file10)
-  call wk_f(uf(4:6,0:nx+1),nx,dir,file13,file14)
+  call wk_f(uf,nx,dir,file13,file14)
 
   do it=1,itmax-it0
 
@@ -50,7 +50,7 @@ program main
      if(mod(it+it0,intvl2) == 0) &
           call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
      if(mod(it+it0,intvl3) == 0) &
-          call wk_f(uf(4:6,0:nx+1),nx,dir,file13,file14)
+          call wk_f(uf,nx,dir,file13,file14)
 
   enddo
 

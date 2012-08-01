@@ -1,6 +1,6 @@
 ;; DATA INFORMATION
 dx = 1.0
-dt = 6.0
+dt = 6.0 ;; TIME INTERVAL OF DATA OUTPUT
 c = 1.0D0
 mr = 1.D0/16.D0
 vai = 1.25D-1
@@ -16,58 +16,51 @@ vte = rge*wge
 ke = 1./(vte/wpe)
 
 info = size(input)
-col = info(1)
-num = info(2)
+nx = info(1)
+nt = info(2)
+x = findgen(nx)*dx
+time = findgen(nt)*dt
+wnum = fltarr(nx)
+freq = fltarr(nt)
 
-output = dcomplexarr(col,num)
+; 2D-FFT
+output = fft2d(input,x,time,-1,wnum=wnum,freq=freq)
 
-;; FFT
-;; for k=0,num-1 do begin
-;;     output(*,k) = fft(input(*,k),-1)
-;; endfor
-;; for i=0,col-1 do begin
-;;     output(i,*) = fft(output(i,*),-1)
-;; endfor
-output = fft(input,-1)
+;; SETUP FOR W-K DIAGRAM
+z = alog10(abs(output))
+kx = wnum*2.*!pi
+w = freq*2.*!pi
 
-;; DRAW W-K DIAGRAM
-hcol = col/20.
-hnum = num/3.
+;; DRAW RANGE
+drx = [nx/2,0.55*nx]
+drt = [nt/2,0.75*nt]
 
-z = abs(output(0:hcol,0:hnum))
-z = alog10(z)
-;z = z^0.2
+;; DRAW
+plot_clcnt,z[drx[0]:drx[1],drt[0]:drt[1]],ct=33,$
+           xax=kx[drx[0]:drx[1]]*rge,yax=w[drt[0]:drt[1]]/wge,$
+           xtitle='!6k!Ix!N r!Ige!N',ytitle='!7x/x!I!6ge!N',$
+           title='!6Parallel waves',/ver_,/keep,chars=1.5
 
-maxz = max(z)
-minz = min(z)
-
-kx = 2.*!pi*(findgen(hcol+1))/(col*dx)
-w = 2.*!pi*(findgen(hnum+1))/(num*dt)
-
-plot_clcnt,z[1:hcol,1:hnum],ct=33,xax=kx[1:hcol]*rge,yax=w[1:hnum]/wge,xtitle='!6k!Ix!N r!Ige!N',ytitle='!7x/x!I!6ge!N',title='!6Parallel waves',/ver_,/keep,chars=1.5
-
-;;******* add angular frequencies ********;;
-
+;;OVERPLOT FREQUENCIES
 loadct,0,/silent
+
 ;;electromagnetic wave
 y = c*kx
 oplot,kx*rge,y/wge
-;; y = 0.7*c*kx
-;; oplot,kx/ke,y/wpe
 
 ;;Alfven wave
 ;y = kx*vai
 ;oplot,kx*rgi,y/wpe
 
 ;;Re-cut off frequency
-y = fltarr(col)+1.0
+y = fltarr(nx)+1.0
 y = y*0.5*(wge-wgi+sqrt((wge+wgi)^2+4.*(wpe^2+wpi^2)))
-oplot,kx[1:hcol]*rge,y/wge,col=0,line=2
+oplot,kx[drx[0]:drx[1]]*rge,y/wge,col=0,line=2
 
 ;;Le-cut off frequency
-y = fltarr(col)+1.0
+y = fltarr(nx)+1.0
 y = y*0.5*(-(wge-wgi)+sqrt((wge+wgi)^2+4.*(wpe^2+wpi^2)))
-oplot,kx[1:hcol]*rge,y/wge,col=0,line=2
+oplot,kx[drx[0]:drx[1]]*rge,y/wge,col=0,line=2
 
 ;;Upper hybrid frequency
 ;; y = kx
@@ -82,7 +75,7 @@ oplot,kx[1:hcol]*rge,y/wge,col=0,line=2
 
 ;;Electron gylo-frequency
 y[*] = 1.0
-oplot,kx[1:hcol]*rge,y,line=2,col=0
+oplot,kx[drx[0]:drx[1]]*rge,y,line=2,col=0
 
 ;;Ion gylo-frequency
 ;; y[*] = 1.0

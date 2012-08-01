@@ -54,8 +54,8 @@ contains
 !             gfac = 0.5 : no implicit
 !             gfac = 1.0 : full implicit
 !*********************************************************************
-    itmax  = 3000
-    intvl1 = 3000
+    itmax  = 15000
+    intvl1 = 500
     intvl2 = 500
     intvl3 = 10
     dir    = './dat/'
@@ -115,7 +115,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(1:nx+bc,1) = 1000
+    np2(1:nx+bc,1) = 200
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
     
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
