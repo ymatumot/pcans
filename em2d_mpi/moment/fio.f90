@@ -205,7 +205,7 @@ contains
     close(28)
     close(29)
 
-99  format(100000E15.5)
+99  format(10000E15.5)
 
   end subroutine fio__mom
 

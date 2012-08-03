@@ -7,7 +7,7 @@ program main
   implicit none
 
   logical           :: lflag=.true.
-  integer           :: nproc, ndata, idata, isp, irank
+  integer           :: nproc, ndata, idata, irank
   character(len=64) :: dir
   character(len=64) :: ifile
   real(8)           :: x0, y0, dx, dy
