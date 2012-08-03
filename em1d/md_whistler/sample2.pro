@@ -17,6 +17,8 @@ vte = rge*wce
 b0 = wce/q
 ke = 1./(vte/wpe)
 
+;; READING WAVE DATA
+data = file_read('dat/wk_by.dat')
 info = size(data)
 nx = info(1)
 nt = info(2)
@@ -48,7 +50,7 @@ kx = wnum*2.*!pi
 w = freq*2.*!pi
 
 ;; DRAW RANGES
-drx = [0.5*nx,0.525*nx]
+drx = [0.5*nx,0.54*nx]
 drt = [0,nt-1]
 drw = [0.5*nt,0.525*nt]
 
@@ -58,6 +60,7 @@ plot,time2*wce, total(t_perp,1)/total(t_para,1),$
      xs=1,ys=2,$
      xtitle='!7X!I!6ce!NT',ytitle='!6T!Iperp!N/T!Ipara!N',$
      chars=2.0
+write_png,'t_tratio.png',tvrd(true=1)
 
 ;; DRAW X-T
 window,1
@@ -80,7 +83,7 @@ plot, time[drt[0]:drt[1]/4.]*wce, abs(datakt[527,drt[0]:drt[1]/4.]), xs=1, ys=1,
       xtitle='!7X!I!6ce!NT',ytitle='!6B!Iyk!N/B!I0!N',/ylog,chars=2.0,$
       title='!6FGM (k!Ix!Nc/!7x!6!Ipe!N)=0.7'
 ;; OVERPLOT LINEAR THEORY
-oplot, time[drt[0]:drt[1]/4.]*wce, exp(0.3*time[drt[0]:drt[1]/4.]*wce),line=2
+oplot, time[drt[0]:drt[1]/4.]*wce, exp(0.27*time[drt[0]:drt[1]/4.]*wce),line=2
 legend,['Simulation','Linear theory'],line=[0,2],position=[30,10],/data,chars=2.0
 write_png,'k-t_fgm.png',tvrd(true=1)
 
@@ -90,6 +93,10 @@ plot_clcnt,zkw[drx[0]:drx[1],drw[0]:drw[1]],ct=33,$
            xax=kx[drx[0]:drx[1]]*(c/wpe),yax=w[drw[0]:drw[1]]/wce,$
            xtitle='!6k!Ix!N (c/!7x!6!Ipe!N)',ytitle='!7x/X!I!6ce!N',$
            /ver_,/keep,chars=2.0
+;; OVERPLOT LINEAR THEORY
+oplot,kx[drx[0]:drx[1]]*(c/wpe),$
+      (kx[drx[0]:drx[1]]*(c/wpe))^2/(1.+(kx[drx[0]:drx[1]]*(c/wpe))^2),$
+      line=2,thick=2
 write_png,'k-w.png',tvrd(true=1)
 
 ;; RESET

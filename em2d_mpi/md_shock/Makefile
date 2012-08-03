@@ -30,7 +30,7 @@ $(LIB_DIR)/moment/mom.out :
 
 ############# PSD calculation ###############
 psd : $(LIB_DIR)/psd/psd.out
-	$(LIB_DIR)/psd/psd.out ./dat/ 300 100 `cd dat; \ls *_rank*.dat`
+	$(LIB_DIR)/psd/psd.out ./dat/ 600 128 `cd dat; \ls *_rank*.dat`
 
 $(LIB_DIR)/psd/psd.out :
 	cd $(LIB_DIR)/psd ; make

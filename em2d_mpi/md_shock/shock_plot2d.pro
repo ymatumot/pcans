@@ -1,14 +1,14 @@
 window,xsize=600,ysize=900
 
 c   = 1.0
-va  = 1.0e-2
-wgi = 5.0e-5
-Mm  = 100
-q   = 2.23d-3
+va  = 2.0e-2
+wgi = 2.0e-4
+Mm  = 25
+q   = 3.15d-3
 v0  = va*10.
 u0  = v0/sqrt(1.-v0^2)
 L   = va/wgi
-n0  = 40
+n0  = 20
 b0  = wgi*Mm/q
 e0  = v0*b0/c
 dt  = 10000.*wgi
@@ -38,10 +38,8 @@ time = (findgen(nt)+1)*dt
 dir   = 'img/'
 fname = 'shock2d'
 
-;; for i=37,nt-1 do begin
-for i=0,nt-1 do begin
-
-set_ps,dir+fname+strcompress(string(i,format='(I03)'),/remove)+'.eps'
+;; for i=0,nt-1 do begin
+for i=0,-1 do begin
 
 print,'Reading... ',list1[i]
 dni = file_read(list1[i])
@@ -99,11 +97,20 @@ plot_clcnt,ey[xrange[0]:xrange[1],*]/e0,title='!6E!Iy!N/E!I0!N',$
            xax=xax[xrange[0]:xrange[1]],yax=yax,/noerase
 color_bar,ey[xrange[0]:xrange[1],*]/e0,ct=ct,0.88,0.07,0.90,0.19,charsize=chars,/ver
 
-device,/close
+write_png,dir+fname+strcompress(string(i,format='(I03)'),/remove)+'.png',tvrd(true=1)
 
 endfor
 
-set_x
+;;PSD
+fi = file_read('psd/030000_0600-0128_psd_i.dat')
+
+psd_calc,psdi,xax,yax,fi[2,*],fi[3,*],nbin_x=51,nbin_y=51,$
+         max_vx=0.3,min_vx=-0.3,max_vy=0.4,min_vy=-0.1
+
+plot_clcnt,alog10(psdi),xax=xax,yax=yax,ct=13,min=-0.05,$
+           xtitle='!6u!Ix!N/c!N',ytitle='!6u!Iy!N/c!N',/ver,$
+           chars=1.75,title='!6(x,y) = (6.0,1.3) c/!7x!I!6pi!N'
+write_png,'psdi_foot.png',tvrd(true=1)
 
 end
 
