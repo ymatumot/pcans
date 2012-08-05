@@ -63,7 +63,7 @@ contains
     itmax  = 30000
     intvl1 = 5000
     intvl2 = 100
-    dir    = './dat/'   !for fx1@jaxa
+    dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
     gfac   = 0.505

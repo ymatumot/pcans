@@ -18,7 +18,7 @@ module init
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
-  character(len=64),  public    :: dir
+  character(len=64), public    :: dir
   character(len=64), public    :: file12
   real(8)                      :: pi, n0, v0, b0, x0, vti, vte, rtemp, delv, dr, br, theta_b
 
