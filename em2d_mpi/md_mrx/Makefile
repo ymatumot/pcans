@@ -1,6 +1,6 @@
 LIB_DIR = ..
 include $(LIB_DIR)/Makefile_inc
-TARGET = rx.out
+TARGET = a.out
 OBJS = const.o init.o main.o
 .PHONY : all 
 .PHONY : clean
