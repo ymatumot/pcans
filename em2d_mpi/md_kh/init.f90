@@ -18,7 +18,7 @@ module init
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
-  character(len=64), public    :: dir
+  character(len=64),  public    :: dir
   character(len=64), public    :: file12
   real(8)                      :: pi, n0, v0, b0, x0, vti, vte, rtemp, delv, dr, br, theta_b
 
@@ -60,9 +60,9 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 1200
-    intvl1 = 300
-    intvl2 = 300
+    itmax  = 27000
+    intvl1 = 900
+    intvl2 = 900
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
@@ -100,9 +100,9 @@ contains
     r(1) = 16.0
     r(2) = 1.0
 
-    alpha = 5.0
-    beta  = 2.4
-    rtemp = 0.25
+    alpha = 2.0
+    beta  = 1.0
+    rtemp = 1.0
 
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
     fge = fpe/alpha
@@ -117,11 +117,11 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    !average number density at x=nxge (magnetosheath)
+    !average number density at x=nxge
     n0 = 100
 
     !number density ratio of Nsph/Nsh
-    dr = 0.1 
+    dr = 1.0
 
     if(nrank == nroot)then
        if(0.5*(1.+dr)*n0*(nxe+bc-nxs+1) > np)then
@@ -140,14 +140,14 @@ contains
     !Magnetic field strength
     b0 = fgi*r(1)*c/q(1)
     !Magnetic field strength ratio
-    br = 2.0
+    br = 1.0
     !Magnetic field orientation
     theta_b = 0.D0/180.D0*pi
 
     !position of the shear layer
     x0 = 0.5*(nxge+nxgs)*delx 
     !half shear width
-    delv = rgi
+    delv = rgi*2.
     
     call random_gen__init(nrank)
     call init__loading
@@ -172,7 +172,6 @@ contains
     real(8)              :: e0, tp, vfnc, efnc, bfnc, dfnc, gamp, tmp, vd
     real(8)              :: intf(nchart), cx(nchart)
     real(8)              :: bfabs, cdf_n, dcn, vy, gam0, dxvy, dvx, dvy, den, x, y
-    real(8)              :: ut1, ut2, ut3
 
     !*** functions ***!
     !magnetic field strength
@@ -353,7 +352,7 @@ contains
              call random_gen__bm(r1,r2)
              up(5,ii,j,isp) = sd*r1
 
-             gamp = dsqrt(1.D0+(ut1*ut1+ut2*ut2+ut3*ut3)/(c*c))
+             gamp = dsqrt(1.D0+(up(3,ii,j,isp)**2+up(4,ii,j,isp)**2+up(5,ii,j,isp)**2)/(c*c))
              vd = dvy(up(1,ii,j,isp))
              if(isp == 2) vd = -vd*rtemp
 
