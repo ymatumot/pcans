@@ -1,7 +1,7 @@
 ;; Initilization when idl starts up.
 
 ;; set path environment
-!path = './:' + !path
+!path = expand_path('./') +':'+!path
 !path = getenv('PCANS_DIR')+ '/idl/'+':' + !path
 
 ;; set color map for 24-bit display

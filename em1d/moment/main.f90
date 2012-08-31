@@ -19,9 +19,9 @@ program main
   do idata=2,ndata
 
      call getarg(idata,ifile)
-     write(*,'(a)')'reading....  '//trim(dir)//trim(ifile)
+     write(*,'(a)')'reading....  '//trim(ifile)
 
-     call fio__input(dir,ifile)
+     call fio__input(ifile)
 
      if(lflag)then
         allocate(den(0:nx+1,nsp))
@@ -49,8 +49,8 @@ program main
         call boundary__den(temp(0:nx+1,3,isp),nx,bc)
      enddo
 
-     call fio__mom(den,vel,temp,trim(dir)//'../mom/')
-     call fio__psd(trim(dir)//'../psd/')
+     call fio__mom(den,vel,temp,trim(dir)//'/mom/')
+     call fio__psd(trim(dir)//'/psd/')
   enddo
 
 end program main

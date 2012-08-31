@@ -16,12 +16,12 @@ module fio
 contains
 
 
-  subroutine fio__input(dir,file)
+  subroutine fio__input(file)
 
-    character(len=*) :: dir, file
+    character(len=*) :: file
 
     !filename
-    open(11,file=trim(dir)//trim(file),form='unformatted')
+    open(11,file=trim(file),form='unformatted')
     read(11)it0,np,nx,nsp,bc,delt,delx,c
 
     if(lflag)then

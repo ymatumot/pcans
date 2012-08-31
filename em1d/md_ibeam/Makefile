@@ -12,7 +12,7 @@ OBJS = const.o init.o main.o
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(FC) -L$(LIB_DIR) -o a.out $(FFLAGS) $(OBJS) -lem1d 
+	$(FC) -L$(LIB_DIR) -o $(TARGET) $(FFLAGS) $(OBJS) -lem1d 
 
 $(LIB_DIR)/libem1d.a : 
 	cd $(LIB_DIR) ; make
@@ -22,7 +22,7 @@ init.o : const.o $(LIB_DIR)/libem1d.a
 
 ############## moment calculation ################
 moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./dat/ `cd dat; \ls *_file10.dat`
+	$(LIB_DIR)/moment/mom.out ./ ./dat/*_file10.dat
 
 $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make

@@ -18,14 +18,14 @@ module fio
 contains
 
 
-  subroutine fio__input(nproc,dir,file)
+  subroutine fio__input(nproc,file)
                        
     integer                      :: inproc
     integer, intent(in)          :: nproc
-    character(len=*), intent(in) :: dir, file
+    character(len=*), intent(in) :: file
     real(8), allocatable         :: uftmp(:,:,:)
 
-    open(11,file=trim(dir)//trim(file),form='unformatted')
+    open(11,file=trim(file),form='unformatted')
 
     !parameters
     read(11)it0,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,inproc,bc,delt,delx,c

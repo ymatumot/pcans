@@ -14,11 +14,11 @@ program main
   character(len=64) :: xpos, ypos
 
   ndata = iargc()
-  call getarg(1,dir)
-  call getarg(2,xpos)
-  call getarg(3,ypos)
+  call getarg(1,xpos)
+  call getarg(2,ypos)
   read(xpos,*)x0
   read(ypos,*)y0
+  call getarg(3,dir)
 
   write(*,*)'No. of processes?'
   read(*,*)nproc
@@ -30,13 +30,13 @@ program main
      do irank=0,nproc-1
 
         call getarg(idata+irank,ifile)
-        write(*,'(a)')'reading.....  '//trim(dir)//trim(ifile)
+        write(*,'(a)')'reading.....  '//trim(ifile)
 
-        call fio__input(nproc,dir,ifile)
+        call fio__input(nproc,ifile)
 
         call particle__solv(up,uf,c,q,r,0.5*delt,np,nxgs,nxge,nygs,nyge,nys,nye,nsp,np2)
         call boundary__particle(up,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2,bc)
-        call fio__psd(up,x0,y0,dx*delx,dy*delx,np,nys,nye,nsp,np2,it0,trim(dir)//'../psd/')
+        call fio__psd(up,x0,y0,dx*delx,dy*delx,np,nys,nye,nsp,np2,it0,trim(dir)//'/psd/')
 
         deallocate(np2)
         deallocate(up)

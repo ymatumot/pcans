@@ -18,15 +18,15 @@ module fio
 contains
 
 
-  subroutine fio__input(nproc,dir,file)
+  subroutine fio__input(nproc,file)
 
     integer, intent(in)          :: nproc
-    character(len=*), intent(in) :: dir, file
+    character(len=*), intent(in) :: file
     integer                      :: inproc, iit0
     integer, allocatable         :: np2tmp(:,:)
     real(8), allocatable         :: uptmp(:,:,:,:),uftmp(:,:)
 
-    open(11,file=trim(dir)//trim(file),form='unformatted')
+    open(11,file=trim(file),form='unformatted')
 
     !parameters
     read(11)it0,np,nxgs,nxge,nxs,nxe,nsp,inproc,bc,bcp,delt,delx,c

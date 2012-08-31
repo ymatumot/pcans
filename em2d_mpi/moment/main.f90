@@ -22,9 +22,9 @@ program main
 
      do irank=0,nproc-1
         call getarg(idata+irank,ifile)
-        write(*,'(a)')'reading.....  '//trim(dir)//trim(ifile)
+        write(*,'(a)')'reading.....  '//trim(ifile)
 
-        call fio__input(nproc,dir,ifile)
+        call fio__input(nproc,ifile)
 
         call particle__solv(up,uf,c,q,r,0.5*delt,np,nxgs,nxge,nygs,nyge,nys,nye,nsp,np2)
 
@@ -51,7 +51,7 @@ program main
         call boundary__den(temp(nxgs-1:nxge+1,nygs-1:nyge+1,6,isp),nxgs,nxge,nygs,nyge,bc)
      enddo
 
-     call fio__mom(den,vel,temp,uf,nxgs,nxge,nygs,nyge,nsp,bc,it0,trim(dir)//'../mom/')
+     call fio__mom(den,vel,temp,uf,nxgs,nxge,nygs,nyge,nsp,bc,it0,trim(dir)//'/mom/')
 
      !memory clear
      den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp) = 0.0D0
