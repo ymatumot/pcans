@@ -22,7 +22,6 @@ program main
 !    re-written in F90   (by Y. Matsumoto, STEL)  2008/10/21
 !    MPI parallelization (by Y. Matsumoto, STEL)  2009/4/1
 !    2-D code            (by Y. Matsumoto, STEL)  2009/6/5
-!    Reconnection setup  (by S. Zenitani, NAOJ)   2012/7/19
 !
 !**********************************************************************c
 
@@ -36,7 +35,7 @@ program main
 
   do it=1,itmax-it0
 
-     call particle__solv(gp,up,uf,                   &
+     call particle__solv2(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)
      call field__fdtd_i(uf,up,gp,                                &

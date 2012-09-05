@@ -32,7 +32,7 @@ contains
     if(nsize /= nproc) then
        call MPI_ABORT(ncomw, 9, nerr)
        call MPI_FINALIZE(nerr)
-       stop 'error in proc no.'
+       stop '** proc number mismatch **'
     endif
 
     !start and end of loop counter
