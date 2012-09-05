@@ -35,7 +35,7 @@ program main
 
   do it=1,itmax-it0
 
-     call particle__solv2(gp,up,uf,                   &
+     call particle__solv(gp,up,uf,                   &
                          c,q,r,delt,                 &
                          np,nsp,np2,nxs,nxe,nys,nye)
      call field__fdtd_i(uf,up,gp,                                &
