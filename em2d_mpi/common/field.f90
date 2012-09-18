@@ -355,7 +355,7 @@ contains
        endif
        !------ end of -----
 
-       f1 = 2.0+(delx/(c*delt*gfac))**2
+       f1 = 4.0+(delx/(c*delt*gfac))**2
        sumr = 0.0
        do j=nys,nye
        do i=nxs,nxe+bc
@@ -520,7 +520,7 @@ contains
        endif
        !------ end of -----
 
-       f1 = 2.0+(delx/(c*delt*gfac))**2
+       f1 = 4.0+(delx/(c*delt*gfac))**2
        do j=nys,nye
        do i=nxs,nxe
           r(i,j) = b(i,j)+x(i,j-1)                    &

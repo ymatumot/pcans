@@ -62,8 +62,8 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 100
-    intvl1 = 100
+    itmax  = 10000
+    intvl1 = 10000
     intvl2 = 10
     intvl3 = 10
     dir    = './dat/'
