@@ -108,11 +108,21 @@ contains
     r(1) = 16.d0
     r(2) =  1.d0
 
+! alpha = fpe/fce = c/c_Ae,
+! where c_Ae = B/sqrt(4pi me n) is the electron Alfven speed
     alpha = 2.d0
     rtemp = 0.25d0
 
+! Here we use the pressure balance,
+!   B**2 / 8*pi = n [ kT_e + kT_i ] = n kT_e * ((1+rtemp)/rtemp)
+!               = 0.5*me*n*(vte**2) * ((1+rtemp)/rtemp)
+!   (vte**2) * ((1+rtemp)/rtemp) = B**2 / 4*pi*me*n = (c/alpha)**2
     vte = dsqrt(rtemp)*c/(dsqrt(1+rtemp)*alpha)
     vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
+! We use the following relation to obtain fpe,
+!   ldb = sqrt( kT_e / 4 pi n e**2 )
+!       = sqrt( 0.5*me*(vte**2) / 4 pi n e**2 )
+!       = vte/fpe/sqrt(2)
     fpe = vte/ldb/dsqrt(2.d0)
     fpi = fpe*dsqrt(r(2)/r(1))
     fge = fpe/alpha
