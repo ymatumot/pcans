@@ -39,7 +39,7 @@ contains
     call mpi_set__init(nxgs,nxge,nygs,nyge,nproc)
 
     allocate(np2(nys:nye,nsp))
-    allocate(uf(6,nxs1:nxe1,nys1:nye1))
+    allocate(uf(6,nxs-2:nxe+2,nys-2:nye+2))
     allocate(up(5,np,nys:nye,nsp))
     allocate(gp(5,np,nys:nye,nsp))
 
@@ -208,7 +208,7 @@ contains
     ! vector potential defined at cell center
     real(8),dimension(:,:),allocatable :: az
     
-    allocate(az(nxs1-1:nxe1,nys1-1:nye1))
+    allocate(az(nxs-3:nxe+2,nys-3:nye+2))
 
     ! set initial parameter
     ! reconnection point is set at
@@ -226,8 +226,8 @@ contains
     ! magnetic field is obtained by descretizing the vector potential.
     ! delb is the relative amplitude of the perturbed field.
     delb=0.1d0
-    do j = nys1-1, nye1
-    do i = nxs1-1, nxe1
+    do j = nys-3, nye+2
+    do i = nxs-3, nxe+2
        xs  = dble(i+0.5)*delx
        ys  = dble(j+0.5)*delx
 
@@ -242,8 +242,8 @@ contains
                     + 2.d0*lcs*delb*exp(-rr3*0.25d0))
     enddo
     enddo
-    do j=nys1,nye1
-    do i=nxs1,nxe1
+    do j=nys-2,nye+2
+    do i=nxs-2,nxe+2
        uf(1,i,j) = (az(i,j) - az(i,j-1))/delx
        uf(2,i,j) =-(az(i,j) - az(i-1,j))/delx
        uf(3,i,j) = 0.d0

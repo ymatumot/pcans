@@ -10,21 +10,26 @@ module particle
 contains
 
 
-  subroutine particle__solv(gp,up,uf,                   &
-                            c,q,r,delt,                 &
-                            np,nsp,np2,nxs,nxe,nys,nye)
+  subroutine particle__solv(gp,up,uf,                        &
+                            np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
+                            c,q,r,delt,delx)
+                            
 
-    integer, intent(in)  :: np, nxs, nxe, nys, nye, nsp
+    use shape_function, only : sf
+
+    integer, intent(in)  :: np, nxs, nxe, nys, nye, nsp, nsfo
     integer, intent(in)  :: np2(nys:nye,nsp)
     real(8), intent(in)  :: up(5,np,nys:nye,nsp)
-    real(8), intent(in)  :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
-    real(8), intent(in)  :: c, q(nsp), r(nsp), delt
+    real(8), intent(in)  :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
+    real(8), intent(in)  :: c, q(nsp), r(nsp), delt, delx
     real(8), intent(out) :: gp(5,np,nys:nye,nsp)
-    integer :: i, j, ii, isp, ih, jh
-    real(8) :: dx, dxm, dy, dym
-    real(8) :: fac1, fac1r, fac2, fac2r, gam, txxx, bt2
+    integer :: j, ii, isp, i0, j0, ih, ip, jp
+    real(8) :: idelx, fac1, fac1r, fac2, fac2r, gam, txxx, bt2
+    real(8) :: s0(-2:2,2), sh(-2:2,2)
     real(8) :: pf(6)
     real(8) :: uvm(6)
+
+    idelx = 1./delx
 
     do isp=1,nsp
 
@@ -33,51 +38,59 @@ contains
        fac2 = q(isp)*delt/r(isp)
        do j=nys,nye
           do ii=1,np2(j,isp)
-             i  = floor(up(1,ii,j,isp))
-             ih = floor(up(1,ii,j,isp)-0.5)
-             jh = floor(up(2,ii,j,isp)-0.5)
+
+             pf(1:6) = 0.D0
+
+             i0 = floor(up(1,ii,j,isp)+0.5)
+             j0 = floor(up(2,ii,j,isp)+0.5)
+             ih = floor(up(1,ii,j,isp))
+
+             s0(-2:2,1) = sf(i0,up(1,ii,j,isp)*idelx,nsfo)
+             s0(-2:2,2) = sf(j0,up(2,ii,j,isp)*idelx,nsfo)
+             sh(-2:2,1) = sf(ih,up(1,ii,j,isp)*idelx-0.5,nsfo)
+             sh(-2:2,2) = sf(j ,up(2,ii,j,isp)*idelx-0.5,nsfo)
 
              !Bx at (i+1/2, j)
-             dx = up(1,ii,j,isp)-0.5-ih
-             dxm = 1.-dx
-             dy = up(2,ii,j,isp)-j
-             dym = 1.-dy
-             pf(1) = +(dxm*uf(1,ih,j  )+dx*uf(1,ih+1,j  ))*dym &
-                     +(dxm*uf(1,ih,j+1)+dx*uf(1,ih+1,j+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(1) = pf(1)+uf(1,ih+ip,j0+jp)*sh(ip,1)*s0(jp,2)
+             enddo
+             enddo
 
              !By at (i, j+1/2)
-             dx = up(1,ii,j,isp)-i
-             dxm = 1.-dx
-             dy = up(2,ii,j,isp)-0.5-jh
-             dym = 1.-dy
-             pf(2) = +(dxm*uf(2,i,jh  )+dx*uf(2,i+1,jh  ))*dym &
-                     +(dxm*uf(2,i,jh+1)+dx*uf(2,i+1,jh+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(2) = pf(2)+uf(2,i0+ip,j +jp)*s0(ip,1)*sh(jp,2)
+             enddo
+             enddo
 
              !Bz at (i, j)
-             dy = up(2,ii,j,isp)-j
-             dym = 1.-dy
-             pf(3) = +(dxm*uf(3,i,j  )+dx*uf(3,i+1,j  ))*dym &
-                     +(dxm*uf(3,i,j+1)+dx*uf(3,i+1,j+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(3) = pf(3)+uf(3,i0+ip,j0+jp)*s0(ip,1)*s0(jp,2)
+             enddo
+             enddo
 
              !Ex at (i, j+1/2)
-             dy = up(2,ii,j,isp)-0.5-jh
-             dym = 1.-dy
-             pf(4) = +(dxm*uf(4,i,jh  )+dx*uf(4,i+1,jh  ))*dym &
-                     +(dxm*uf(4,i,jh+1)+dx*uf(4,i+1,jh+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(4) = pf(4)+uf(4,i0+ip,j +jp)*s0(ip,1)*sh(jp,2)
+             enddo
+             enddo
 
              !Ey at (i+1/2, j)
-             dx = up(1,ii,j,isp)-0.5-ih
-             dxm = 1.-dx
-             dy = up(2,ii,j,isp)-j
-             dym = 1.-dy
-             pf(5) = +(dxm*uf(5,ih,j  )+dx*uf(5,ih+1,j  ))*dym &
-                     +(dxm*uf(5,ih,j+1)+dx*uf(5,ih+1,j+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(5) = pf(5)+uf(5,ih+ip,j0+jp)*sh(ip,1)*s0(jp,2)
+             enddo
+             enddo
 
              !Ez at (i+1/2, j+1/2)
-             dy = up(2,ii,j,isp)-0.5-jh
-             dym = 1.-dy
-             pf(6) = +(dxm*uf(6,ih,jh  )+dx*uf(6,ih+1,jh  ))*dym &
-                     +(dxm*uf(6,ih,jh+1)+dx*uf(6,ih+1,jh+1))*dy
+             do jp=-1,1
+             do ip=-1,1
+                pf(6) = pf(6)+uf(6,ih+ip,j +jp)*sh(ip,1)*sh(jp,2)
+             enddo
+             enddo
 
              bt2 = pf(1)*pf(1)+pf(2)*pf(2)+pf(3)*pf(3)
 

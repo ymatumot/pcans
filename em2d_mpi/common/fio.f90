@@ -21,7 +21,7 @@ contains
     integer, intent(in) :: nproc, nrank
     integer, intent(in) :: it, it0
     real(8), intent(in) :: up(5,np,nys:nye,nsp)
-    real(8), intent(in) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(in) :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
     real(8), intent(in) :: c, q(nsp), r(nsp), delt, delx
     character(len=*), intent(in) :: dir
     integer :: it2
@@ -40,7 +40,7 @@ contains
     write(100+nrank)r
 
     !field data
-    write(100+nrank)uf
+    write(100+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     !particle data
     write(100+nrank)up
@@ -57,7 +57,7 @@ contains
     character(len=*), intent(in) :: dir, file
     integer, intent(out) :: np2(nys:nye,nsp), it0
     real(8), intent(out) :: up(5,np,nys:nye,nsp)
-    real(8), intent(out) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(out) :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
     real(8), intent(out) :: c, q(nsp), r(nsp), delt, delx
     integer :: inp, inxgs, inxge, inygs, inyge, inxs, inxe, inys, inye, insp, ibc, inproc
 
@@ -77,7 +77,7 @@ contains
     read(101+nrank)r
 
     !field data
-    read(101+nrank)uf
+    read(101+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     !particle data
     read(101+nrank)up
@@ -144,7 +144,7 @@ contains
     integer, intent(inout)       :: nerr
     real(8), intent(in)          :: c, r(nsp), delt
     real(8), intent(in)          :: up(5,np,nys:nye,nsp)
-    real(8), intent(in)          :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(in)          :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
     character(len=*), intent(in) :: dir, file
     integer :: i, j, ii, isp
     real(8) :: pi

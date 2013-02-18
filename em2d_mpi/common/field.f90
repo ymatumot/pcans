@@ -10,37 +10,38 @@ module field
 contains
 
   
-  subroutine field__fdtd_i(uf,up,gp,                                &
-                           np,nsp,np2,nxgs,nxge,nxs,nxe,nys,nye,bc, &
-                           q,c,delx,delt,gfac,                      &
+  subroutine field__fdtd_i(uf,up,gp,                           &
+                           np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
+                           q,c,delx,delt,gfac,                 &
                            nup,ndown,mnpr,opsum,nstat,ncomw,nerr)
 
     use boundary, only : boundary__field, boundary__curre,  boundary__particle
  
-    integer, intent(in)    :: np, nsp, nxgs, nxge, nxs, nxe, nys, nye, bc
+    integer, intent(in)    :: np, nsp, nxs, nxe, nys, nye, nsfo, bc
     integer, intent(in)    :: np2(nys:nye,nsp)
     integer, intent(in)    :: nup, ndown, opsum, mnpr, ncomw
     integer, intent(inout) :: nerr, nstat(:)
     real(8), intent(in)    :: q(nsp), c, delx, delt, gfac
     real(8), intent(in)    :: gp(5,np,nys:nye,nsp)
     real(8), intent(inout) :: up(5,np,nys:nye,nsp)
-    real(8), intent(inout) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(inout) :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
+    logical, save              :: lflag=.true.
     integer                    :: ii, i, j, isp
-    integer, save              :: flag
     real(8)                    :: pi, f1, f2, f3
-    real(8)                    :: uj(3,nxs-2:nxe+2,nys-2:nye+2), gkl(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8)                    :: uj(3,nxs-2:nxe+2,nys-2:nye+2)
+    real(8)                    :: gkl(6,nxs-2:nxe+2,nys-2:nye+2)
     real(8), save, allocatable :: gf(:,:,:)
 
     pi = 4.0*atan(1.0)
 
-    if(flag /=1)then
-       allocate(gf(6,nxs-1:nxe+1,nys-1:nye+1))
-       gf(1:6,nxs-1:nxe+1,nys-1:nye+1) = 0.0
-       flag=1
+    if(lflag)then
+       allocate(gf(6,nxs-2:nxe+2,nys-2:nye+2))
+       gf(1:6,nxs-2:nxe+2,nys-2:nye+2) = 0.0
+       lflag = .false.
     endif
 
     call ele_cur(uj,up,gp, &
-                 np,nsp,np2,nxgs,nxge,nxs,nxe,nys,nye,bc,q,c,delx,delt)
+                 np,nsp,np2,nxs,nxe,nys,nye,bc,nsfo,q,c,delx,delt)
     call boundary__curre(uj,nxs,nxe,nys,nye,bc, &
                          nup,ndown,mnpr,nstat,ncomw,nerr)
 
@@ -121,8 +122,8 @@ contains
                          nup,ndown,mnpr,nstat,ncomw,nerr)
 
     !===== Update fields and particles ======
-    uf(1:6,nxs-1:nxe+1,nys-1:nye+1) = uf(1:6,nxs-1:nxe+1,nys-1:nye+1) &
-                                     +gf(1:6,nxs-1:nxe+1,nys-1:nye+1)
+    uf(1:6,nxs-2:nxe+2,nys-2:nye+2) = uf(1:6,nxs-2:nxe+2,nys-2:nye+2) &
+                                     +gf(1:6,nxs-2:nxe+2,nys-2:nye+2)
 
     do isp=1,nsp
        do j=nys,nye
@@ -140,132 +141,72 @@ contains
 
 
   subroutine ele_cur(uj,up,gp, &
-                     np,nsp,np2,nxgs,nxge,nxs,nxe,nys,nye,bc,q,c,delx,delt)
+                     np,nsp,np2,nxs,nxe,nys,nye,bc,nsfo,q,c,delx,delt)
 
-    integer, intent(in)  :: np, nsp, nxgs, nxge, nxs, nxe, nys, nye, bc
+    use shape_function, only : sf
+
+    integer, intent(in)  :: np, nsp, nxs, nxe, nys, nye, bc, nsfo
     integer, intent(in)  :: np2(nys:nye,nsp)
     real(8), intent(in)  :: q(nsp), c, delx, delt
     real(8), intent(in)  :: up(5,np,nys:nye,nsp), gp(5,np,nys:nye,nsp)
     real(8), intent(out) :: uj(3,nxs-2:nxe+2,nys-2:nye+2)
     
-    integer :: ii, i, j, isp
-    integer :: i1 ,i2 ,j1 ,j2, ih, jh
-    real(8) :: x2, y2, xh, yh, xr, yr, qvx1, qvx2, qvy1, qvy2, idelt, idelx, idelx2, gam
-    real(8) :: dx1, dx2, dy1, dy2, dxm1, dxm2, dym1, dym2, dx, dxm, dy, dym
+    integer            :: ii, j, isp, i1, j1, i2, j2, iinc, jinc, ip, jp
+    real(8), parameter :: fac = 1.D0/3.D0
+    real(8)            :: idelx, idelt, gamp
+    real(8)            :: s0(-2:2,2), s1(-2:2,2), ds(-2:2,2), ujp(3,-2:3,-2:3)
 
     uj(1:3,nxs-2:nxe+2,nys-2:nye+2) = 0.D0
 
-    !----- Charge Conservation Method for Jx, Jy ------!
-    !----  Zigzag scheme (Umeda et al., CPC, 2003) ----!
     idelt = 1.D0/delt
     idelx = 1.D0/delx
+
+    !--------------Charge Conservation Method -------------!
+    !---- Density Decomposition (Esirkepov, CPC, 2001) ----!
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)
 
-             x2  = gp(1,ii,j,isp)
-             y2  = gp(2,ii,j,isp)
+             ujp(1:3,-2:3,-2:3) = 0.D0
 
-             !reflective boundary condition in x
-             if(bc == -1)then
-                if(x2 < nxgs)then
-                   x2  = 2.*nxgs-x2
-                endif
-                if(x2 > nxge)then
-                   x2  = 2.*nxge-x2
-                endif
-             endif
+             i1 = int(up(1,ii,j,isp)*idelx)
+             i2 = int(gp(1,ii,j,isp)*idelx)
+             j2 = int(gp(2,ii,j,isp)*idelx)
+             iinc = i2-i1
+             jinc = j2-j
 
-             i1  = floor(up(1,ii,j,isp)*idelx-0.5)
-             j1  = floor(up(2,ii,j,isp)*idelx-0.5)
-             i2  = floor(x2*idelx-0.5)
-             j2  = floor(y2*idelx-0.5)
-
-             xh  = 0.5*(up(1,ii,j,isp)+x2)
-             yh  = 0.5*(up(2,ii,j,isp)+y2)
-
-             if(i1==i2) then
-                xr = xh
-             else
-                xr = (max(i1,i2)+0.5)*delx
-             endif
-             if(j1==j2) then
-                yr = yh
-             else
-                yr = (max(j1,j2)+0.5)*delx
-             endif
-
-             qvx1 = q(isp)*(xr-up(1,ii,j,isp))*idelt
-             qvy1 = q(isp)*(yr-up(2,ii,j,isp))*idelt
-             qvx2 = q(isp)*(x2-xr)*idelt
-             qvy2 = q(isp)*(y2-yr)*idelt
-
-             dx1  = 0.5*(up(1,ii,j,isp)+xr)*idelx-0.5-i1
-             dy1  = 0.5*(up(2,ii,j,isp)+yr)*idelx-0.5-j1
-             dxm1 = 1.-dx1
-             dym1 = 1.-dy1
-             dx2  = 0.5*(xr+x2)*idelx-0.5-i2
-             dy2  = 0.5*(yr+y2)*idelx-0.5-j2
-             dxm2 = 1.-dx2
-             dym2 = 1.-dy2
-
-             !Jx and Jy
-             uj(1,i1+1,j1  ) = uj(1,i1+1,j1  )+qvx1*dym1
-             uj(1,i1+1,j1+1) = uj(1,i1+1,j1+1)+qvx1*dy1 
-             uj(1,i2+1,j2  ) = uj(1,i2+1,j2  )+qvx2*dym2
-             uj(1,i2+1,j2+1) = uj(1,i2+1,j2+1)+qvx2*dy2 
-             uj(2,i1  ,j1+1) = uj(2,i1  ,j1+1)+qvy1*dxm1
-             uj(2,i1+1,j1+1) = uj(2,i1+1,j1+1)+qvy1*dx1 
-             uj(2,i2  ,j2+1) = uj(2,i2  ,j2+1)+qvy2*dxm2
-             uj(2,i2+1,j2+1) = uj(2,i2+1,j2+1)+qvy2*dx2 
-
-             !Jz
-             gam = 1./dsqrt(1.0+(+gp(3,ii,j,isp)*gp(3,ii,j,isp) &
+             gamp = 1./dsqrt(1.+(+gp(3,ii,j,isp)*gp(3,ii,j,isp) &
                                  +gp(4,ii,j,isp)*gp(4,ii,j,isp) &
-                                 +gp(5,ii,j,isp)*gp(5,ii,j,isp) &
-                                )/(c*c))
-             ih = floor(xh-0.5)
-             dx  = xh-0.5-ih
-             dxm = 1.-dx
-             jh = floor(yh-0.5)
-             dy  = yh-0.5-jh
-             dym = 1.-dy
-             uj(3,ih  ,jh  ) = uj(3,ih  ,jh  )+q(isp)*gp(5,ii,j,isp)*gam*dxm*dym
-             uj(3,ih+1,jh  ) = uj(3,ih+1,jh  )+q(isp)*gp(5,ii,j,isp)*gam*dx *dym
-             uj(3,ih  ,jh+1) = uj(3,ih  ,jh+1)+q(isp)*gp(5,ii,j,isp)*gam*dxm*dy 
-             uj(3,ih+1,jh+1) = uj(3,ih+1,jh+1)+q(isp)*gp(5,ii,j,isp)*gam*dx *dy 
+                                 +gp(5,ii,j,isp)*gp(5,ii,j,isp))/(c*c) )
+
+             s0(-2:2,1) = sf(i1,up(1,ii,j,isp)*idelx-0.5,nsfo)
+             s0(-2:2,2) = sf(j ,up(2,ii,j,isp)*idelx-0.5,nsfo)
+
+             s1(-2:2,1) = sf(i2,gp(1,ii,j,isp)*idelx-0.5,nsfo)
+             s1(-2:2,2) = sf(j2,gp(2,ii,j,isp)*idelx-0.5,nsfo)
+
+             ds(-2:2,1) = cshift(s1(-2:2,1),-iinc,1)-s0(-2:2,1)
+             ds(-2:2,2) = cshift(s1(-2:2,2),-jinc,1)-s0(-2:2,2)
+
+             do jp=-1+min(jinc,0),1+max(jinc,0)
+             do ip=-1+min(iinc,0),1+max(iinc,0)
+                ujp(1,ip+1,jp) = ujp(1,ip,jp) &
+                                -q(isp)*delx*idelt*ds(ip,1)*(s0(jp,2)+0.5*ds(jp,2))
+
+                ujp(2,ip,jp+1) = ujp(2,ip,jp) &
+                                -q(isp)*delx*idelt*ds(jp,2)*(s0(ip,1)+0.5*ds(ip,1))
+
+                ujp(3,ip,jp) = +q(isp)*gp(5,ii,j,isp)*gamp                &
+                               *(+s0(ip,1)*s0(jp,2)+0.5*ds(ip,1)*s0(jp,2) &
+                                 +0.5*s0(ip,1)*ds(jp,2)+fac*ds(ip,1)*ds(jp,2))
+             enddo
+             enddo
+
+             uj(1:3,i1-2:i1+2,j-2:j+2) = uj(1:3,i1-2:i1+2,j-2:j+2)+ujp(1:3,-2:2,-2:2)
+
           enddo
        enddo
     enddo
-
-    idelx2 = idelx*idelx
-    if(bc == 0)then
-       do j=nys-2,nye+2
-          do i=nxs-2,nxe+2
-             uj(1,i,j) = uj(1,i,j)*idelx2
-          enddo
-       enddo
-    else if(bc == -1)then
-       do j=nys-2,nye+2
-          i=nxs
-          uj(1,i,j) = uj(1,i,j)*2.*idelx2
-          do i=nxs+1,nxe-1
-             uj(1,i,j) = uj(1,i,j)*idelx2
-          enddo
-          i=nxe
-          uj(1,i,j) = uj(1,i,j)*2.*idelx2
-       enddo
-       do j=nys-2,nye+2
-          do i=nxs-1,nxe
-             uj(2,i,j) = uj(2,i,j)*idelx2
-             uj(3,i,j) = uj(3,i,j)*idelx2
-          enddo
-       enddo
-    else
-       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-       stop
-    endif
-
 
   end subroutine ele_cur
 
@@ -284,8 +225,8 @@ contains
     integer, intent(in)    :: nup, ndown, mnpr, opsum, ncomw
     integer, intent(inout) :: nerr, nstat(:)
     real(8), intent(in)    :: c, delx, delt, gfac
-    real(8), intent(in)    :: gkl(6,nxs-1:nxe+1,nys-1:nye+1)
-    real(8), intent(inout) :: gb(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(in)    :: gkl(6,nxs-2:nxe+2,nys-2:nye+2)
+    real(8), intent(inout) :: gb(6,nxs-2:nxe+2,nys-2:nye+2)
     integer, parameter :: ite_max = 100 ! maximum number of iteration
     integer            :: i, ii, j, l, ite
     real(8), parameter :: err = 1d-6 
@@ -629,67 +570,6 @@ contains
     end do
     
   end subroutine cgm
-
-
-!!$  subroutine ele_cur2(uj,up, &
-!!$                      np,nsp,np2,nxs,nxe,nys,nye,q,c)
-!!$
-!!$    integer, intent(in)  :: np, nsp, nxs, nxe, nys, nye
-!!$    integer, intent(in)  :: np2(nys:nye,nsp)
-!!$    real(8), intent(in)  :: q(nsp), c
-!!$    real(8), intent(in)  :: up(5,np,nys:nye,nsp)
-!!$    real(8), intent(out) :: uj(3,nxs-2:nxe+2,nys-2:nye+2)
-!!$    integer :: ii, i, j, isp, ih, jh
-!!$    real(8) :: dx, dxm, dy, dym, gam
-!!$
-!!$    !memory clear
-!!$    uj(1:3,nxs-2:nxe+2,nys-2:nye+2) = 0.0D0
-!!$
-!!$    !calculate erectric current density
-!!$    do isp=1,nsp
-!!$       do j=nys,nye
-!!$          do ii=1,np2(j,isp)
-!!$             gam = 1./dsqrt(1.0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
-!!$                                 +up(4,ii,j,isp)*up(4,ii,j,isp) &
-!!$                                 +up(5,ii,j,isp)*up(5,ii,j,isp) &
-!!$                                )/(c*c))
-!!$
-!!$             !jx at (i,j+1/2)
-!!$             i = floor(up(1,ii,j,isp))
-!!$             dx = up(1,ii,j,isp)-i
-!!$             dxm = 1.-dx
-!!$             jh = floor(up(2,ii,j,isp)-0.5)
-!!$             dy = up(2,ii,j,isp)-0.5-jh
-!!$             dym = 1.-dy
-!!$             uj(1,i  ,jh  ) = uj(1,i  ,jh  )+q(isp)*up(3,ii,j,isp)*gam*dxm*dym
-!!$             uj(1,i+1,jh  ) = uj(1,i+1,jh  )+q(isp)*up(3,ii,j,isp)*gam*dx *dym
-!!$             uj(1,i  ,jh+1) = uj(1,i  ,jh+1)+q(isp)*up(3,ii,j,isp)*gam*dxm*dy
-!!$             uj(1,i+1,jh+1) = uj(1,i+1,jh+1)+q(isp)*up(3,ii,j,isp)*gam*dx *dy
-!!$
-!!$             !jy at (i+1/2,j)
-!!$             ih = floor(up(1,ii,j,isp)-0.5)
-!!$             dx = up(1,ii,j,isp)-0.5-ih
-!!$             dxm = 1.-dx
-!!$             dy = up(2,ii,j,isp)-j
-!!$             dym = 1.-dy
-!!$             uj(2,ih  ,j  ) = uj(2,ih  ,j  )+q(isp)*up(4,ii,j,isp)*gam*dxm*dym
-!!$             uj(2,ih+1,j  ) = uj(2,ih+1,j  )+q(isp)*up(4,ii,j,isp)*gam*dx *dym
-!!$             uj(2,ih  ,j+1) = uj(2,ih  ,j+1)+q(isp)*up(4,ii,j,isp)*gam*dxm*dy
-!!$             uj(2,ih+1,j+1) = uj(2,ih+1,j+1)+q(isp)*up(4,ii,j,isp)*gam*dx *dy
-!!$
-!!$             !jz at (i+1/2,j+1/2)
-!!$             jh = floor(up(2,ii,j,isp)-0.5)
-!!$             dy = up(2,ii,j,isp)-0.5-jh
-!!$             dym = 1.-dy
-!!$             uj(3,ih  ,jh  ) = uj(3,ih  ,jh  )+q(isp)*up(5,ii,j,isp)*gam*dxm*dym
-!!$             uj(3,ih+1,jh  ) = uj(3,ih+1,jh  )+q(isp)*up(5,ii,j,isp)*gam*dx *dym
-!!$             uj(3,ih  ,jh+1) = uj(3,ih  ,jh+1)+q(isp)*up(5,ii,j,isp)*gam*dxm*dy
-!!$             uj(3,ih+1,jh+1) = uj(3,ih+1,jh+1)+q(isp)*up(5,ii,j,isp)*gam*dx *dy
-!!$          enddo
-!!$       enddo
-!!$    enddo
-!!$
-!!$  end subroutine ele_cur2
 
 
 end module field

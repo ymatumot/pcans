@@ -35,16 +35,16 @@ program main
 
   do it=1,itmax-it0
 
-    if(nrank == nroot) then
+     if(nrank == nroot) then
         write(*,100) it, it*delt
 100     format('[', I4, '] t=', g10.3)
-    endif
-     call particle__solv(gp,up,uf,                   &
-                         c,q,r,delt,                 &
-                         np,nsp,np2,nxs,nxe,nys,nye)
-     call field__fdtd_i(uf,up,gp,                                &
-                        np,nsp,np2,nxgs,nxge,nxs,nxe,nys,nye,bc, &
-                        q,c,delx,delt,gfac,                      &
+     endif
+     call particle__solv(gp,up,uf,                        &
+                         np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
+                         c,q,r,delt,delx)
+     call field__fdtd_i(uf,up,gp,                           &
+                        np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
+                        q,c,delx,delt,gfac,                 &
                         nup,ndown,mnpr,opsum,nstat,ncomw,nerr)
      call boundary__particle(up,                                        &
                              np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &

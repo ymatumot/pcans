@@ -35,12 +35,12 @@ program main
 
   do it=1,itmax-it0
 
-     call particle__solv(gp,up,uf,                   &
-                         c,q,r,delt,                 &
-                         np,nsp,np2,nxs,nxe,nys,nye)
-     call field__fdtd_i(uf,up,gp,                                &
-                        np,nsp,np2,nxgs,nxge,nxs,nxe,nys,nye,bc, &
-                        q,c,delx,delt,gfac,                      &
+     call particle__solv(gp,up,uf,                        &
+                         np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
+                         c,q,r,delt,delx)
+     call field__fdtd_i(uf,up,gp,                           &
+                        np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
+                        q,c,delx,delt,gfac,                 &
                         nup,ndown,mnpr,opsum,nstat,ncomw,nerr)
      call boundary__particle(up,                                        &
                              np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &
@@ -49,6 +49,7 @@ program main
      if(mod(it+it0,intvl1) == 0)                                                                &
           call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
                            c,q,r,delt,delx,it,it0,dir)
+
      if(mod(it+it0,intvl2) == 0)                          &
           call fio__energy(up,uf,                         &
                            np,nsp,np2,nxs,nxe,nys,nye,bc, &

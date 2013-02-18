@@ -154,65 +154,99 @@ contains
     integer, intent(in)    :: nxs, nxe, nys, nye, bc
     integer, intent(in)    :: nup, ndown, mnpr, ncomw
     integer, intent(inout) :: nerr, nstat(:)
-    real(8), intent(inout) :: uf(6,nxs-1:nxe+1,nys-1:nye+1)
+    real(8), intent(inout) :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
     integer                :: i, ii
-    real(8)                :: bff_snd(6*(nxe-nxs+1)), bff_rcv(6*(nxe-nxs+1))
+    real(8)                :: bff_snd(12*(nxe-nxs+1)), bff_rcv(12*(nxe-nxs+1))
 
     do i=nxs,nxe
-       ii = 6*(i-nxs)
-       bff_snd(ii+1) = uf(1,i,nys)
-       bff_snd(ii+2) = uf(2,i,nys)
-       bff_snd(ii+3) = uf(3,i,nys)
-       bff_snd(ii+4) = uf(4,i,nys)
-       bff_snd(ii+5) = uf(5,i,nys)
-       bff_snd(ii+6) = uf(6,i,nys)
+       ii = 12*(i-nxs)
+       bff_snd(ii+1)  = uf(1,i,nys)
+       bff_snd(ii+2)  = uf(2,i,nys)
+       bff_snd(ii+3)  = uf(3,i,nys)
+       bff_snd(ii+4)  = uf(4,i,nys)
+       bff_snd(ii+5)  = uf(5,i,nys)
+       bff_snd(ii+6)  = uf(6,i,nys)
+       bff_snd(ii+7)  = uf(1,i,nys+1)
+       bff_snd(ii+8)  = uf(2,i,nys+1)
+       bff_snd(ii+9)  = uf(3,i,nys+1)
+       bff_snd(ii+10) = uf(4,i,nys+1)
+       bff_snd(ii+11) = uf(5,i,nys+1)
+       bff_snd(ii+12) = uf(6,i,nys+1)
     enddo
-    call MPI_SENDRECV(bff_snd(1),6*(nxe-nxs+1),mnpr,ndown,110, &
-                      bff_rcv(1),6*(nxe-nxs+1),mnpr,nup  ,110, &
+    call MPI_SENDRECV(bff_snd(1),12*(nxe-nxs+1),mnpr,ndown,110, &
+                      bff_rcv(1),12*(nxe-nxs+1),mnpr,nup  ,110, &
                       ncomw,nstat,nerr)
     do i=nxs,nxe
-       ii = 6*(i-nxs)
+       ii = 12*(i-nxs)
        uf(1,i,nye+1) = bff_rcv(ii+1)   
        uf(2,i,nye+1) = bff_rcv(ii+2)
        uf(3,i,nye+1) = bff_rcv(ii+3)
        uf(4,i,nye+1) = bff_rcv(ii+4)   
        uf(5,i,nye+1) = bff_rcv(ii+5)
        uf(6,i,nye+1) = bff_rcv(ii+6)
+       uf(1,i,nye+2) = bff_rcv(ii+7)   
+       uf(2,i,nye+2) = bff_rcv(ii+8)
+       uf(3,i,nye+2) = bff_rcv(ii+9)
+       uf(4,i,nye+2) = bff_rcv(ii+10)   
+       uf(5,i,nye+2) = bff_rcv(ii+11)
+       uf(6,i,nye+2) = bff_rcv(ii+12)
     enddo
 
     do i=nxs,nxe
-       ii = 6*(i-nxs)
-       bff_snd(ii+1) = uf(1,i,nye)
-       bff_snd(ii+2) = uf(2,i,nye)
-       bff_snd(ii+3) = uf(3,i,nye)
-       bff_snd(ii+4) = uf(4,i,nye)
-       bff_snd(ii+5) = uf(5,i,nye)
-       bff_snd(ii+6) = uf(6,i,nye)
+       ii = 12*(i-nxs)
+       bff_snd(ii+1)  = uf(1,i,nye-1)
+       bff_snd(ii+2)  = uf(2,i,nye-1)
+       bff_snd(ii+3)  = uf(3,i,nye-1)
+       bff_snd(ii+4)  = uf(4,i,nye-1)
+       bff_snd(ii+5)  = uf(5,i,nye-1)
+       bff_snd(ii+6)  = uf(6,i,nye-1)
+       bff_snd(ii+7)  = uf(1,i,nye)
+       bff_snd(ii+8)  = uf(2,i,nye)
+       bff_snd(ii+9)  = uf(3,i,nye)
+       bff_snd(ii+10) = uf(4,i,nye)
+       bff_snd(ii+11) = uf(5,i,nye)
+       bff_snd(ii+12) = uf(6,i,nye)
     enddo
-    call MPI_SENDRECV(bff_snd(1),6*(nxe-nxs+1),mnpr,nup  ,100, &
-                      bff_rcv(1),6*(nxe-nxs+1),mnpr,ndown,100, &
+    call MPI_SENDRECV(bff_snd(1),12*(nxe-nxs+1),mnpr,nup  ,100, &
+                      bff_rcv(1),12*(nxe-nxs+1),mnpr,ndown,100, &
                       ncomw,nstat,nerr)
     do i=nxs,nxe
-       ii = 6*(i-nxs)
-       uf(1,i,nys-1) = bff_rcv(ii+1)   
-       uf(2,i,nys-1) = bff_rcv(ii+2)
-       uf(3,i,nys-1) = bff_rcv(ii+3)
-       uf(4,i,nys-1) = bff_rcv(ii+4)   
-       uf(5,i,nys-1) = bff_rcv(ii+5)
-       uf(6,i,nys-1) = bff_rcv(ii+6)
+       ii = 12*(i-nxs)
+       uf(1,i,nys-2) = bff_rcv(ii+1)   
+       uf(2,i,nys-2) = bff_rcv(ii+2)
+       uf(3,i,nys-2) = bff_rcv(ii+3)
+       uf(4,i,nys-2) = bff_rcv(ii+4)   
+       uf(5,i,nys-2) = bff_rcv(ii+5)
+       uf(6,i,nys-2) = bff_rcv(ii+6)
+       uf(1,i,nys-1) = bff_rcv(ii+7)   
+       uf(2,i,nys-1) = bff_rcv(ii+8)
+       uf(3,i,nys-1) = bff_rcv(ii+9)
+       uf(4,i,nys-1) = bff_rcv(ii+10)   
+       uf(5,i,nys-1) = bff_rcv(ii+11)
+       uf(6,i,nys-1) = bff_rcv(ii+12)
     enddo
 
     if(bc == 0)then
-       uf(1:6,nxs-1,nys-1:nye+1) = uf(1:6,nxe,nys-1:nye+1)
-       uf(1:6,nxe+1,nys-1:nye+1) = uf(1:6,nxs,nys-1:nye+1)
+       uf(1:6,nxs-2,nys-2:nye+2) = uf(1:6,nxe-1,nys-2:nye+2)
+       uf(1:6,nxs-1,nys-2:nye+2) = uf(1:6,nxe  ,nys-2:nye+2)
+       uf(1:6,nxe+1,nys-2:nye+2) = uf(1:6,nxs  ,nys-2:nye+2)
+       uf(1:6,nxe+2,nys-2:nye+2) = uf(1:6,nxs+1,nys-2:nye+2)
     else if(bc == -1)then
-       uf(1  ,nxs-1,nys-1:nye+1) = -uf(1  ,nxs  ,nys-1:nye+1)
-       uf(2:4,nxs-1,nys-1:nye+1) = +uf(2:4,nxs+1,nys-1:nye+1)
-       uf(5:6,nxs-1,nys-1:nye+1) = -uf(5:6,nxs  ,nys-1:nye+1)
+       uf(1  ,nxs-2,nys-2:nye+2) = -uf(1  ,nxs+1,nys-2:nye+2)
+       uf(2:4,nxs-2,nys-2:nye+2) = +uf(2:4,nxs+2,nys-2:nye+2)
+       uf(5:6,nxs-2,nys-2:nye+2) = -uf(5:6,nxs+1,nys-2:nye+2)
 
-       uf(1  ,nxe  ,nys-1:nye+1) = -uf(1  ,nxe-1,nys-1:nye+1)
-       uf(2:4,nxe+1,nys-1:nye+1) = +uf(2:4,nxe-1,nys-1:nye+1)
-       uf(5:6,nxe  ,nys-1:nye+1) = -uf(5:6,nxe-1,nys-1:nye+1)
+       uf(1  ,nxs-1,nys-2:nye+2) = -uf(1  ,nxs  ,nys-2:nye+2)
+       uf(2:4,nxs-1,nys-2:nye+2) = +uf(2:4,nxs+1,nys-2:nye+2)
+       uf(5:6,nxs-1,nys-2:nye+2) = -uf(5:6,nxs  ,nys-2:nye+2)
+
+       uf(1  ,nxe  ,nys-2:nye+2) = -uf(1  ,nxe-1,nys-2:nye+2)
+       uf(2:4,nxe+1,nys-2:nye+2) = +uf(2:4,nxe-1,nys-2:nye+2)
+       uf(5:6,nxe  ,nys-2:nye+2) = -uf(5:6,nxe-1,nys-2:nye+2)
+
+       uf(1  ,nxe+1,nys-2:nye+2) = -uf(1  ,nxe-2,nys-2:nye+2)
+       uf(2:4,nxe+2,nys-2:nye+2) = +uf(2:4,nxe-2,nys-2:nye+2)
+       uf(5:6,nxe+1,nys-2:nye+2) = -uf(5:6,nxe-2,nys-2:nye+2)
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
        stop
@@ -230,6 +264,7 @@ contains
     real(8), intent(inout) :: uj(3,nxs-2:nxe+2,nys-2:nye+2)
     integer                :: i, ii
     real(8)                :: bff_rcv(6*(nxe-nxs+4+1)), bff_snd(6*(nxe-nxs+4+1))
+    real(8)                :: bff_rcv2(2*(nxe-nxs+4+1)), bff_snd2(2*(nxe-nxs+4+1))
 
     !send to rank-1
     do i=nxs-2,nxe+2
@@ -285,11 +320,15 @@ contains
        uj(1:3,nxe-1,nys:nye) = uj(1:3,nxe-1,nys:nye)+uj(1:3,nxs-2,nys:nye)
        uj(1:3,nxe  ,nys:nye) = uj(1:3,nxe  ,nys:nye)+uj(1:3,nxs-1,nys:nye)
     else if(bc == -1)then
-       uj(2:3,nxs  ,nys:nye) = uj(2:3,nxs  ,nys:nye)-uj(2:3,nxs-1,nys:nye)
-       uj(2:3,nxs+1,nys:nye) = uj(2:3,nxs+1,nys:nye)-uj(2:3,nxs-2,nys:nye)
+       uj(1  ,nxs+1,nys:nye) = uj(1  ,nxs+1,nys:nye)-uj(1  ,nxs-1,nys:nye)
+       uj(1  ,nxs+2,nys:nye) = uj(1  ,nxs+2,nys:nye)-uj(1  ,nxs-2,nys:nye)
+       uj(2:3,nxs  ,nys:nye) = uj(2:3,nxs  ,nys:nye)+uj(2:3,nxs-1,nys:nye)
+       uj(2:3,nxs+1,nys:nye) = uj(2:3,nxs+1,nys:nye)+uj(2:3,nxs-2,nys:nye)
 
-       uj(2:3,nxe-2,nys:nye) = uj(2:3,nxe-2,nys:nye)-uj(2:3,nxe+1,nys:nye)
-       uj(2:3,nxe-1,nys:nye) = uj(2:3,nxe-1,nys:nye)-uj(2:3,nxe  ,nys:nye)
+       uj(1  ,nxe-2,nys:nye) = uj(1  ,nxe-2,nys:nye)-uj(1  ,nxe+2,nys:nye)
+       uj(1  ,nxe-1,nys:nye) = uj(1  ,nxe-1,nys:nye)-uj(1  ,nxe+1,nys:nye)
+       uj(2:3,nxe-2,nys:nye) = uj(2:3,nxe-2,nys:nye)+uj(2:3,nxe+1,nys:nye)
+       uj(2:3,nxe-1,nys:nye) = uj(2:3,nxe-1,nys:nye)+uj(2:3,nxe  ,nys:nye)
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
        stop

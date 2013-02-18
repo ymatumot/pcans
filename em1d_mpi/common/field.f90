@@ -25,18 +25,18 @@ contains
     real(8), intent(in)    :: gp(4,np,nxs:nxe+bcp,nsp)
     real(8), intent(inout) :: up(4,np,nxs:nxe+bcp,nsp)
     real(8), intent(inout) :: uf(6,nxs1:nxe1)
+    logical, save              :: lflag=.true.
     integer                    :: ii, i, isp
-    integer, save              :: flag
     real(8)                    :: uj(3,nxs1-1:nxe1+1), gkl(6,nxs1:nxe1)
     real(8), save, allocatable :: gf(:,:)
     real(8)                    :: pi, f1, f2, f3, rotb2, rotb3, rote2, rote3
 
     pi = 4.0*atan(1.0)
 
-    if(flag /=1)then
+    if(lflag)then
        allocate(gf(6,nxs1:nxe1))
        gf(1:6,nxs1:nxe1) = 0.0
-       flag=1
+       lflag = .false.
     endif
 
     !position at n+1/2
@@ -150,7 +150,6 @@ contains
     uj(1:3,nxs1-1:nxe1+1) = 0.0D0
 
     !------ Charge Conservation Method for Jx ---------!
-    !----  Zigzag scheme (Umeda et al., CPC, 2003) ----!
     idelt = 1.D0/delt
     idelx = 1.D0/delx
     do isp=1,nsp

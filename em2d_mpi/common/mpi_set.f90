@@ -12,7 +12,7 @@ module mpi_set
   integer, public, parameter   :: opsum = MPI_SUM
   integer, public              :: nerr, ncomw, nsize, nrank
   integer, public              :: nstat(MPI_STATUS_SIZE)
-  integer, public              :: nxs, nxe, nxs1, nxe1, nys, nye, nys1, nye1, nup, ndown
+  integer, public              :: nxs, nxe, nys, nye, nup, ndown
 
 
 contains
@@ -45,10 +45,6 @@ contains
     if(iwork2 > nrank) nye = nye+1
 
     !For MPI_SENDRECV
-    nxs1 = nxs-1
-    nxe1 = nxe+1
-    nys1 = nys-1
-    nye1 = nye+1
     nup   = nrank+1
     ndown = nrank-1
     if(nrank == nsize-1) nup = 0    ! periodic boundary condition
