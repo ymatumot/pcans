@@ -22,7 +22,7 @@ init.o : const.o $(LIB_DIR)/libem2d.a
 
 ############# moment calculation ###############
 moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./ ./dat_ngp/020000_rank*.dat
+	$(LIB_DIR)/moment/mom.out ./ ./dat/*_rank*.dat
 
 $(LIB_DIR)/moment/mom.out :
 	cd $(LIB_DIR)/moment ; make
