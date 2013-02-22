@@ -37,8 +37,9 @@ contains
     real(8), intent(out) :: r1, r2
     real(8)              :: aa, bb
 
-    call random_number(aa)
+    call random_number(aa) ! [0,1)
     call random_number(bb)
+    aa = 1-aa ! (0,1]
 
     r1 = dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
     r2 = dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
@@ -57,10 +58,14 @@ contains
 
     do
        !! Gamma distributions
-       call random_number(r1)
-       call random_number(r2)
-       call random_number(r3)
-       call random_number(r4)
+       call random_number(r1) ! [0,1)
+       call random_number(r2) ! [0,1)
+       call random_number(r3) ! [0,1)
+       call random_number(r4) ! [0,1)
+       r1 = 1-r1 ! (0,1]
+       r2 = 1-r2 ! (0,1]
+       r3 = 1-r3 ! (0,1]
+       r4 = 1-r4 ! (0,1]
        e3 = - T * dlog(r1*r2*r3)
        e4 = - T * dlog(r1*r2*r3*r4)
        !! criterion

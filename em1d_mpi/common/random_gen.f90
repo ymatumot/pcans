@@ -37,8 +37,9 @@ contains
     real(8), intent(out) :: r1, r2
     real(8)              :: aa, bb
 
-    call random_number(aa)
+    call random_number(aa) ! [0,1)
     call random_number(bb)
+    aa = 1-aa ! (0,1]
 
     r1 = dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
     r2 = dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
