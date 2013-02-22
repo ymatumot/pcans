@@ -12,7 +12,7 @@ module init
 
   integer, public, parameter :: nroot=0
   integer, allocatable, public :: np2(:,:)
-  integer, public :: itmax, it0, intvl1, intvl2, intvl3
+  integer, public :: itmax, it0, intvl1, intvl2
   real(8), public :: delx, delt, gfac
   real(8), public :: c
   real(8), allocatable, public :: uf(:,:,:)
@@ -38,7 +38,7 @@ contains
     call mpi_set__init(nxgs,nxge,nygs,nyge,nproc)
 
     allocate(np2(nys:nye,nsp))
-    allocate(uf(6,nxs1:nxe1,nys1:nye1))
+    allocate(uf(6,nxs-2:nxe+2,nys-2:nye+2))
     allocate(up(5,np,nys:nye,nsp))
     allocate(gp(5,np,nys:nye,nsp))
 !*********** End of MPI settings  ***************!
@@ -49,7 +49,6 @@ contains
 !   it0     : base count
 !   intvl1  : storage interval for particles & fields
 !   intvl2  : printing interval for energy variation
-!   intvl3  : printing interval for wave analysis
 !   dir     : directory name for data output
 !   file??  : output file name for unit number ??
 !           :  9 - initial parameters
@@ -62,10 +61,9 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 10000
-    intvl1 = 10000
-    intvl2 = 10
-    intvl3 = 10
+    itmax  = 2048
+    intvl1 = 10
+    intvl2 = 100
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
@@ -120,7 +118,7 @@ contains
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
-    np2(nys:nye,1) = 50*(nxe+bc-nxs+1)
+    np2(nys:nye,1) = 25*(nxe+bc-nxs+1)
     np2(nys:nye,2) = np2(nys:nye,1)
 
     if(nrank == nroot)then

@@ -42,7 +42,7 @@ contains
     call mpi_set__init(nxgs,nxge,nygs,nyge,nproc)
 
     allocate(np2(nys:nye,nsp))
-    allocate(uf(6,nxs1:nxe1,nys1:nye1))
+    allocate(uf(6,nxs-2:nxe+2,nys-2:nye+2))
     allocate(up(5,np,nys:nye,nsp))
     allocate(gp(5,np,nys:nye,nsp))
 !*********** End of MPI settings  ***************!
@@ -224,7 +224,7 @@ contains
     enddo
     enddo
 
-    call boundary__field(uf,                 &
+    call boundary__field(uf,                &
                          nxs,nxe,nys,nye,bc, &
                          nup,ndown,mnpr,nstat,ncomw,nerr)
     ! ---------------- Electromagnetic field ------------------

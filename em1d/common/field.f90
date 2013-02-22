@@ -149,7 +149,6 @@ contains
     uj(1:3,-1:nx+2) = 0.0D0
 
     !------ Charge Conservation Method for Jx ---------!
-    !----  Zigzag scheme (Umeda et al., CPC, 2003) ----!
     idelt = 1.D0/delt
     idelx = 1.D0/delx
     do isp=1,nsp
@@ -563,67 +562,67 @@ contains
   end subroutine prolng
 
 
-!!$  subroutine ele_cur2(uj,up,np2)
-!!$
-!!$    integer, intent(in)  :: np2(1:nx+bc,nsp)
-!!$    real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
-!!$    real(8), intent(out) :: uj(3,-1:nx+2)
-!!$    integer :: ii, i, isp, ih
-!!$    real(8) :: dx, dxm, gam, idelx
-!!$
-!!$    !memory clear
-!!$    uj(1:3,-1:nx+2) = 0.0D0
-!!$
-!!$    !calculate erectric current density
-!!$    do isp=1,nsp
-!!$       do i=1,nx+bc
-!!$          do ii=1,np2(i,isp)
-!!$             gam = 1./dsqrt(1.0+(+up(2,ii,i,isp)*up(2,ii,i,isp) &
-!!$                                 +up(3,ii,i,isp)*up(3,ii,i,isp) &
-!!$                                 +up(4,ii,i,isp)*up(4,ii,i,isp) &
-!!$                                )/(c*c))
-!!$
-!!$             dx = up(1,ii,i,isp)-i
-!!$             dxm = 1.-dx
-!!$             uj(1,i  ) = uj(1,i  )+q(isp)*up(2,ii,i,isp)*gam*dxm
-!!$             uj(1,i+1) = uj(1,i+1)+q(isp)*up(2,ii,i,isp)*gam*dx 
-!!$
-!!$             ih = floor(up(1,ii,i,isp)-0.5)
-!!$             dx = up(1,ii,i,isp)-0.5-ih
-!!$             dxm = 1.-dx
-!!$
-!!$             uj(2,ih  ) = uj(2,ih  )+q(isp)*up(3,ii,i,isp)*gam*dxm
-!!$             uj(3,ih  ) = uj(3,ih  )+q(isp)*up(4,ii,i,isp)*gam*dxm
-!!$             uj(2,ih+1) = uj(2,ih+1)+q(isp)*up(3,ii,i,isp)*gam*dx 
-!!$             uj(3,ih+1) = uj(3,ih+1)+q(isp)*up(4,ii,i,isp)*gam*dx 
-!!$          enddo
-!!$       enddo
-!!$    enddo
-!!$
-!!$    idelx = 1.D0/delx
-!!$    if(bc == 0)then
-!!$       do i=-1,nx+2
-!!$          uj(1:3,i) = uj(1:3,i)*idelx
-!!$       enddo
-!!$    else if(bc == -1)then
-!!$       i=1
-!!$       uj(1,i) = uj(1,i)*2.*idelx
-!!$       do i=2,nx-1
-!!$          uj(1,i) = uj(1,i)*idelx
-!!$       enddo
-!!$       i=nx
-!!$       uj(1,i) = uj(1,i)*2.*idelx
-!!$
-!!$       do i=0,nx
-!!$          uj(2,i) = uj(2,i)*idelx
-!!$          uj(3,i) = uj(3,i)*idelx
-!!$       enddo
-!!$    else
-!!$       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-!!$       stop
-!!$    endif
-!!$
-!!$  end subroutine ele_cur2
+  subroutine ele_cur2(uj,up,np2)
+
+    integer, intent(in)  :: np2(1:nx+bc,nsp)
+    real(8), intent(in)  :: up(4,np,1:nx+bc,nsp)
+    real(8), intent(out) :: uj(3,-1:nx+2)
+    integer :: ii, i, isp, ih
+    real(8) :: dx, dxm, gam, idelx
+
+    !memory clear
+    uj(1:3,-1:nx+2) = 0.0D0
+
+    !calculate erectric current density
+    do isp=1,nsp
+       do i=1,nx+bc
+          do ii=1,np2(i,isp)
+             gam = 1./dsqrt(1.0+(+up(2,ii,i,isp)*up(2,ii,i,isp) &
+                                 +up(3,ii,i,isp)*up(3,ii,i,isp) &
+                                 +up(4,ii,i,isp)*up(4,ii,i,isp) &
+                                )/(c*c))
+
+             dx = up(1,ii,i,isp)-i
+             dxm = 1.-dx
+             uj(1,i  ) = uj(1,i  )+q(isp)*up(2,ii,i,isp)*gam*dxm
+             uj(1,i+1) = uj(1,i+1)+q(isp)*up(2,ii,i,isp)*gam*dx 
+
+             ih = floor(up(1,ii,i,isp)-0.5)
+             dx = up(1,ii,i,isp)-0.5-ih
+             dxm = 1.-dx
+
+             uj(2,ih  ) = uj(2,ih  )+q(isp)*up(3,ii,i,isp)*gam*dxm
+             uj(3,ih  ) = uj(3,ih  )+q(isp)*up(4,ii,i,isp)*gam*dxm
+             uj(2,ih+1) = uj(2,ih+1)+q(isp)*up(3,ii,i,isp)*gam*dx 
+             uj(3,ih+1) = uj(3,ih+1)+q(isp)*up(4,ii,i,isp)*gam*dx 
+          enddo
+       enddo
+    enddo
+
+    idelx = 1.D0/delx
+    if(bc == 0)then
+       do i=-1,nx+2
+          uj(1:3,i) = uj(1:3,i)*idelx
+       enddo
+    else if(bc == -1)then
+       i=1
+       uj(1,i) = uj(1,i)*2.*idelx
+       do i=2,nx-1
+          uj(1,i) = uj(1,i)*idelx
+       enddo
+       i=nx
+       uj(1,i) = uj(1,i)*2.*idelx
+
+       do i=0,nx
+          uj(2,i) = uj(2,i)*idelx
+          uj(3,i) = uj(3,i)*idelx
+       enddo
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
+    endif
+
+  end subroutine ele_cur2
 
 
 end module field
