@@ -16,17 +16,13 @@ plot_clcnt,d(*,*,16)/v0,ct=33
 ;plot_clcnt,d(*,*,17)/v0,ct=33
 ;plot_clcnt,ezi/e0,ct=33
 
-;; STARTPOINTS
-r1 = fltarr(2,npos)
-r1[0,*] = randomu(seed,npos)*(nx-1)
-r1[1,*] = ny/2
+rotb_z = +0.5*(-shift(d[*,*,7],+1,0)+shift(d[*,*,7],-1,0)) $
+         -0.5*(-shift(d[*,*,6],0,+1)+shift(d[*,*,6],0,-1))
+rotb_z[0,*] = 0.0
+rotb_z[nx-1,*] = 0.0
 
-fl1=field_lines_2d(d[*,*,6],d[*,*,7],r0=r1,npos=100,dir=+1)
-fl2=field_lines_2d(d[*,*,6],d[*,*,7],r0=r1,npos=100,dir=-1)
-
-for k=0,npos-1 do begin
-   oplot,fl1[0,*,k],fl1[1,*,k],col=0
-   oplot,fl2[0,*,k],fl2[1,*,k],col=0
-endfor
+resolve_routine, "poisson_bp", /no_recompile, /compile_full_file
+poisson_bp, -rotb_z, az
+plot_cnt,float(az),25,c_labels=0
 
 end
