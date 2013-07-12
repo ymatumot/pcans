@@ -1,4 +1,33 @@
 ;-----------------------------------------------------------------------
+;  #  GAUSSIAN ELIMINATION
+;-----------------------------------------------------------------------
+pro gssel, dm,j
+common pssn, p, x
+common numarr, nx, ny
+
+w = dcomplexarr(nx)
+g = dcomplexarr(nx)
+
+w[0] = 1.0/(-2.0*dm-1.0)
+g[0] = p[0,j]*w[0]
+
+for i=1,nx-2 do begin
+   w[i] = 1.0/(-2.0*dm-w[i-1])
+   g[i] = (p[i,j]-g[i-1])*w[i]
+endfor
+w[nx-1] = 1./(-2.0*dm-1.0-w[nx-2])
+g[nx-1] = (p[nx-1,j]-g[nx-2])*w[nx-1]
+
+x[nx-1,j] = g[nx-1]
+
+for i=nx-2,0,-1 do begin
+   x[i,j] = g[i]-w[i]*x[i+1,j]
+endfor
+
+end
+
+
+;-----------------------------------------------------------------------
 ;     POISSON EQ. SOLVER FOR 2D BOUNDED-PERIODIC SIMULATION BOX
 ;-----------------------------------------------------------------------
 pro poisson_bp, b, phi
@@ -61,31 +90,3 @@ endfor
 
 end
 
-
-;-----------------------------------------------------------------------
-;  #  GAUSSIAN ELIMINATION
-;-----------------------------------------------------------------------
-pro gssel, dm,j
-common pssn, p, x
-common numarr, nx, ny
-
-w = dcomplexarr(nx)
-g = dcomplexarr(nx)
-
-w[0] = 1.0/(-2.0*dm-1.0)
-g[0] = p[0,j]*w[0]
-
-for i=1,nx-2 do begin
-   w[i] = 1.0/(-2.0*dm-w[i-1])
-   g[i] = (p[i,j]-g[i-1])*w[i]
-endfor
-w[nx-1] = 1./(-2.0*dm-1.0-w[nx-2])
-g[nx-1] = (p[nx-1,j]-g[nx-2])*w[nx-1]
-
-x[nx-1,j] = g[nx-1]
-
-for i=nx-2,0,-1 do begin
-   x[i,j] = g[i]-w[i]*x[i+1,j]
-endfor
-
-end

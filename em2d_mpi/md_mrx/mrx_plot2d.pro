@@ -21,7 +21,6 @@ rotb_z = +0.5*(-shift(d[*,*,7],+1,0)+shift(d[*,*,7],-1,0)) $
 rotb_z[0,*] = 0.0
 rotb_z[nx-1,*] = 0.0
 
-resolve_routine, "poisson_bp", /no_recompile, /compile_full_file
 poisson_bp, -rotb_z, az
 plot_cnt,float(az),25,c_labels=0
 
