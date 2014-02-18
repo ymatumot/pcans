@@ -31,21 +31,21 @@ contains
 
     !filename
     write(filename,'(a,i6.6,a,i3.3,a)')trim(dir),it2,'_rank=',nrank,'.dat'
-    open(100+nrank,file=filename,form='unformatted')
+    open(110+nrank,file=filename,form='unformatted')
 
     !time & parameters
-    write(100+nrank)it2,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,nproc,bc,delt,delx,c
-    write(100+nrank)np2
-    write(100+nrank)q
-    write(100+nrank)r
+    write(110+nrank)it2,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,nproc,bc,delt,delx,c
+    write(110+nrank)np2
+    write(110+nrank)q
+    write(110+nrank)r
 
     !field data
-    write(100+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
+    write(110+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     !particle data
-    write(100+nrank)up
+    write(110+nrank)up
        
-    close(100+nrank)
+    close(110+nrank)
 
   end subroutine fio__output
 
@@ -62,27 +62,27 @@ contains
     integer :: inp, inxgs, inxge, inygs, inyge, inxs, inxe, inys, inye, insp, ibc, inproc
 
     !filename
-    open(101+nrank,file=trim(dir)//trim(file),form='unformatted')
+    open(110+nrank,file=trim(dir)//trim(file),form='unformatted')
 
     !time & parameters
-    read(101+nrank)it0,inp,inxgs,inxge,inygs,inyge,inxs,inxe,inys,inye,insp,inproc,ibc,delt,delx,c
+    read(110+nrank)it0,inp,inxgs,inxge,inygs,inyge,inxs,inxe,inys,inye,insp,inproc,ibc,delt,delx,c
     if((inxgs /= nxgs) .or. (inxge /= nxge)  .or.(inygs /= nygs) .or. (inyge /= nyge) &
        .or. (inxs /= nxs) .or. (inxe /= nxe)  .or.(inys /= nys) .or. (inye /= nye)         &
        .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc) .or. (inproc /= nproc))then
        write(6,*) '** parameter mismatch **'
        stop
     endif
-    read(101+nrank)np2
-    read(101+nrank)q
-    read(101+nrank)r
+    read(110+nrank)np2
+    read(110+nrank)q
+    read(110+nrank)r
 
     !field data
-    read(101+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
+    read(110+nrank)uf(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     !particle data
-    read(101+nrank)up
+    read(110+nrank)up
 
-    close(101+nrank)
+    close(110+nrank)
 
   end subroutine fio__input
 
