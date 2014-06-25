@@ -23,13 +23,27 @@ contains
     real(8), intent(in)  :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
     real(8), intent(in)  :: c, q(nsp), r(nsp), delt, delx
     real(8), intent(out) :: gp(5,np,nys:nye,nsp)
-    integer :: j, ii, isp, i0, j0, ih, ip, jp
+    integer :: i, j, ii, isp, ih, ip, jp
     real(8) :: idelx, fac1, fac1r, fac2, fac2r, gam, txxx, bt2
-    real(8) :: s0(-2:2,2), sh(-2:2,2)
+    real(8) :: sh(-2:2,2)
     real(8) :: pf(6)
     real(8) :: uvm(6)
+    real(8) :: tmp(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
     idelx = 1./delx
+
+    !fields at (i+1/2, j+1/2)
+    do j=nys-1,nye+1
+    do i=nxs-1,nxe+1
+       tmp(1,i,j) = 0.5*(+uf(1,i,j)+uf(1,i,j+1))
+       tmp(2,i,j) = 0.5*(+uf(2,i,j)+uf(2,i+1,j))
+       tmp(3,i,j) = 0.25*(+uf(3,i,j)  +uf(3,i+1,j) &
+                          +uf(3,i,j+1)+uf(3,i+1,j+1))
+       tmp(4,i,j) = 0.5*(+uf(4,i,j)+uf(4,i+1,j))
+       tmp(5,i,j) = 0.5*(+uf(5,i,j)+uf(5,i,j+1))
+       tmp(6,i,j) = uf(6,i,j)
+    enddo
+    enddo
 
     do isp=1,nsp
 
@@ -41,54 +55,50 @@ contains
 
              pf(1:6) = 0.D0
 
-             i0 = floor(up(1,ii,j,isp)+0.5)
-             j0 = floor(up(2,ii,j,isp)+0.5)
              ih = floor(up(1,ii,j,isp))
 
-             s0(-2:2,1) = sf(i0,up(1,ii,j,isp)*idelx,nsfo)
-             s0(-2:2,2) = sf(j0,up(2,ii,j,isp)*idelx,nsfo)
              sh(-2:2,1) = sf(ih,up(1,ii,j,isp)*idelx-0.5,nsfo)
              sh(-2:2,2) = sf(j ,up(2,ii,j,isp)*idelx-0.5,nsfo)
 
              !Bx at (i+1/2, j)
              do jp=-1,1
              do ip=-1,1
-                pf(1) = pf(1)+uf(1,ih+ip,j0+jp)*sh(ip,1)*s0(jp,2)
+                pf(1) = pf(1)+tmp(1,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 
              !By at (i, j+1/2)
              do jp=-1,1
              do ip=-1,1
-                pf(2) = pf(2)+uf(2,i0+ip,j +jp)*s0(ip,1)*sh(jp,2)
+                pf(2) = pf(2)+tmp(2,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 
              !Bz at (i, j)
              do jp=-1,1
              do ip=-1,1
-                pf(3) = pf(3)+uf(3,i0+ip,j0+jp)*s0(ip,1)*s0(jp,2)
+                pf(3) = pf(3)+tmp(3,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 
              !Ex at (i, j+1/2)
              do jp=-1,1
              do ip=-1,1
-                pf(4) = pf(4)+uf(4,i0+ip,j +jp)*s0(ip,1)*sh(jp,2)
+                pf(4) = pf(4)+tmp(4,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 
              !Ey at (i+1/2, j)
              do jp=-1,1
              do ip=-1,1
-                pf(5) = pf(5)+uf(5,ih+ip,j0+jp)*sh(ip,1)*s0(jp,2)
+                pf(5) = pf(5)+tmp(5,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 
              !Ez at (i+1/2, j+1/2)
              do jp=-1,1
              do ip=-1,1
-                pf(6) = pf(6)+uf(6,ih+ip,j +jp)*sh(ip,1)*sh(jp,2)
+                pf(6) = pf(6)+tmp(6,ih+ip,j+jp)*sh(ip,1)*sh(jp,2)
              enddo
              enddo
 

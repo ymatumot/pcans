@@ -20,7 +20,7 @@ module init
   real(8), allocatable, public :: gp(:,:,:,:)
   character(len=128), public   :: dir
   character(len=128), public   :: file12
-  real(8), save                :: pi, n0, u0, v0, b0, vti, vte
+  real(8), save                :: pi, n0, v0, gam0, b0, vti, vte
 
 
 contains
@@ -98,14 +98,14 @@ contains
     fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
     fge = fpe/alpha
 
-    va  = fge/fpe*c*dsqrt(r(2)/r(1))
-    rge = alpha*ldb*dsqrt(2.D0)
-    rgi = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
-    vte = rge*fge
-    vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
-    v0  = 10.0*va
-    u0  = v0/dsqrt(1.-(v0/c)**2)
-
+    va   = fge/fpe*c*dsqrt(r(2)/r(1))
+    rge  = alpha*ldb*dsqrt(2.D0)
+    rgi  = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
+    vte  = rge*fge
+    vti  = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
+    v0   = 10.0*va
+    gam0 = 1./dsqrt(1.-(v0/c)**2)
+   
     fgi = fge*r(2)/r(1)
     fpi = fpe*dsqrt(r(2)/r(1))
 
@@ -154,7 +154,7 @@ contains
     use boundary, only : boundary__field
 
     integer :: i, j, ii, isp
-    real(8) :: sd, r1, r2
+    real(8) :: sd, r1, r2, gamp
 
     !*** setting of fields ***!
     !magnetic field
@@ -217,11 +217,24 @@ contains
              endif
 
              call random_gen__bm(r1,r2)
-             up(3,ii,j,isp) = sd*r1+u0
+             up(3,ii,j,isp) = sd*r1
              up(4,ii,j,isp) = sd*r2
 
              call random_gen__bm(r1,r2)
              up(5,ii,j,isp) = sd*r1
+
+             gamp = dsqrt(1.D0+(up(3,ii,j,isp)**2+up(4,ii,j,isp)**2+up(5,ii,j,isp)**2)/(c*c))
+
+             call random_number(r1)
+             if(up(3,ii,j,isp)*v0 >= 0.)then
+                up(3,ii,j,isp) = (+up(3,ii,j,isp)+v0*gamp)*gam0
+             else
+                if(r1 < (-v0*up(3,ii,j,isp)/gamp))then
+                   up(3,ii,j,isp) = (-up(3,ii,j,isp)+v0*gamp)*gam0
+                else
+                   up(3,ii,j,isp) = (+up(3,ii,j,isp)+v0*gamp)*gam0
+                endif
+             endif
           enddo
        enddo
     enddo
@@ -234,7 +247,7 @@ contains
     use boundary, only : boundary__field
 
     integer :: isp, ii, ii2, ii3, j, dn
-    real(8) :: sd, r1, r2, dx
+    real(8) :: sd, r1, r2, dx, gamp
 
     !Inject particles in x=nxs~nxs+v0*dt
 
@@ -268,11 +281,24 @@ contains
        do j=nys,nye
           do ii=np2(j,isp)+1,np2(j,isp)+dn
              call random_gen__bm(r1,r2)
-             up(3,ii,j,isp) = sd*r1+u0
+             up(3,ii,j,isp) = sd*r1
              up(4,ii,j,isp) = sd*r2
 
              call random_gen__bm(r1,r2)
              up(5,ii,j,isp) = sd*r1
+
+             gamp = dsqrt(1.D0+(up(3,ii,j,isp)**2+up(4,ii,j,isp)**2+up(5,ii,j,isp)**2)/(c*c))
+
+             call random_number(r1)
+             if(up(3,ii,j,isp)*v0 >= 0.)then
+                up(3,ii,j,isp) = (+up(3,ii,j,isp)+v0*gamp)*gam0
+             else
+                if(r1 < (-v0*up(3,ii,j,isp)/gamp))then
+                   up(3,ii,j,isp) = (-up(3,ii,j,isp)+v0*gamp)*gam0
+                else
+                   up(3,ii,j,isp) = (+up(3,ii,j,isp)+v0*gamp)*gam0
+                endif
+             endif
           enddo
        enddo
     enddo

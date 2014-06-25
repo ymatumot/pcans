@@ -368,12 +368,15 @@ contains
              endif
              call random_number(r1)
              if(up(4,ii,j,isp)*(+vy(up(1,ii,j,isp))+vd) >= 0.)then
-                up(4,ii,j,isp) = +up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
+                up(4,ii,j,isp) = (+up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp) &
+                                *gam0(up(1,ii,j,isp))
              else
                 if(r1 < (-(+vy(up(1,ii,j,isp))+vd)*up(4,ii,j,isp)/gamp))then
-                   up(4,ii,j,isp) = -up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
+                   up(4,ii,j,isp) = (-up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp) &
+                                   *gam0(up(1,ii,j,isp))
                 else
-                   up(4,ii,j,isp) = +up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp
+                   up(4,ii,j,isp) = (+up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp) &
+                                   *gam0(up(1,ii,j,isp))
                 endif
              endif
 
