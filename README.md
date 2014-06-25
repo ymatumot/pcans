@@ -1,8 +1,6 @@
 #pCANSを使うには
 まずは、**pCANS**の[マニュアルサイト](http://www.astro.phys.s.chiba-u.ac.jp/pcans)をご覧ください。
 
-**pCANS**は気象研のFortranコーディングルールに従って記述しています。詳しくは[こちら](http://www.mri-jma.go.jp/Project/mrinpd/coderule.html)をご覧下さい。既存のコードになるべく合わせてコーディングするようにお願いします。
-
 まず、レポジトリのダウンロードは
 
 ```
