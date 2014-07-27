@@ -87,17 +87,16 @@ contains
 !   L     : size of simulation box in electron skin depth
 !
 !   r(1)  : ion mass             r(2)  : electron mass
-!   q0(1) : ion charge in e      q0(2) : electron charge in e
 !   q(1)  : ion charge           q(2)  : electron charge
 !   c     : speed of light       ldb   : debye length
 !
 !   fpi   : ion plasma frequency fpe   : electron plasma frequency
 !   vti   : ion thermal speed    vte   : electron thermal speed
 !   b0    : magnetic field       
+!
 !   
 !   alp   : anisotropy in thermal velocity (vthz/vth)
 !  
-!   rtemp : Te/Ti
 !*********************************************************************
   
     delx = 1.0
@@ -113,12 +112,11 @@ contains
     ! thermal velocity
     vte = 0.1 * c
     vti = 0.1 * c
+    ! Lorentz factor
     gam0 = 100
     v0   = c*dsqrt(1.-1./gam0**2)
-    n0 = 10
-
-    sig = 0.00
-
+    ! avarage number density at x = nxgs (lab.frame)
+    n0 = 100
 
     alp = 1.0   ! anisotropy (= vz/vx)
 
