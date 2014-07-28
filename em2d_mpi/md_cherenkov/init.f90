@@ -21,8 +21,8 @@ module init
   real(8), allocatable, public :: gp(:,:,:,:)
   character(len=64), public :: dir
   character(len=64), public :: file12
-  real(8)                   :: pi, vti, vte, va, v0, rtemp, fpe, fge, ldb, b0, n0, sig
-  real(8) :: alp, gam0
+  real(8)                   :: pi, vti, vte, va, v0, rtemp, fpe, fge, ldb, b0, n0
+  real(8) :: gam0
 
 
 contains
@@ -70,7 +70,6 @@ contains
     dir    = './dat/'
     file9  = 'init_param.dat'
     file12 = 'energy.dat'
-!!!!   
     gfac   = 0.501
 
     it0    = 0
@@ -93,10 +92,6 @@ contains
 !   fpi   : ion plasma frequency fpe   : electron plasma frequency
 !   vti   : ion thermal speed    vte   : electron thermal speed
 !   b0    : magnetic field       
-!
-!   
-!   alp   : anisotropy in thermal velocity (vthz/vth)
-!  
 !*********************************************************************
   
     delx = 1.0
@@ -118,9 +113,6 @@ contains
     ! avarage number density at x = nxgs (lab.frame)
     n0 = 100
 
-    alp = 1.0   ! anisotropy (= vz/vx)
-
-
     ! number of particles
     np2(nys:nye,1) = n0*(nxe+bc-nxs+1)
     np2(nys:nye,2) = np2(nys:nye,1)
@@ -136,11 +128,8 @@ contains
     if(nrank == nroot) n0 = dble(np2(nys,1))/dble((nxge-nxgs+1))
     call MPI_BCAST(n0,1,mnpr,nroot,ncomw,nerr)
     
-    b0 = dsqrt(sig * 4. * pi * n0 * gam0 * r(1) * c**2)
-    q(1) = vte/(delx*dsqrt(2.0d0))* dsqrt(r(1) * gam0 / (4. * pi * n0))
+    q(1) = vte/(ldb*dsqrt(2.0d0))* dsqrt(r(1) * gam0 / (4. * pi * n0))
     q(2) = -q(1)
-
-
 
     call random_gen__init(nrank)
     call init__loading
@@ -219,7 +208,7 @@ contains
     enddo
     do j=nys,nye
     do i=nxs,nxe
-       uf(2,i,j) = b0
+       uf(2,i,j) = 0.0
        uf(3,i,j) = 0.0
     enddo
     enddo
@@ -233,7 +222,7 @@ contains
     do j=nys,nye
     do i=nxs,nxe+bc
        uf(5,i,j) = 0.0
-       uf(6,i,j) = -v0*b0/c
+       uf(6,i,j) = 0.0
     enddo
     enddo
 

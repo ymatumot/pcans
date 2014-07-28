@@ -43,7 +43,7 @@ time = (findgen(nt)+1)*dt
 dir   = 'img/'
 fname = 'shock'
 
-for i=1,1 do begin
+for i=1,nt-1 do begin
 
 set_ps,dir+fname+strcompress(string(i,format='(I03)'),/remove)+'.eps'
 

@@ -39,10 +39,9 @@ program main
         write(*,100) it, it*delt
 100     format('[', I4, '] t=', g10.3)
      endif
-     call particle__solv(gp,up,uf,                           &
-                         np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
-                         c,q,r,delt,delx,                    &
-                         nup,ndown,mnpr,nstat,ncomw,nerr)
+     call particle__solv(gp,up,uf,                        &
+                         np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
+                         c,q,r,delt,delx)
      call field__fdtd_i(uf,up,gp,                           &
                         np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
                         q,c,delx,delt,gfac,                 &
