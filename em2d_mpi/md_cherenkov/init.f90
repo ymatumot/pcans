@@ -63,7 +63,7 @@ contains
 !             gfac = 1.0 : full implicit
 !*********************************************************************
     pi     = 4.0*atan(1.0)
-    itmax  = 400
+    itmax  = 600
     intvl1 = 100
     intvl2 = 5
     intvl3 = 5
@@ -111,7 +111,7 @@ contains
     gam0 = 100
     v0   = c*dsqrt(1.-1./gam0**2)
     ! avarage number density at x = nxgs (lab.frame)
-    n0 = 100
+    n0 = 10
 
     ! number of particles
     np2(nys:nye,1) = n0*(nxe+bc-nxs+1)
