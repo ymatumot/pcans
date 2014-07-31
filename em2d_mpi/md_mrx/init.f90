@@ -21,6 +21,7 @@ module init
   character(len=64), public    :: dir
   character(len=64), public    :: file12
   real(8)                      :: pi, v0, x0, y0, vti, vte, rtemp, dr, br, theta_b
+  real(8) :: sdi, sde  ! for Box-Mullter method
   real(8) :: ncs, nbg  ! Harris sheet density and the background density
   real(8) :: vdi, vde  ! drift speed
   real(8) :: b0   ! B0 for harris fields
@@ -232,6 +233,9 @@ contains
     ! ---------------- Particles ------------------
     f1 =  1.d0 / ( (1.d0+rtemp) * q(1) )
     f2 = rtemp / ( (1.d0+rtemp) * q(2) )
+    ! a factor of 1/sqrt(2) for Box-Muller method
+    sdi = vti/sqrt(2.)
+    sde = vte/sqrt(2.)
 
     do j=nys,nye
 
@@ -258,14 +262,14 @@ contains
        ! nonrelativistic Maxwellian 
        do ii=1,np2(j,1)
           call random_gen__bm(r1,r2)
-          up(3,ii,j,1) = vti*r1
-          up(4,ii,j,1) = vti*r2
+          up(3,ii,j,1) = sdi*r1
+          up(4,ii,j,1) = sdi*r2
           call random_gen__bm(r1,r2)
-          up(5,ii,j,1) = vti*r1 + f1*jz(up(1,ii,j,1),up(2,ii,j,1))/density(up(1,ii,j,1))
-          up(3,ii,j,2) = vte*r2
+          up(5,ii,j,1) = sdi*r1 + f1*jz(up(1,ii,j,1),up(2,ii,j,1))/density(up(1,ii,j,1))
+          up(3,ii,j,2) = sde*r2
           call random_gen__bm(r1,r2)
-          up(4,ii,j,2) = vte*r1
-          up(5,ii,j,2) = vte*r2 + f2*jz(up(1,ii,j,2),up(2,ii,j,2))/density(up(1,ii,j,2))
+          up(4,ii,j,2) = sde*r1
+          up(5,ii,j,2) = sde*r2 + f2*jz(up(1,ii,j,2),up(2,ii,j,2))/density(up(1,ii,j,2))
        enddo
     enddo
 
