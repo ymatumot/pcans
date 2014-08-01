@@ -181,7 +181,7 @@ contains
 
              call random_gen__bm(r1,r2)
              up(4,ii,j,isp) = sd*r1
-             up(5,ii,j,isp) = sd*r2*alp
+             up(5,ii,j,isp) = sd*r2
           enddo
        enddo
     enddo
