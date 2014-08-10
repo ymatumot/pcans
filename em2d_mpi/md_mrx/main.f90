@@ -35,6 +35,10 @@ program main
 
   do it=1,itmax-it0
 
+!     if(nrank == nroot) then
+!        write(*,100) it, it*delt
+!100     format('[', I5.5, '] t=', 1p, e11.4)
+!     endif
      call particle__solv(gp,up,uf,                        &
                          np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
                          c,q,r,delt,delx)                 
