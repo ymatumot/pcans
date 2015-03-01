@@ -9,6 +9,7 @@ program main
 
   logical, save        :: lflag=.true.
   integer              :: nproc, ndata, idata, isp, irank
+  integer              :: iargc  !! iargc() - implicit none on Cray
   real(8), allocatable :: den(:,:), vel(:,:,:), temp(:,:,:)
   character(len=64)    :: dir
   character(len=64)    :: ifile
