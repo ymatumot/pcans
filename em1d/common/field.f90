@@ -54,16 +54,16 @@ contains
     real(8)                :: uj(3,-1:nx+2), gkl(6,0:nx+1)
     real(8)                :: f1, f2, f3, rotb2, rotb3, rote2, rote3
 
-!!$    !position at n+1/2
-!!$    do isp=1,nsp
-!!$       do i=1,nx+bc
-!!$          do ii=1,np2(i,isp)
-!!$             up(1,ii,i,isp) = 0.5*(up(1,ii,i,isp)+gp(1,ii,i,isp))
-!!$             up(2:4,ii,i,isp) = gp(2:4,ii,i,isp)
-!!$          enddo
-!!$       enddo
-!!$    enddo
-!!$    call ele_cur2(uj,up,np,nx,nsp,np2,bc,q,c,delx)
+    !position at n+1/2
+!    do isp=1,nsp
+!       do i=1,nx+bc
+!          do ii=1,np2(i,isp)
+!             up(1,ii,i,isp) = 0.5*(up(1,ii,i,isp)+gp(1,ii,i,isp))
+!             up(2:4,ii,i,isp) = gp(2:4,ii,i,isp)
+!          enddo
+!       enddo
+!    enddo
+!    call ele_cur2(uj,up,np2)
     call ele_cur(uj,up,gp,np2)
     call boundary__curre(uj)
 
@@ -240,7 +240,7 @@ contains
     real(8), intent(inout) :: gb(6,0:nx+1)
     integer, parameter     :: ite_max = 1000 ! maximum number of iteration
     integer :: i, l, ite
-    real(8), parameter     :: err = 1d-9
+    real(8), parameter     :: err = 1d-6
     real(8) :: eps, sumr, sum, sum1, sum2, av, bv
     real(8) :: x(0:nx+1), b(0:nx+1), r(0:nx+1), p(0:nx+1), ap(0:nx+1)
 
@@ -255,6 +255,7 @@ contains
           b(i) = fac2*gl(l,i)
           sum = sum+b(i)*b(i)
        enddo
+
        eps = dsqrt(sum)*err
        
        call boundary__phi(x)

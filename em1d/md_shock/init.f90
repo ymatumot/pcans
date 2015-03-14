@@ -165,8 +165,6 @@ contains
 
   subroutine init__loading
 
-    use boundary, only : boundary__particle
-
     integer :: i, ii, isp
     real(8) :: r1, r2, uu
 
@@ -200,32 +198,28 @@ contains
        enddo
     enddo
 
-    call boundary__particle(up,np2)
-
   end subroutine init__loading
 
 
   subroutine init__set_field
 
-    use boundary, only : boundary__field
-
     integer :: i
     real(8) :: uu, vv
 
     !magnetic field
-    do i=1,nx+bc
+    do i=0,nx+1+bc
        uf(1,i) = bx0
     enddo
-    do i=1,nx
+    do i=0,nx+1
        uf(2,i) = by0
        uf(3,i) = bz0
     enddo
 
     !electric field
-    do i=1,nx
+    do i=0,nx+1
        uf(4,i) = 0.0
     enddo
-    do i=1,nx+bc
+    do i=0,nx+1+bc
        if( dble(i-1) < lbuf ) then
           uu = u0 * dble(i-1)/lbuf
           vv = uu/dsqrt(1.0+(uu/c)**2)
@@ -235,8 +229,6 @@ contains
        uf(5,i) =-vv*bz0/c
        uf(6,i) =+vv*by0/c
     enddo
-
-    call boundary__field(uf)
 
   end subroutine init__set_field
 

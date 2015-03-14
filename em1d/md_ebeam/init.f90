@@ -160,8 +160,6 @@ contains
 
   subroutine init__loading
 
-    use boundary, only : boundary__particle
-
     integer :: i, ii, isp, nb
     real(8) :: r1, r2, vb1, vb2, vt1, vt2
 
@@ -224,29 +222,25 @@ contains
 
   subroutine init__set_field
 
-    use boundary, only : boundary__field
-
     integer :: i
 
     !magnetic field
-    do i=1,nx+bc
+    do i=0,nx+1+bc
        uf(1,i) = b0
     enddo
-    do i=1,nx
+    do i=0,nx+1
        uf(2,i) = 0.0
        uf(3,i) = 0.0
     enddo
 
     !electric field
-    do i=1,nx
+    do i=0,nx+1
        uf(4,i) = 0.0
     enddo
-    do i=1,nx+bc
+    do i=0,nx+1+bc
        uf(5,i) = 0.0
        uf(6,i) = 0.0
     enddo
-
-    call boundary__field(uf)
 
   end subroutine init__set_field
 
