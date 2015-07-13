@@ -43,6 +43,11 @@ contains
     nys = nrank*iwork1+nygs+min(nrank,iwork2)
     nye = nys+iwork1-1
     if(iwork2 > nrank) nye = nye+1
+    if(nys == nye) then
+       call MPI_ABORT(ncomw, 9, nerr)
+       call MPI_FINALIZE(nerr)
+       stop '** Reduce # of proc. so that nye-nys > 1 **'
+    endif
 
     !For MPI_SENDRECV
     nup   = nrank+1
