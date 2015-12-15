@@ -106,7 +106,7 @@ contains
     
     ! thermal velocity
     vte = 0.1 * c
-    vti = 0.1 * c
+    vti = vte / dsqrt(r(1)/r(2))
     ! Lorentz factor
     gam0 = 100
     v0   = c*dsqrt(1.-1./gam0**2)
@@ -128,8 +128,8 @@ contains
     if(nrank == nroot) n0 = dble(np2(nys,1))/dble((nxge-nxgs+1))
     call MPI_BCAST(n0,1,mnpr,nroot,ncomw,nerr)
     
-    q(1) = vte/(ldb*dsqrt(2.0d0))* dsqrt(r(1) * gam0 / (4. * pi * n0))
-    q(2) = -q(1)
+    q(2) = -vte/(ldb*dsqrt(2.0d0))* dsqrt(r(2) * gam0 / (4. * pi * n0))
+    q(1) = -q(2)
 
     call random_gen__init(nrank)
     call init__loading
