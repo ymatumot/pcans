@@ -15,5 +15,6 @@ clean :
 	cd md_shock; make clean
 	cd md_wave; make clean
 	cd md_weibel; make clean
+	cd md_cherenkov; make clean
 	rm -f $(TARGET)
 
