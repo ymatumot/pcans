@@ -225,6 +225,7 @@ contains
 
              gamp = dsqrt(1.D0+(up(3,ii,j,isp)**2+up(4,ii,j,isp)**2+up(5,ii,j,isp)**2)/(c*c))
 
+             ! Density fix: Zenitani, Phys. Plasmas 22, 042116 (2015)
              call random_number(r1)
              if(up(3,ii,j,isp)*v0 >= 0.)then
                 up(3,ii,j,isp) = (+up(3,ii,j,isp)+v0*gamp)*gam0

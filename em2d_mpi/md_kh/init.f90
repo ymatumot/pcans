@@ -356,6 +356,7 @@ contains
              vd = dvy(up(1,ii,j,isp))
              if(isp == 2) vd = -vd*rtemp
 
+             ! Density fix: Zenitani, Phys. Plasmas 22, 042116 (2015)
              call random_number(r1)
              if(up(3,ii,j,isp)*dvx(up(1,ii,j,isp),up(2,ii,j,isp)) >= 0.)then
                 up(3,ii,j,isp) = up(3,ii,j,isp)+dvx(up(1,ii,j,isp),up(2,ii,j,isp))*gamp
@@ -366,6 +367,7 @@ contains
                    up(3,ii,j,isp) = up(3,ii,j,isp)+dvx(up(1,ii,j,isp),up(2,ii,j,isp))*gamp
                 endif
              endif
+             ! Density fix: Zenitani, Phys. Plasmas 22, 042116 (2015)
              call random_number(r1)
              if(up(4,ii,j,isp)*(+vy(up(1,ii,j,isp))+vd) >= 0.)then
                 up(4,ii,j,isp) = (+up(4,ii,j,isp)+(+vy(up(1,ii,j,isp))+vd)*gamp) &
