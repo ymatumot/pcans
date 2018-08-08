@@ -7,7 +7,6 @@ $(TARGET) :
 
 clean :
 	cd common; make clean
-	cd moment; make clean
 	cd md_ebeam; make clean
 	cd md_ibeam; make clean
 	cd md_shock; make clean
