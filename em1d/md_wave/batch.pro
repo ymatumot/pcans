@@ -36,17 +36,17 @@ drx = [nx/2,0.55*nx]
 drt = [nt/2,0.75*nt]
 
 ;; DRAW
-plot_clcnt,z[drx[0]:drx[1],drt[0]:drt[1]],ct=33,$
-           xax=kx[drx[0]:drx[1]]*rge,yax=w[drt[0]:drt[1]]/wge,$
-           xtitle='!6k!Ix!N r!Ige!N',ytitle='!7x/x!I!6ge!N',$
-           title='!6Parallel waves',/ver_,/keep,chars=1.5
-
-;;OVERPLOT FREQUENCIES
-loadct,0,/silent
+img = image(z[drx[0]:drx[1],drt[0]:drt[1]],kx[drx[0]:drx[1]]*rge,w[drt[0]:drt[1]]/wge,$
+           xtitle='$k_x r_{ge}$',ytitle='$\omega/\omega_{ge}$',$
+           title='Parallel waves',aspect=0,rgb=33,$
+           _extra=imgdefop)
+img.xrange=[kx[drx[0]],kx[drx[1]]]*rge
+img.yrange=[w[drt[0]],w[drt[1]]]/wge
+cb = colorbar(target=img,/orientation,/textpos,font_size=16,font_name='Times',position=[0.925,0.3,0.95,0.7])
 
 ;;electromagnetic wave
 y = c*kx
-oplot,kx*rge,y/wge
+pl1 = plot(kx*rge,y/wge,over=img,_extra=pldefop)
 
 ;;Alfven wave
 ;y = kx*vai
@@ -55,12 +55,12 @@ oplot,kx*rge,y/wge
 ;;Re-cut off frequency
 y = fltarr(nx)+1.0
 y = y*0.5*(wge-wgi+sqrt((wge+wgi)^2+4.*(wpe^2+wpi^2)))
-oplot,kx[drx[0]:drx[1]]*rge,y/wge,col=0,line=2
+pl2 = plot(kx[drx[0]:drx[1]]*rge,y/wge,line=2,over=img,_extra=pldefop)
 
 ;;Le-cut off frequency
 y = fltarr(nx)+1.0
 y = y*0.5*(-(wge-wgi)+sqrt((wge+wgi)^2+4.*(wpe^2+wpi^2)))
-oplot,kx[drx[0]:drx[1]]*rge,y/wge,col=0,line=2
+pl3 = plot(kx[drx[0]:drx[1]]*rge,y/wge,line=2,over=img,_extra=pldefop)
 
 ;;Upper hybrid frequency
 ;; y = kx
@@ -75,7 +75,7 @@ oplot,kx[drx[0]:drx[1]]*rge,y/wge,col=0,line=2
 
 ;;Electron gylo-frequency
 y[*] = 1.0
-oplot,kx[drx[0]:drx[1]]*rge,y,line=2,col=0
+pl4 = plot(kx[drx[0]:drx[1]]*rge,y,line=2,over=img,_extra=pldefop)
 
 ;;Ion gylo-frequency
 ;; y[*] = 1.0
@@ -94,9 +94,6 @@ oplot,kx[drx[0]:drx[1]]*rge,y,line=2,col=0
 ;y = y*wpi
 ;oplot,x,y
 ;;******* end ********;;
-
-;; RESET
-loadct,12,/silent
 
 
 end

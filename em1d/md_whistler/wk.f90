@@ -8,15 +8,20 @@ module wk
 
 contains
   
-  subroutine wk_f(uf,nx,dir,file13,file14)
+  subroutine wk_f(uf,nx,it,dir,file13,file14)
 
-    integer, intent(in)          :: nx
+    integer, intent(in)          :: nx,it
     real(8), intent(in)          :: uf(6,0:nx+1)
     character(len=*), intent(in) :: dir, file13, file14
     integer :: i
 
-    open(13,file=trim(dir)//trim(file13),status='unknown')
-    open(14,file=trim(dir)//trim(file14),status='unknown')
+    if(it == 0)then
+       open(13,file=trim(dir)//trim(file13),status='replace')
+       open(14,file=trim(dir)//trim(file14),status='replace')
+    else
+       open(13,file=trim(dir)//trim(file13),position='append')
+       open(14,file=trim(dir)//trim(file14),position='append')
+    endif
 
     !save data for w-k diagram
     write(13,'(100000e13.4)')(uf(2,i),i=1,nx)

@@ -8,9 +8,10 @@ module boundary
   public :: boundary__field
   public :: boundary__particle
   public :: boundary__curre
-  public :: boundary__charge
   public :: boundary__phi
+  public :: boundary__mom
 
+  logical, save :: is_init = .false.
   integer, save :: np, nx, nsp, bc
 
 
@@ -18,12 +19,14 @@ contains
 
 
   subroutine boundary__init(npin,nxin,nspin,bcin)
+
     integer, intent(in)    :: npin, nxin, nspin, bcin
 
     np  = npin
     nx  = nxin
     nsp = nspin
     bc  = bcin
+    is_init = .true.
 
   end subroutine boundary__init
 
@@ -36,6 +39,10 @@ contains
     integer :: i, ii, iii, isp, ipos, cnt_tmp
     integer :: cnt(1:nx+bc,nsp), flag(np,1:nx+bc,nsp)
 
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
 
     cnt(1:nx+bc,1:nsp) = 0
     flag(1:np,1:nx+bc,1:nsp) = 0
@@ -114,6 +121,11 @@ contains
 
     real(8), intent(inout) :: uf(6,0:nx+1)
 
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
+
     if(bc == 0)then
        !periodic condition
        uf(1:6,0) = uf(1:6,nx)
@@ -141,14 +153,19 @@ contains
 
     real(8), intent(inout) :: uj(3,-1:nx+2)
 
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
+
+    !PERIODIC CONDITION
     if(bc == 0)then
-       !periodic condition
        uj(1:3,1)    = uj(1:3,1)+uj(1:3,nx+1)
        uj(1:3,2)    = uj(1:3,2)+uj(1:3,nx+2)
        uj(1:3,nx-1) = uj(1:3,nx-1)+uj(1:3,-1)
        uj(1:3,nx)   = uj(1:3,nx)+uj(1:3,0)
+    !REFLECTIVE CONDITION
     else if(bc == -1)then
-       !reflective condition
        uj(1  ,2)  = uj(1  ,2)+uj(1  ,0)
        uj(2:3,1)  = uj(2:3,1)-uj(2:3,0)
        uj(2:3,2)  = uj(2:3,2)-uj(2:3,-1)
@@ -165,40 +182,21 @@ contains
   end subroutine boundary__curre
 
 
-  subroutine boundary__charge(cden)
-
-    real(8), intent(inout) :: cden(-1:nx+2)
-
-    if(bc == 0)then
-       !periodic condition
-       cden(1)    = cden(1)+cden(nx+1)
-       cden(2)    = cden(2)+cden(nx+2)
-       cden(nx-1) = cden(nx-1)+cden(-1)
-       cden(nx)   = cden(nx)+cden(0)
-    else if(bc == -1)then
-       !reflective condition
-       cden(1)  = cden(1)-cden(0)
-       cden(2)  = cden(2)-cden(-1)
-       cden(nx-2) = cden(nx-2)-cden(nx+1)
-       cden(nx-1) = cden(nx-1)-cden(nx)
-    else
-       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
-       stop
-    endif
-
-  end subroutine boundary__charge
-
-
   subroutine boundary__phi(x)
 
     real(8), intent(inout) :: x(0:nx+1)
 
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
+
+    !PERIODIC CONDITION
     if(bc == 0)then
-       !periodic condition
        x(0) = x(nx)
        x(nx+1) = x(1)
+    !REFLECTIVE CONDITION
     else if(bc == -1)then
-       !reflective condition
        x(0)  = x(2)
        x(nx+1) = x(nx-1)
     else
@@ -207,6 +205,46 @@ contains
     endif
 
   end subroutine boundary__phi
+
+
+  subroutine boundary__mom(den,vel,temp)
+
+    real(8), intent(inout) :: den(0:nx+1,nsp)
+    real(8), intent(inout) :: vel(0:nx+1,3,nsp)
+    real(8), intent(inout) :: temp(0:nx+1,3,nsp)
+    integer :: isp
+
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
+
+    !PERIODIC CONDITION
+    if(bc == 0)then
+       do isp=1,nsp
+          den(1,isp)  = den(1,isp)+den(nx+1,isp)
+          den(nx,isp) = den(nx,isp)+den(0,isp)
+          vel(1 ,1:3,isp) = vel(1 ,1:3,isp)+vel(nx+1,1:3,isp)
+          vel(nx,1:3,isp) = vel(nx,1:3,isp)+vel(0   ,1:3,isp)
+          temp(1 ,1:3,isp) = temp(1 ,1:3,isp)+temp(nx+1,1:3,isp)
+          temp(nx,1:3,isp) = temp(nx,1:3,isp)+temp(0   ,1:3,isp)
+       enddo
+    !REFLECTIVE CONDITION
+    else if(bc==-1) then
+       do isp=1,nsp
+          den(1,isp)     = den(1,isp)    +den(0,isp)
+          den(nx+bc,isp) = den(nx+bc,isp)+den(nx+bc+1,isp)
+          vel(1    ,1:3,isp) = vel(1    ,1:3,isp)+vel(0      ,1:3,isp)
+          vel(nx+bc,1:3,isp) = vel(nx+bc,1:3,isp)+vel(nx+bc+1,1:3,isp)
+          temp(1    ,1:3,isp) = temp(1    ,1:3,isp)+temp(0      ,1:3,isp)
+          temp(nx+bc,1:3,isp) = temp(nx+bc,1:3,isp)+temp(nx+bc+1,1:3,isp)
+       enddo
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
+    endif
+
+  end subroutine boundary__mom
 
 
 end module boundary

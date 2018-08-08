@@ -10,133 +10,85 @@ module init
   public :: init__set_param, init__inject
 
   integer, public :: np2(1:nx+bc,nsp)
-  integer, public :: itmax, it0, intvl1, intvl2, intvl3
-  real(8), public :: delx, delt, gfac
+  real(8), public :: delx, delt
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
+  real(8), public :: gp(4,np,1:nx+bc,nsp)
   real(8), public :: q(nsp), r(nsp)
-  !gx, gv, are temporal spaces used for the time integration
-  real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=64), public :: dir
-  character(len=64), public :: file10
-  character(len=64), public :: file12
-  real(8)                   :: pi
+  real(8), public :: den(0:nx+1,nsp),vel(0:nx+1,3,nsp),temp(0:nx+1,3,nsp)
+  real(8)         :: v0, u0, bx0, by0, bz0, vt0(nsp)
 
-  integer :: n0
-  real(8) :: v0, u0, b0, bx0, by0, bz0, vt0(nsp), lbuf
 
 contains
 
 
   subroutine init__set_param
 
-    use fio, only : fio__input, fio__param
+    use fio, only : fio__init, fio__input, fio__param
+    use boundary, only : boundary__init
+    use particle, only : particle__init
+    use field, only : field__init
+    use mom_calc, only : mom_calc__init
 
-    real(8) :: rmass, fpe, fpi, fge, fgi, vte, vti, vae, vai, betae, betai
-    real(8) :: sigma, Ma, theta
-    character(len=64) :: file9 
+    real(8) :: fpi, fge, fgi, vti, vae, vai, b0
     character(len=64) :: file11
 
-!*********************************************************************
-!   time0   : start time (if time0 < 0, initial data from input.f)
-!   itmax   : number of iteration
-!   it0     : base count
-!   intvl1  : storage interval for particles & fields
-!   intvl2  : printing interval for energy variation
-!   intvl3  : printing interval for wave analysis
-!   dir     : directory name for data output
-!   file??  : output file name for unit number ??
-!           :  9 - initial parameters
-!           : 10 - for saving all data
-!           : 11 - for starting from saved data
-!           : 12 - for saving energy history
-!   gfac    : implicit factor
-!             gfac < 0.5 : unstable
-!             gfac = 0.5 : no implicit
-!             gfac = 1.0 : full implicit
-!*********************************************************************
-    itmax  = 40000
-    intvl1 = 1000
-    intvl2 = 1000
-    dir    = './dat/'
-    file9  = 'init_param.dat'
-    file10 = 'file10.dat'
-    file12 = 'energy.dat'
-    gfac   = 0.505
-    it0    = 0
-
-    pi   = 4.0*atan(1.0)
-
-    !
-    ! n0    : number of particles / cell
-    ! rmass : mass ratio
-    ! sigma : (wce/wpe)^2
-    ! betae : electron beta
-    ! betai : ion beta
-    ! Ma    : Mach number of the flow (in the simulation frame)
-    ! theta : upstream magnetic field angle normal to the x axis
-    ! lbuf  : initial buffer within which flow smoothly decreases to zero
-    !
-    n0    = 64
-    rmass = 25.0
-    sigma = 0.04
-    betae = 1.0/2.0
-    betai = 1.0/8.0
-    Ma    = 3.0
-    theta = 90.0 * pi/180.0
-    lbuf  = 500.0
-
-    vte   = 1.0
     vti   = vte * dsqrt(betai/(betae*rmass))
     c     = vte / dsqrt(sigma * 0.5*betae)
-    fpe   = 1.0
     fge   = dsqrt(sigma)
     fpi   = fpe / dsqrt(rmass)
     fgi   = fge / rmass
     vae   = dsqrt(sigma) * c
     vai   = dsqrt(sigma/rmass) * c
     b0    = dsqrt(4*pi*n0) * vae
-    delx  = vte / fpe
-    delt  = 0.5*delx/c
+    delx  = vte/fpe/rdbl
+    delt  = cfl*delx/c
+    bx0   = b0 * dcos(theta)
+    by0   = 0.0d0
+    bz0   = b0 * dsin(theta)
 
-    ! for upstream boundary condition
+    ! FOR UPSTREAM BOUNDARY CONDITION
     vt0(1) = vti
     vt0(2) = vte
-    v0   = Ma * vai
+    v0   = -ma * vai
     u0   = v0/dsqrt(1.0-(v0/c)**2)
-    bx0  = b0 * dcos(theta)
-    by0  = 0.0
-    bz0  = b0 * dsin(theta)
 
-    ! number of particles
+    ! NUMBER OF PARTICLES
     np2(1:nx+bc,1:2) = n0
-
     if(max(np2(1,1), np2(nx+bc,1), np) > np)then
        write(*,*)'Too large number of particles'
        stop
     endif
 
-    ! mass and charge
+    ! MASS AND CHARGE
     r(1) = rmass
     r(2) = 1.0
     q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
     q(2) = -q(1)
 
+    !INTIALIZATION OF SUBROUTINES
+    call random_gen__init
+    call boundary__init(np,nx,nsp,bc)
+    call particle__init(np,nx,nsp,bc,q,r,c,delx,delt)
+    call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
+    call fio__init(np,nx,nsp,bc,q,r,c,delx,delt,pi,dir,dir_mom,dir_psd)
+    call mom_calc__init(np,nx,nsp,bc,q,r,c,delx,0.5*delt)
+    call random_gen__init
+
+    !READING RESTART DATA IF NECESSARY
     if(it0 /= 0)then
        !start from the past calculation
-       file11 = '020000_test10.dat'
-       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
+       write(file11,'(i6.6,a)')it0,'_file10.dat'
+       call fio__input(up,uf,np2,it0,file11)
        return
     endif
 
-    call random_gen__init
     call init__loading
     call init__set_field
 
-    ! output parameters
+    !OUTPUT PARAMETERS
     open(9,file=trim(dir)//trim(file9),status='unknown')
-
     write(9,"(A30, 2x, i10)") "number of grids : ", nx
     write(9,"(A30, 2x, i10)") "number of particles/cell : ", n0
     write(9,"(A30, 2x, es10.3)") "speed of light : ", c
@@ -157,7 +109,6 @@ contains
     write(9,"(A30, 2x, es10.3)") "electron thermal velocity : ", vte
     write(9,"(A30, 2x, es10.3)") "ion Alfven velocity : ", vai
     write(9,"(A30, 2x, es10.3)") "electron Alfven velocity : ", vae
-
     close(9)
 
   end subroutine init__set_param
@@ -168,7 +119,7 @@ contains
     integer :: i, ii, isp
     real(8) :: r1, r2, uu
 
-    !particle position
+    !PARTICLE POSITION
     isp = 1
     do i=1,nx+bc
        do ii=1,np2(i,isp)
@@ -178,8 +129,8 @@ contains
        enddo
     enddo
 
-    !velocity
-    !Maxwellian distribution
+    !VELOCITY
+    !MAXWELLIAN DISTRIBUTION
     do isp=1,nsp
        do i=1,nx+bc
           if( dble(i-1) < lbuf ) then
@@ -189,7 +140,7 @@ contains
           end if
           do ii=1,np2(i,isp)
              call random_gen__bm(r1,r2)
-             up(2,ii,i,isp) = vt0(isp)*r1 - uu
+             up(2,ii,i,isp) = vt0(isp)*r1 + uu
              up(3,ii,i,isp) = vt0(isp)*r2
 
              call random_gen__bm(r1,r2)
@@ -206,7 +157,6 @@ contains
     integer :: i
     real(8) :: uu, vv
 
-    !magnetic field
     do i=0,nx+1+bc
        uf(1,i) = bx0
     enddo
@@ -215,7 +165,7 @@ contains
        uf(3,i) = bz0
     enddo
 
-    !electric field
+    !ELECTRIC FIELD
     do i=0,nx+1
        uf(4,i) = 0.0
     enddo
@@ -226,23 +176,24 @@ contains
        else
           vv = v0
        end if
-       uf(5,i) =-vv*bz0/c
-       uf(6,i) =+vv*by0/c
+       uf(5,i) = +vv*bz0/c
+       uf(6,i) = -vv*by0/c
     enddo
 
   end subroutine init__set_field
 
 
   subroutine init__inject
+
     integer :: isp, i, ii, ii1, ii2, ii3, dn
     real(8) :: rr, r1, r2, ninj, iinj, finj, x0
 
     i  = nx-1
-    x0 =-v0*delt + dble(nx)
+    x0 = dble(nx)+v0*delt
 
     ! number of particles to be injected
     call random_number(rr)
-    ninj = n0*v0*delt
+    ninj = n0*abs(v0)*delt
     iinj = floor(ninj)
     finj = ninj - iinj
     dn   = int(iinj) + ceiling(finj-rr)
@@ -253,7 +204,7 @@ contains
        ii2 = np2(i,2) + ii
        ! position
        call random_number(rr)
-       rr =-rr*v0*delt + dble(i+1)
+       rr = rr*v0*delt + dble(i+1)
        up(1,ii1,i,1) = rr
        up(1,ii2,i,2) = rr
 
@@ -261,7 +212,7 @@ contains
        do isp = 1, nsp
           ii3 = np2(i,isp) + ii
           call random_gen__bm(r1,r2)
-          up(2,ii3,i,isp) = vt0(isp)*r1 - u0
+          up(2,ii3,i,isp) = vt0(isp)*r1 + u0
           up(3,ii3,i,isp) = vt0(isp)*r2
 
           call random_gen__bm(r1,r2)
@@ -270,7 +221,7 @@ contains
           ! folding back
           if( delt*up(2,ii3,i,isp) > up(1,ii3,i,isp)-dble(i+1) ) then
              up(1,ii3,i,isp) = 2*x0 - up(1,ii3,i,isp)
-             up(2,ii3,i,isp) =-2*v0 - up(2,ii3,i,isp)
+             up(2,ii3,i,isp) = 2*v0 - up(2,ii3,i,isp)
           end if
        end do
     end do
@@ -288,8 +239,8 @@ contains
     ! ey, ez, bx
     i = nx-1
     uf(1,i) = bx0
-    uf(5,i) =-v0*bz0/c
-    uf(6,i) =+v0*by0/c
+    uf(5,i) =+v0*bz0/c
+    uf(6,i) =-v0*by0/c
 
   end subroutine init__inject
 

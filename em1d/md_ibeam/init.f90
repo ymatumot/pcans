@@ -10,105 +10,42 @@ module init
   public :: init__set_param
 
   integer, public :: np2(1:nx+bc,nsp)
-  integer, public :: itmax, it0, intvl1, intvl2, intvl3
-  real(8), public :: delx, delt, gfac
+  real(8), public :: delx, delt
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
   real(8), public :: q(nsp), r(nsp)
-  !gx, gv, are temporal spaces used for the time integration
-  real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=64), public :: dir
-  character(len=64), public :: file10
-  character(len=64), public :: file12
-  real(8)                   :: pi
+  real(8), public :: gp(4,np,1:nx+bc,nsp)
+  real(8), public :: den(0:nx+1,nsp),vel(0:nx+1,3,nsp),temp(0:nx+1,3,nsp)
+  real(8)         :: b0, vt0(nsp)
 
-  integer :: n0
-  real(8) :: b0, vt0(nsp), nbeam, vbeam, tbeam
 
 contains
 
 
   subroutine init__set_param
 
-    use fio, only : fio__input, fio__param
+    use fio, only : fio__init, fio__input, fio__param
+    use boundary, only : boundary__init
+    use particle, only : particle__init
+    use field, only : field__init
+    use mom_calc, only : mom_calc__init
 
-    real(8) :: rmass, fpe, fpi, fge, fgi, vte, vti, vae, vai, betae, betai
-    real(8) :: sigma, Ma, theta
-    character(len=64) :: file9 
+    real(8) :: fpi, fge, fgi, vti, vae, vai
     character(len=64) :: file11
 
-!*********************************************************************
-!   time0   : start time (if time0 < 0, initial data from input.f)
-!   itmax   : number of iteration
-!   it0     : base count
-!   intvl1  : storage interval for particles & fields
-!   intvl2  : printing interval for energy variation
-!   intvl3  : printing interval for wave analysis
-!   dir     : directory name for data output
-!   file??  : output file name for unit number ??
-!           :  9 - initial parameters
-!           : 10 - for saving all data
-!           : 11 - for starting from saved data
-!           : 12 - for saving energy history
-!           : 13~14 - for w-k diagram
-!   gfac    : implicit factor
-!             gfac < 0.5 : unstable
-!             gfac = 0.5 : no implicit
-!             gfac = 1.0 : full implicit
-!*********************************************************************
-    itmax  = 400000
-    intvl1 = 1000
-    intvl2 = 1000
-    dir    = './dat/'
-    file9  = 'init_param.dat'
-    file10 = 'file10.dat'
-    file12 = 'energy.dat'
-    gfac   = 0.505
-
-    it0    = 0
-    if(it0 /= 0)then
-       !start from the past calculation
-       file11 = '002048_file10.dat'
-       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
-       return
-    endif
-
-    pi   = 4.0*atan(1.0)
-
-    !
-    ! n0    : number of particles / cell
-    ! rmass : mass ratio
-    ! sigma : (wce/wpe)^2
-    ! betae : electron beta
-    ! betai : ion beta
-    ! nbeam : density ratio (beam / total)
-    ! vbeam : relative streaming velocity
-    ! tbeam : temperature ratio (beam / core)
-    !
-    n0    = 250
-    rmass = 25.0
-    sigma = 0.04
-    betae = 0.5
-    betai = 0.03125
-
-    vte   = 1.0
     vti   = vte * dsqrt(betai/(betae*rmass))
     c     = vte / dsqrt(sigma * 0.5*betae)
-    fpe   = 1.0
-    fge   = dsqrt(sigma)
+    fge   = dsqrt(sigma)*fpe
     fpi   = fpe / dsqrt(rmass)
     fgi   = fge / rmass
     vae   = dsqrt(sigma) * c
     vai   = dsqrt(sigma/rmass) * c
     b0    = dsqrt(4*pi*n0) * vae
-    delx  = vte / fpe
-    delt  = 0.5*delx/c
+    delx  = vte/fpe/rdbl
+    delt  = cfl*delx/c
 
-    ! beam parameters
-    nbeam = 0.2
-    vbeam = 3.0 * vai
-    tbeam = 1.0
+    ! BEAM PARAMETERS
     vt0(1) = vti
     vt0(2) = vte
 
@@ -119,19 +56,30 @@ contains
        stop
     endif
 
-    ! mass and charge
+    ! MASS AND CHARGE
     r(1) = rmass
     r(2) = 1.0
     q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
     q(2) = -q(1)
 
+    !INTIALIZATION OF SUBROUTINES
     call random_gen__init
-    call init__loading
-    call init__set_field
+    call boundary__init(np,nx,nsp,bc)
+    call particle__init(np,nx,nsp,bc,q,r,c,delx,delt)
+    call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
+    call fio__init(np,nx,nsp,bc,q,r,c,delx,delt,pi,dir,dir_mom,dir_psd)
+    call mom_calc__init(np,nx,nsp,bc,q,r,c,delx,0.5*delt)
 
-    ! output parameters
+    !READING RESTART DATA IF NECESSARY
+    if(it0 /= 0)then
+       !start from the past calculation
+       write(file11,'(i6.6,a)')it0,'_file10.dat'
+       call fio__input(up,uf,np2,it0,file11)
+       return
+    endif
+
+    !OUTPUT PARAMETERS
     open(9,file=trim(dir)//trim(file9),status='unknown')
-
     write(9,"(A30, 2x, i10)") "number of grids : ", nx
     write(9,"(A30, 2x, i10)") "number of particles/cell : ", n0
     write(9,"(A30, 2x, es10.3)") "speed of light : ", c

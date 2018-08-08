@@ -10,18 +10,13 @@ module init
   public :: init__set_param
 
   integer, public :: np2(1:nx+bc,nsp)
-  integer, public :: itmax, it0, intvl1, intvl2, intvl3
-  real(8), public :: delx, delt, gfac
-  real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
+  real(8), public :: gp(4,np,1:nx+bc,nsp)
   real(8), public :: q(nsp), r(nsp)
-  !gx, gv, are temporal spaces used for the time integration
-  real(8), public :: gp(4,np,1:nx,nsp) !just for initialization
-  character(len=64), public :: dir
-  character(len=64), public :: file10
-  character(len=64), public :: file12, file13, file14
-  real(8)                   :: pi, vti, vte, va, rtemp, t_ani, fpe, fge, rgi, rge, ldb, b0
+  real(8), public :: delt
+  real(8), public :: den(0:nx+1,nsp),vel(0:nx+1,3,nsp),temp(0:nx+1,3,nsp)
+  real(8)         :: vti, vte, b0
 
 
 contains
@@ -29,91 +24,29 @@ contains
   
   subroutine init__set_param
 
-    use fio, only : fio__input, fio__param
+    use fio, only : fio__init, fio__input, fio__param
+    use boundary, only : boundary__init
+    use particle, only : particle__init
+    use field, only : field__init
+    use mom_calc, only : mom_calc__init
 
-    real(8) :: fgi, fpi, alpha, beta
-    character(len=64) :: file9 
+    real(8)           :: fgi, fpi, va, fpe, fge, rgi, rge, ldb
     character(len=64) :: file11
 
-!*********************************************************************
-!   time0   : start time (if time0 < 0, initial data from input.f)
-!   itmax   : number of iteration
-!   it0     : base count
-!   intvl1  : storage interval for particles & fields
-!   intvl2  : printing interval for energy variation
-!   intvl3  : printing interval for EM fields for FFT
-!   dir     : directory name for data output
-!   file??  : output file name for unit number ??
-!           :  9 - initial parameters
-!           : 10 - for saving all data
-!           : 11 - for starting from saved data
-!           : 12 - for saving energy history
-!           : 13~14 - for w-k diagram
-!   gfac    : implicit factor
-!             gfac < 0.5 : unstable
-!             gfac = 0.5 : no implicit
-!             gfac = 1.0 : full implicit
-!*********************************************************************
-    itmax  = 15000
-    intvl1 = 500
-    intvl2 = 500
-    intvl3 = 10
-    dir    = './dat/'
-    file9  = 'init_param.dat'
-    file10 = 'file10.dat'
-    file12 = 'energy.dat'
-    file13 = 'wk_by.dat'
-    file14 = 'wk_bz.dat'
-    gfac   = 0.505
-
-    it0    = 0
-    if(it0 /= 0)then
-       !start from the past calculation
-       file11 = '005000_test10.dat'
-       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,np,nx,nsp,bc,dir,file11)
-       return
-    endif
-
-!*********************************************************************
-!   r(1)  : ion mass             r(2)  : electron mass
-!   q(1)  : ion charge           q(2)  : electron charge
-!   c     : speed of light       ldb   : debye length
-!
-!   rgi   : ion Larmor radius    rge   : electron Larmor radius
-!   fgi   : ion gyro-frequency   fge   : electron gyro-frequency
-!   vti   : ion thermal speed    vte   : electron thermal speed
-!   b0    : magnetic field       
-!  
-!   alpha : wpe/wge
-!   beta  : ion plasma beta
-!   rtemp : Te/Ti
-!*********************************************************************
-    pi   = 4.0*atan(1.0)
-    delx = 1.0
-    c    = 1.0
-    delt = 0.5*delx/c
-    ldb  = delx
-
-    r(1) = 1837.0
-    r(2) = 1.0
-
-    alpha = 5.0
-    beta  = 1.0
-    rtemp = 1.0
-    t_ani = 3.0
-
-    fpe = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
-    fge = fpe/alpha
-
-    va  = fge/fpe*c*dsqrt(r(2)/r(1))
-    rge = fpe/fge*ldb*dsqrt(2.D0)
-    rgi = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
-
-    vte = rge*fge
-    vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
-
-    fgi = fge*r(2)/r(1)
-    fpi = fpe*dsqrt(r(2)/r(1))
+!**** SETTING OTHER NUMERICAL & PHYSICAL CONSTANTS ****!
+    r(2) = 1.0D0      ! ELECTRON MASS
+    r(1) = r(2)*mr    ! ION MASS
+    delt = cfl*delx/c ! TIME STEP SIZE
+    ldb  = delx*rdbl
+    fpe  = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
+    fge  = fpe/alpha
+    fgi  = fge*r(2)/r(1)
+    fpi  = fpe*dsqrt(r(2)/r(1))
+    va   = fge/fpe*c*dsqrt(r(2)/r(1))
+    rge  = alpha*ldb*dsqrt(2.D0)
+    rgi  = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
+    vte  = rge*fge
+    vti  = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
 
     np2(1:nx+bc,1) = 200
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
@@ -123,17 +56,32 @@ contains
        stop
     endif
 
-    !charge
+    !CHARGE
     q(1) = fpi*dsqrt(r(1)/(4.0*pi*np2(1,1)))
     q(2) = -q(1)
 
-    !Magnetic field strength
+    !MAGNETIC FIELD STRENGTH
     b0 = fgi*r(1)*c/q(1)
 
+    !INTIALIZATION OF SUBROUTINES
     call random_gen__init
+    call boundary__init(np,nx,nsp,bc)
+    call particle__init(np,nx,nsp,bc,q,r,c,delx,delt)
+    call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
+    call fio__init(np,nx,nsp,bc,q,r,c,delx,delt,pi,dir,dir_mom,dir_psd)
+    call mom_calc__init(np,nx,nsp,bc,q,r,c,delx,0.5*delt)
+
+    !READING RESTART DATA IF NECESSARY
+    if(it0 /= 0)then
+       !start from the past calculation
+       write(file11,'(i6.6,a)')it0,'_file10.dat'
+       call fio__input(up,uf,np2,it0,file11)
+       return
+    endif
+
     call init__loading
     call init__set_field
-    call fio__param(np,nx,nsp,np2,c,q,r,vti,vte,va,rtemp,fpe,fge,ldb,delt,delx,bc,dir,file9)
+    call fio__param(np2,vti,vte,va,rtemp,fpe,fge,ldb,file9)
 
   end subroutine init__set_param
 
@@ -141,12 +89,9 @@ contains
   subroutine init__loading
 
     integer :: i, ii, isp
-    real(8) :: sd, sd2, r1, r2, v0, u0
+    real(8) :: sd, sd2, r1, r2, u0
 
-    v0 = 0.0*c
     u0 = v0/dsqrt(1.-(v0/c)**2)
-
-    call random_seed()
 
     !particle position
     isp = 1
@@ -164,11 +109,6 @@ contains
        if(isp == 1) then 
           sd = vti/dsqrt(2.0D0)
           sd2 = sd*sqrt(t_ani)
-          sd = sd/sqrt(1.-(sd/c)**2)
-          sd2 = sd2/sqrt(1.-(sd2/c)**2)
-!!$          sd = vti/dsqrt(2.0D0)
-!!$          sd = sd/sqrt(1.-(sd/c)**2)
-          
           do i=1,nx+bc
              do ii=1,np2(i,isp)
                 call random_gen__bm(r1,r2)
@@ -183,9 +123,6 @@ contains
        if(isp == 2) then
           sd = vte/dsqrt(2.0D0)
           sd2 = sd*sqrt(t_ani)
-          sd = sd/sqrt(1.-(sd/c)**2)
-          sd2 = sd2/sqrt(1.-(sd2/c)**2)
-
           do i=1,nx+bc
              do ii=1,np2(i,isp)
                 call random_gen__bm(r1,r2)
@@ -207,21 +144,13 @@ contains
     integer :: i
 
     !magnetic field
-    do i=0,nx+1+bc
+    do i=0,nx+1
        uf(1,i) = b0
-    enddo
-    do i=0,nx+1
-       uf(2,i) = 0.0
-       uf(3,i) = 0.0
-    enddo
-
-    !electric field
-    do i=0,nx+1
-       uf(4,i) = 0.0
-    enddo
-    do i=0,nx+1+bc
-       uf(5,i) = 0.0
-       uf(6,i) = 0.0
+       uf(2,i) = 0.0D0
+       uf(3,i) = 0.0D0
+       uf(4,i) = 0.0D0
+       uf(5,i) = 0.0D0
+       uf(6,i) = 0.0D0
     enddo
 
   end subroutine init__set_field

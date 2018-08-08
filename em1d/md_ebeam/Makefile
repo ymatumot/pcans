@@ -20,14 +20,6 @@ $(LIB_DIR)/libem1d.a :
 main.o : init.o const.o $(LIB_DIR)/libem1d.a
 init.o : const.o $(LIB_DIR)/libem1d.a
 
-############## moment calculation ################
-moment : $(LIB_DIR)/moment/mom.out
-	$(LIB_DIR)/moment/mom.out ./ ./dat/*_file10.dat
-
-$(LIB_DIR)/moment/mom.out :
-	cd $(LIB_DIR)/moment ; make
-###############################################
-
 clean :
 	rm -f $(TARGET) $(OBJS) *.mod dat/*.dat mom/*.dat psd/*.dat
 

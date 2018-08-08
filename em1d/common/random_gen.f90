@@ -6,6 +6,7 @@ module random_gen
 
   public :: random_gen__init, random_gen__bm
 
+  logical, save :: is_init = .false.
   real(8), save :: pi
 
 
@@ -16,6 +17,7 @@ contains
 
     call random_seed()
     pi = 4.*atan(1.D0)
+    is_init = .true.
 
   end subroutine random_gen__init
 
@@ -25,6 +27,11 @@ contains
 
     real(8), intent(out) :: r1, r2
     real(8)              :: aa, bb
+
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling random_gen__init()'
+       stop
+    endif
 
     call random_number(aa)
     call random_number(bb)

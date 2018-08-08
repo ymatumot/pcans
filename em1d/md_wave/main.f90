@@ -6,8 +6,8 @@ program main
   use fio
   use particle
   use field
-  use crct
   use wk
+  use mom_calc
 
   implicit none
 
@@ -24,17 +24,13 @@ program main
 !
 !**********************************************************************c
 
-  !Initializations
+  !INITIALIZATIONS
   call init__set_param
-  call boundary__init(np,nx,nsp,bc)
-  call particle__init(np,nx,nsp,bc,q,r,c,delt)
-  call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
-!!$  call crct__init(np,nx,nsp,bc,q,delx)
 
-!!$  call crct__ef(uf,up,np,nx,nsp,np2,bc,q,delx)
-  call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
-  call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,0,it0,dir,file10)
-  call wk_f(uf,nx,dir,file13,file14)
+  !RECORDING INITIAL DATA
+  call fio__output(up,uf,np2,0,file10)
+  call fio__energy(up,uf,np2,0,file12)
+  call wk_f(uf,nx,0,dir,file13,file14)
 
   do it=1,itmax-it0
 
@@ -43,14 +39,19 @@ program main
      call particle__solv(gp,up,uf,np2)
      call field__fdtd_i(uf,up,gp,np2)
      call boundary__particle(up,np2)
-!!$     call crct__ef(uf,up,np2)
 
      if(mod(it+it0,intvl1) == 0) &
-          call fio__output(up,uf,np,nx,nsp,np2,c,q,r,delt,delx,bc,it,it0,dir,file10)
+          call fio__output(up,uf,np2,it+it0,file10)
      if(mod(it+it0,intvl2) == 0) &
-          call fio__energy(up,uf,np,nx,nsp,np2,c,r,delt,bc,it,it0,dir,file12)
-     if(mod(it+it0,intvl3) == 0) &
-          call wk_f(uf,nx,dir,file13,file14)
+          call fio__energy(up,uf,np2,it+it0,file12)
+     if(mod(it+it0,intvl3) == 0)then
+        call mom_calc__accel(gp,up,uf,np2)
+        call mom_calc__nvt(den,vel,temp,gp,np2)
+        call boundary__mom(den,vel,temp)
+        call fio__mom(den,vel,temp,uf,it+it0)
+     endif
+     if(mod(it+it0,intvl4) == 0) &
+          call wk_f(uf,nx,it+it0,dir,file13,file14)
 
   enddo
 
