@@ -4,33 +4,67 @@ module particle
 
   private
 
+  public :: particle__init
   public :: particle__solv
+
+  logical, save :: is_init = .false.
+  integer, save :: np, nsp, nxs, nxe, nys, nye, nsfo
+  real(8), save :: c, d_delx, delt
+  real(8), allocatable, save :: q(:), r(:)
 
 
 contains
 
 
-  subroutine particle__solv(gp,up,uf,                        &
-                            np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
-                            c,q,r,delt,delx)
+  subroutine particle__init(np_in,nsp_in,&
+                            nxs_in,nxe_in,nys_in,nye_in,nsfo_in, &
+                            q_in,r_in,c_in,delx_in,delt_in)
+
+    integer, intent(in) :: np_in, nsp_in
+    integer, intent(in) :: nxs_in, nxe_in, nys_in, nye_in, nsfo_in
+    real(8), intent(in) :: q_in(nsp_in), r_in(nsp_in), c_in, delx_in, delt_in
+ 
+    np    = np_in
+    nsp   = nsp_in
+    nxs   = nxs_in
+    nxe   = nxe_in
+    nys   = nys_in
+    nye   = nye_in
+    nsfo  = nsfo_in
+    c     = c_in
+    d_delx = 1./delx_in
+    delt  = delt_in
+
+    allocate(q(nsp))
+    allocate(r(nsp))
+    q     = q_in
+    r     = r_in
+
+    is_init = .true.
+
+  end subroutine particle__init
+
+
+  subroutine particle__solv(gp,up,uf,np2)
                             
 
     use shape_function, only : sf
 
-    integer, intent(in)  :: np, nxs, nxe, nys, nye, nsp, nsfo
     integer, intent(in)  :: np2(nys:nye,nsp)
     real(8), intent(in)  :: up(5,np,nys:nye,nsp)
     real(8), intent(in)  :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
-    real(8), intent(in)  :: c, q(nsp), r(nsp), delt, delx
     real(8), intent(out) :: gp(5,np,nys:nye,nsp)
     integer :: i, j, ii, isp, ih, ip, jp
-    real(8) :: idelx, fac1, fac1r, fac2, fac2r, gam, txxx, bt2
+    real(8) :: fac1, fac1r, fac2, fac2r, gam, txxx, bt2
     real(8) :: sh(-2:2,2)
     real(8) :: pf(6)
     real(8) :: uvm(6)
     real(8) :: tmp(1:6,nxs-1:nxe+1,nys-1:nye+1)
 
-    idelx = 1./delx
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling particle__init()'
+       stop
+    endif
 
     !fields at (i+1/2, j+1/2)
     do j=nys-1,nye+1
@@ -57,8 +91,8 @@ contains
 
              ih = floor(up(1,ii,j,isp))
 
-             sh(-2:2,1) = sf(ih,up(1,ii,j,isp)*idelx-0.5,nsfo)
-             sh(-2:2,2) = sf(j ,up(2,ii,j,isp)*idelx-0.5,nsfo)
+             sh(-2:2,1) = sf(ih,up(1,ii,j,isp)*d_delx-0.5,nsfo)
+             sh(-2:2,2) = sf(j ,up(2,ii,j,isp)*d_delx-0.5,nsfo)
 
              !Bx at (i+1/2, j)
              do jp=-1,1
@@ -108,7 +142,7 @@ contains
              uvm(2) = up(4,ii,j,isp)+fac1*pf(5)
              uvm(3) = up(5,ii,j,isp)+fac1*pf(6)
 
-             gam = dsqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
+             gam = sqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
              fac1r = fac1/gam
              fac2r = fac2/(gam+txxx*bt2/gam)
 
@@ -124,9 +158,9 @@ contains
              gp(4,ii,j,isp) = uvm(2)+fac1*pf(5)
              gp(5,ii,j,isp) = uvm(3)+fac1*pf(6)
 
-             gam = 1./dsqrt(1.0+(+gp(3,ii,j,isp)*gp(3,ii,j,isp) &
-                                 +gp(4,ii,j,isp)*gp(4,ii,j,isp) &
-                                 +gp(5,ii,j,isp)*gp(5,ii,j,isp))/(c*c))
+             gam = 1./sqrt(1.0D0+(+gp(3,ii,j,isp)*gp(3,ii,j,isp) &
+                                  +gp(4,ii,j,isp)*gp(4,ii,j,isp) &
+                                  +gp(5,ii,j,isp)*gp(5,ii,j,isp))/(c*c))
              gp(1,ii,j,isp) = up(1,ii,j,isp)+gp(3,ii,j,isp)*delt*gam
              gp(2,ii,j,isp) = up(2,ii,j,isp)+gp(4,ii,j,isp)*delt*gam
           enddo

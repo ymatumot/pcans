@@ -4,26 +4,90 @@ module boundary
 
   private
 
-  public  :: boundary__field
+  public  :: boundary__init
+  public  :: boundary__dfield
   public  :: boundary__particle
   public  :: boundary__curre
+  public  :: boundary__phi
+
+  logical, save :: is_init = .false.
+  integer, save :: np, nsp, nxgs, nxge, nygs, nyge, nxs, nxe, nys, nye, bc
+  integer, save :: nup, ndown, mnpi, mnpr, ncomw
+  integer       :: nerr
+  integer, allocatable :: nstat(:)
+  real(8), save :: u0x_bnd(2), u0y_bnd(2), u0z_bnd(2)
 
 
 contains
 
 
-  subroutine boundary__particle(up,                                        &
-                                np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &
-                                nup,ndown,nstat,mnpi,mnpr,ncomw,nerr)
-    integer, intent(in)    :: np, nsp, nxgs, nxge, nygs, nyge, nys, nye, bc
-    integer, intent(in)    :: nup, ndown, mnpi, mnpr, ncomw
-    integer, intent(inout) :: nerr, nstat(:)
+  subroutine boundary__init(np_in,nsp_in,&
+                            nxgs_in,nxge_in,nygs_in,nyge_in,nxs_in,nxe_in,nys_in,nye_in,bc_in, &
+                            nup_in,ndown_in,mnpi_in,mnpr_in,ncomw_in,nerr_in,nstat_in, &
+                            u0x,u0y,u0z)
+
+    integer, intent(in) :: np_in, nsp_in
+    integer, intent(in) :: nxgs_in, nxge_in, nygs_in, nyge_in, nxs_in, nxe_in, nys_in, nye_in, bc_in
+    integer, intent(in) :: nup_in, ndown_in, mnpi_in, mnpr_in, ncomw_in
+    integer, intent(in) :: nerr_in, nstat_in(:)
+    real(8), optional, intent(in) :: u0x(2), u0y(2), u0z(2)
+
+    np    = np_in
+    nsp   = nsp_in
+    nxgs  = nxgs_in
+    nxge  = nxge_in
+    nygs  = nygs_in
+    nyge  = nyge_in
+    nxs   = nxs_in
+    nxe   = nxe_in
+    nys   = nys_in
+    nye   = nye_in
+    bc    = bc_in
+    nup   = nup_in
+    ndown = ndown_in
+    mnpi  = mnpi_in
+    mnpr  = mnpr_in
+    ncomw = ncomw_in
+    nerr  = nerr_in
+
+    allocate(nstat(size(nstat_in)))
+    nstat = nstat_in
+
+    if(present(u0x))then
+      u0x_bnd = u0x
+    else
+      u0x_bnd = (/0.0D0, 0.0D0/)
+    endif
+    if(present(u0y))then
+      u0y_bnd = u0y
+    else
+      u0y_bnd = (/0.0D0, 0.0D0/)
+    endif
+    if(present(u0z))then
+      u0z_bnd = u0z
+    else
+      u0z_bnd = (/0.0D0, 0.0D0/)
+    endif
+
+    is_init = .true.
+
+  end subroutine boundary__init
+
+
+  subroutine boundary__particle(up,np2)
+
     integer, intent(inout) :: np2(nys:nye,nsp)
     real(8), intent(inout) :: up(5,np,nys:nye,nsp)
+
     integer :: j, ii, iii, isp, ipos, jpos
     integer :: cnt(nys-1:nye+1,nsp), cnt2(nys:nye,nsp), cnt_tmp
     integer :: flag(np,nys:nye,nsp)
     real(8) :: bff_ptcl(np*5,nys-1:nye+1,nsp)
+
+    if(.not.is_init)then
+       write(6,*)'Initialize first by calling boundary__init()'
+       stop
+    endif
 
     cnt(nys-1:nye+1,1:nsp) = 0
     cnt2(nys:nye,1:nsp) = 0
@@ -46,11 +110,15 @@ contains
              else if(bc==-1)then
                 if(ipos <= nxgs-1)then
                    up(1,ii,j,isp) = 2.0*nxgs-up(1,ii,j,isp)
-                   up(3,ii,j,isp) = -up(3,ii,j,isp)
+                   up(3,ii,j,isp) = 2.0*u0x_bnd(1)-up(3,ii,j,isp)
+                   up(4,ii,j,isp) = 2.0*u0y_bnd(1)-up(4,ii,j,isp)
+                   up(5,ii,j,isp) = 2.0*u0z_bnd(1)-up(5,ii,j,isp)
                 endif
                 if(ipos >= nxge)then
                    up(1,ii,j,isp) = 2.0*nxge-up(1,ii,j,isp)
-                   up(3,ii,j,isp) = -up(3,ii,j,isp)
+                   up(3,ii,j,isp) = 2.0*u0x_bnd(2)-up(3,ii,j,isp)
+                   up(4,ii,j,isp) = 2.0*u0y_bnd(2)-up(4,ii,j,isp)
+                   up(5,ii,j,isp) = 2.0*u0z_bnd(2)-up(5,ii,j,isp)
                 endif
              else
                 write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
@@ -147,126 +215,115 @@ contains
   end subroutine boundary__particle
 
 
-  subroutine boundary__field(uf,                 &
-                             nxs,nxe,nys,nye,bc, &
-                             nup,ndown,mnpr,nstat,ncomw,nerr)
+  subroutine boundary__dfield(df)
 
-    integer, intent(in)    :: nxs, nxe, nys, nye, bc
-    integer, intent(in)    :: nup, ndown, mnpr, ncomw
-    integer, intent(inout) :: nerr, nstat(:)
-    real(8), intent(inout) :: uf(6,nxs-2:nxe+2,nys-2:nye+2)
+    real(8), intent(inout) :: df(6,nxs-2:nxe+2,nys-2:nye+2)
     integer                :: i, ii
     real(8)                :: bff_snd(12*(nxe-nxs+1)), bff_rcv(12*(nxe-nxs+1))
 
     do i=nxs,nxe
        ii = 12*(i-nxs)
-       bff_snd(ii+1)  = uf(1,i,nys)
-       bff_snd(ii+2)  = uf(2,i,nys)
-       bff_snd(ii+3)  = uf(3,i,nys)
-       bff_snd(ii+4)  = uf(4,i,nys)
-       bff_snd(ii+5)  = uf(5,i,nys)
-       bff_snd(ii+6)  = uf(6,i,nys)
-       bff_snd(ii+7)  = uf(1,i,nys+1)
-       bff_snd(ii+8)  = uf(2,i,nys+1)
-       bff_snd(ii+9)  = uf(3,i,nys+1)
-       bff_snd(ii+10) = uf(4,i,nys+1)
-       bff_snd(ii+11) = uf(5,i,nys+1)
-       bff_snd(ii+12) = uf(6,i,nys+1)
+       bff_snd(ii+1)  = df(1,i,nys)
+       bff_snd(ii+2)  = df(2,i,nys)
+       bff_snd(ii+3)  = df(3,i,nys)
+       bff_snd(ii+4)  = df(4,i,nys)
+       bff_snd(ii+5)  = df(5,i,nys)
+       bff_snd(ii+6)  = df(6,i,nys)
+       bff_snd(ii+7)  = df(1,i,nys+1)
+       bff_snd(ii+8)  = df(2,i,nys+1)
+       bff_snd(ii+9)  = df(3,i,nys+1)
+       bff_snd(ii+10) = df(4,i,nys+1)
+       bff_snd(ii+11) = df(5,i,nys+1)
+       bff_snd(ii+12) = df(6,i,nys+1)
     enddo
     call MPI_SENDRECV(bff_snd(1),12*(nxe-nxs+1),mnpr,ndown,110, &
                       bff_rcv(1),12*(nxe-nxs+1),mnpr,nup  ,110, &
                       ncomw,nstat,nerr)
     do i=nxs,nxe
        ii = 12*(i-nxs)
-       uf(1,i,nye+1) = bff_rcv(ii+1)   
-       uf(2,i,nye+1) = bff_rcv(ii+2)
-       uf(3,i,nye+1) = bff_rcv(ii+3)
-       uf(4,i,nye+1) = bff_rcv(ii+4)   
-       uf(5,i,nye+1) = bff_rcv(ii+5)
-       uf(6,i,nye+1) = bff_rcv(ii+6)
-       uf(1,i,nye+2) = bff_rcv(ii+7)   
-       uf(2,i,nye+2) = bff_rcv(ii+8)
-       uf(3,i,nye+2) = bff_rcv(ii+9)
-       uf(4,i,nye+2) = bff_rcv(ii+10)   
-       uf(5,i,nye+2) = bff_rcv(ii+11)
-       uf(6,i,nye+2) = bff_rcv(ii+12)
+       df(1,i,nye+1) = bff_rcv(ii+1)   
+       df(2,i,nye+1) = bff_rcv(ii+2)
+       df(3,i,nye+1) = bff_rcv(ii+3)
+       df(4,i,nye+1) = bff_rcv(ii+4)   
+       df(5,i,nye+1) = bff_rcv(ii+5)
+       df(6,i,nye+1) = bff_rcv(ii+6)
+       df(1,i,nye+2) = bff_rcv(ii+7)   
+       df(2,i,nye+2) = bff_rcv(ii+8)
+       df(3,i,nye+2) = bff_rcv(ii+9)
+       df(4,i,nye+2) = bff_rcv(ii+10)   
+       df(5,i,nye+2) = bff_rcv(ii+11)
+       df(6,i,nye+2) = bff_rcv(ii+12)
     enddo
 
     do i=nxs,nxe
        ii = 12*(i-nxs)
-       bff_snd(ii+1)  = uf(1,i,nye-1)
-       bff_snd(ii+2)  = uf(2,i,nye-1)
-       bff_snd(ii+3)  = uf(3,i,nye-1)
-       bff_snd(ii+4)  = uf(4,i,nye-1)
-       bff_snd(ii+5)  = uf(5,i,nye-1)
-       bff_snd(ii+6)  = uf(6,i,nye-1)
-       bff_snd(ii+7)  = uf(1,i,nye)
-       bff_snd(ii+8)  = uf(2,i,nye)
-       bff_snd(ii+9)  = uf(3,i,nye)
-       bff_snd(ii+10) = uf(4,i,nye)
-       bff_snd(ii+11) = uf(5,i,nye)
-       bff_snd(ii+12) = uf(6,i,nye)
+       bff_snd(ii+1)  = df(1,i,nye-1)
+       bff_snd(ii+2)  = df(2,i,nye-1)
+       bff_snd(ii+3)  = df(3,i,nye-1)
+       bff_snd(ii+4)  = df(4,i,nye-1)
+       bff_snd(ii+5)  = df(5,i,nye-1)
+       bff_snd(ii+6)  = df(6,i,nye-1)
+       bff_snd(ii+7)  = df(1,i,nye)
+       bff_snd(ii+8)  = df(2,i,nye)
+       bff_snd(ii+9)  = df(3,i,nye)
+       bff_snd(ii+10) = df(4,i,nye)
+       bff_snd(ii+11) = df(5,i,nye)
+       bff_snd(ii+12) = df(6,i,nye)
     enddo
     call MPI_SENDRECV(bff_snd(1),12*(nxe-nxs+1),mnpr,nup  ,100, &
                       bff_rcv(1),12*(nxe-nxs+1),mnpr,ndown,100, &
                       ncomw,nstat,nerr)
     do i=nxs,nxe
        ii = 12*(i-nxs)
-       uf(1,i,nys-2) = bff_rcv(ii+1)   
-       uf(2,i,nys-2) = bff_rcv(ii+2)
-       uf(3,i,nys-2) = bff_rcv(ii+3)
-       uf(4,i,nys-2) = bff_rcv(ii+4)   
-       uf(5,i,nys-2) = bff_rcv(ii+5)
-       uf(6,i,nys-2) = bff_rcv(ii+6)
-       uf(1,i,nys-1) = bff_rcv(ii+7)   
-       uf(2,i,nys-1) = bff_rcv(ii+8)
-       uf(3,i,nys-1) = bff_rcv(ii+9)
-       uf(4,i,nys-1) = bff_rcv(ii+10)   
-       uf(5,i,nys-1) = bff_rcv(ii+11)
-       uf(6,i,nys-1) = bff_rcv(ii+12)
+       df(1,i,nys-2) = bff_rcv(ii+1)   
+       df(2,i,nys-2) = bff_rcv(ii+2)
+       df(3,i,nys-2) = bff_rcv(ii+3)
+       df(4,i,nys-2) = bff_rcv(ii+4)   
+       df(5,i,nys-2) = bff_rcv(ii+5)
+       df(6,i,nys-2) = bff_rcv(ii+6)
+       df(1,i,nys-1) = bff_rcv(ii+7)   
+       df(2,i,nys-1) = bff_rcv(ii+8)
+       df(3,i,nys-1) = bff_rcv(ii+9)
+       df(4,i,nys-1) = bff_rcv(ii+10)   
+       df(5,i,nys-1) = bff_rcv(ii+11)
+       df(6,i,nys-1) = bff_rcv(ii+12)
     enddo
 
     if(bc == 0)then
-       uf(1:6,nxs-2,nys-2:nye+2) = uf(1:6,nxe-1,nys-2:nye+2)
-       uf(1:6,nxs-1,nys-2:nye+2) = uf(1:6,nxe  ,nys-2:nye+2)
-       uf(1:6,nxe+1,nys-2:nye+2) = uf(1:6,nxs  ,nys-2:nye+2)
-       uf(1:6,nxe+2,nys-2:nye+2) = uf(1:6,nxs+1,nys-2:nye+2)
+       df(1:6,nxs-2,nys-2:nye+2) = df(1:6,nxe-1,nys-2:nye+2)
+       df(1:6,nxs-1,nys-2:nye+2) = df(1:6,nxe  ,nys-2:nye+2)
+       df(1:6,nxe+1,nys-2:nye+2) = df(1:6,nxs  ,nys-2:nye+2)
+       df(1:6,nxe+2,nys-2:nye+2) = df(1:6,nxs+1,nys-2:nye+2)
     else if(bc == -1)then
-       uf(1  ,nxs-2,nys-2:nye+2) = -uf(1  ,nxs+1,nys-2:nye+2)
-       uf(2:4,nxs-2,nys-2:nye+2) = +uf(2:4,nxs+2,nys-2:nye+2)
-       uf(5:6,nxs-2,nys-2:nye+2) = -uf(5:6,nxs+1,nys-2:nye+2)
+       df(1  ,nxs-2,nys-2:nye+2) = -df(1  ,nxs+1,nys-2:nye+2)
+       df(2:4,nxs-2,nys-2:nye+2) = +df(2:4,nxs+2,nys-2:nye+2)
+       df(5:6,nxs-2,nys-2:nye+2) = -df(5:6,nxs+1,nys-2:nye+2)
 
-       uf(1  ,nxs-1,nys-2:nye+2) = -uf(1  ,nxs  ,nys-2:nye+2)
-       uf(2:4,nxs-1,nys-2:nye+2) = +uf(2:4,nxs+1,nys-2:nye+2)
-       uf(5:6,nxs-1,nys-2:nye+2) = -uf(5:6,nxs  ,nys-2:nye+2)
+       df(1  ,nxs-1,nys-2:nye+2) = -df(1  ,nxs  ,nys-2:nye+2)
+       df(2:4,nxs-1,nys-2:nye+2) = +df(2:4,nxs+1,nys-2:nye+2)
+       df(5:6,nxs-1,nys-2:nye+2) = -df(5:6,nxs  ,nys-2:nye+2)
 
-       uf(1  ,nxe  ,nys-2:nye+2) = -uf(1  ,nxe-1,nys-2:nye+2)
-       uf(2:4,nxe+1,nys-2:nye+2) = +uf(2:4,nxe-1,nys-2:nye+2)
-       uf(5:6,nxe  ,nys-2:nye+2) = -uf(5:6,nxe-1,nys-2:nye+2)
+       df(1  ,nxe  ,nys-2:nye+2) = -df(1  ,nxe-1,nys-2:nye+2)
+       df(2:4,nxe+1,nys-2:nye+2) = +df(2:4,nxe-1,nys-2:nye+2)
+       df(5:6,nxe  ,nys-2:nye+2) = -df(5:6,nxe-1,nys-2:nye+2)
 
-       uf(1  ,nxe+1,nys-2:nye+2) = -uf(1  ,nxe-2,nys-2:nye+2)
-       uf(2:4,nxe+2,nys-2:nye+2) = +uf(2:4,nxe-2,nys-2:nye+2)
-       uf(5:6,nxe+1,nys-2:nye+2) = -uf(5:6,nxe-2,nys-2:nye+2)
+       df(1  ,nxe+1,nys-2:nye+2) = -df(1  ,nxe-2,nys-2:nye+2)
+       df(2:4,nxe+2,nys-2:nye+2) = +df(2:4,nxe-2,nys-2:nye+2)
+       df(5:6,nxe+1,nys-2:nye+2) = -df(5:6,nxe-2,nys-2:nye+2)
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
        stop
     endif
 
-  end subroutine boundary__field
+  end subroutine boundary__dfield
 
 
-  subroutine boundary__curre(uj,nxs,nxe,nys,nye,bc, &
-                             nup,ndown,mnpr,nstat,ncomw,nerr)
+  subroutine boundary__curre(uj)
 
-    integer, intent(in)    :: nxs, nxe, nys, nye, bc
-    integer, intent(in)    :: nup, ndown, mnpr, ncomw
-    integer, intent(inout) :: nerr, nstat(:)
     real(8), intent(inout) :: uj(3,nxs-2:nxe+2,nys-2:nye+2)
     integer                :: i, ii
     real(8)                :: bff_rcv(6*(nxe-nxs+4+1)), bff_snd(6*(nxe-nxs+4+1))
-    real(8)                :: bff_rcv2(2*(nxe-nxs+4+1)), bff_snd2(2*(nxe-nxs+4+1))
 
-    !send to rank-1
     do i=nxs-2,nxe+2
        ii = 6*(i-(nxs-2))
        bff_snd(ii+1) = uj(1,i,nys-2)
@@ -289,7 +346,6 @@ contains
        uj(3,i,nye  ) = uj(3,i,nye  )+bff_rcv(ii+6)
     enddo
 
-    !send to rank+1
     do i=nxs-2,nxe+2
        ii = 6*(i-(nxs-2))
        bff_snd(ii+1) = uj(1,i,nye+1)
@@ -312,29 +368,116 @@ contains
        uj(3,i,nys+1) = uj(3,i,nys+1)+bff_rcv(ii+6)
     enddo
 
-    !boundary condition in x
+    do i=nxs-2,nxe+2
+       ii = 3*(i-(nxs-2))
+       bff_snd(ii+1) = uj(1,i,nys)
+       bff_snd(ii+2) = uj(2,i,nys)
+       bff_snd(ii+3) = uj(3,i,nys)
+    enddo
+    call MPI_SENDRECV(bff_snd(1),3*(nxe-nxs+4+1),mnpr,ndown,130, &
+                      bff_rcv(1),3*(nxe-nxs+4+1),mnpr,nup  ,130, &
+                      ncomw,nstat,nerr)
+    do i=nxs-2,nxe+2
+       ii = 3*(i-(nxs-2))
+       uj(1,i,nye+1) = bff_rcv(ii+1)
+       uj(2,i,nye+1) = bff_rcv(ii+2)
+       uj(3,i,nye+1) = bff_rcv(ii+3)
+    enddo
+
+    do i=nxs-2,nxe+2
+       ii = 3*(i-(nxs-2))
+       bff_snd(ii+1) = uj(1,i,nye)
+       bff_snd(ii+2) = uj(2,i,nye)
+       bff_snd(ii+3) = uj(3,i,nye)
+    enddo
+    call MPI_SENDRECV(bff_snd(1),3*(nxe-nxs+4+1),mnpr,nup  ,140, &
+                      bff_rcv(1),3*(nxe-nxs+4+1),mnpr,ndown,140, &
+                      ncomw,nstat,nerr)
+    do i=nxs-2,nxe+2
+       ii = 3*(i-(nxs-2))
+       uj(1,i,nys-1) = bff_rcv(ii+1)
+       uj(2,i,nys-1) = bff_rcv(ii+2)
+       uj(3,i,nys-1) = bff_rcv(ii+3)
+    enddo
+
     if(bc == 0)then
-       uj(1:3,nxs  ,nys:nye) = uj(1:3,nxs  ,nys:nye)+uj(1:3,nxe+1,nys:nye)
-       uj(1:3,nxs+1,nys:nye) = uj(1:3,nxs+1,nys:nye)+uj(1:3,nxe+2,nys:nye)
+       uj(1:3,nxs  ,nys-2:nye+2) = uj(1:3,nxs  ,nys-2:nye+2)+uj(1:3,nxe+1,nys-2:nye+2)
+       uj(1:3,nxs+1,nys-2:nye+2) = uj(1:3,nxs+1,nys-2:nye+2)+uj(1:3,nxe+2,nys-2:nye+2)
+       uj(1:3,nxe-1,nys-2:nye+2) = uj(1:3,nxe-1,nys-2:nye+2)+uj(1:3,nxs-2,nys-2:nye+2)
+       uj(1:3,nxe  ,nys-2:nye+2) = uj(1:3,nxe  ,nys-2:nye+2)+uj(1:3,nxs-1,nys-2:nye+2)
 
-       uj(1:3,nxe-1,nys:nye) = uj(1:3,nxe-1,nys:nye)+uj(1:3,nxs-2,nys:nye)
-       uj(1:3,nxe  ,nys:nye) = uj(1:3,nxe  ,nys:nye)+uj(1:3,nxs-1,nys:nye)
+       uj(1:3,nxs-1,nys-2:nye+2) = uj(1:3,nxe,nys-2:nye+2)
+       uj(1:3,nxe+1,nys-2:nye+2) = uj(1:3,nxs,nys-2:nye+2)
     else if(bc == -1)then
-       uj(1  ,nxs+1,nys:nye) = uj(1  ,nxs+1,nys:nye)-uj(1  ,nxs-1,nys:nye)
-       uj(1  ,nxs+2,nys:nye) = uj(1  ,nxs+2,nys:nye)-uj(1  ,nxs-2,nys:nye)
-       uj(2:3,nxs  ,nys:nye) = uj(2:3,nxs  ,nys:nye)+uj(2:3,nxs-1,nys:nye)
-       uj(2:3,nxs+1,nys:nye) = uj(2:3,nxs+1,nys:nye)+uj(2:3,nxs-2,nys:nye)
+       uj(1  ,nxs+1,nys-2:nye+2) = uj(1  ,nxs+1,nys-2:nye+2)-uj(1  ,nxs-1,nys-2:nye+2)
+       uj(2:3,nxs  ,nys-2:nye+2) = uj(2:3,nxs  ,nys-2:nye+2)+uj(2:3,nxs-1,nys-2:nye+2)
+       uj(2:3,nxs+1,nys-2:nye+2) = uj(2:3,nxs+1,nys-2:nye+2)+uj(2:3,nxs-2,nys-2:nye+2)
+       uj(2:3,nxe-2,nys-2:nye+2) = uj(2:3,nxe-2,nys-2:nye+2)+uj(2:3,nxe+1,nys-2:nye+2)
+       uj(2:3,nxe-1,nys-2:nye+2) = uj(2:3,nxe-1,nys-2:nye+2)+uj(2:3,nxe  ,nys-2:nye+2)
+       uj(1  ,nxe-1,nys-2:nye+2) = uj(1  ,nxe-1,nys-2:nye+2)-uj(1  ,nxe+1,nys-2:nye+2)
 
-       uj(1  ,nxe-2,nys:nye) = uj(1  ,nxe-2,nys:nye)-uj(1  ,nxe+2,nys:nye)
-       uj(1  ,nxe-1,nys:nye) = uj(1  ,nxe-1,nys:nye)-uj(1  ,nxe+1,nys:nye)
-       uj(2:3,nxe-2,nys:nye) = uj(2:3,nxe-2,nys:nye)+uj(2:3,nxe+1,nys:nye)
-       uj(2:3,nxe-1,nys:nye) = uj(2:3,nxe-1,nys:nye)+uj(2:3,nxe  ,nys:nye)
+       uj(1  ,nxs-1,nys-2:nye+2) = +uj(1  ,nxs+1,nys-2:nye+2)
+       uj(2:3,nxs-1,nys-2:nye+2) = -uj(2:3,nxs  ,nys-2:nye+2)
+       uj(2:3,nxe  ,nys-2:nye+2) = -uj(2:3,nxe-1,nys-2:nye+2)
+       uj(1  ,nxe+1,nys-2:nye+2) = +uj(1  ,nxe-1,nys-2:nye+2)
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
        stop
     endif
 
   end subroutine boundary__curre
+
+
+  subroutine boundary__phi(phi,l)
+
+    integer, intent(in)    :: l
+    real(8), intent(inout) :: phi(nxs-1:nxe+1,nys-1:nye+1)
+    integer                :: i, j, ii, bcc
+    real(8)                :: bff_snd(nxe-nxs+1), bff_rcv(nxe-nxs+1)
+
+    do i=nxs,nxe
+       ii = i-nxs
+       bff_snd(ii+1)  = phi(i,nys)
+    enddo
+    call MPI_SENDRECV(bff_snd(1),nxe-nxs+1,mnpr,ndown,110, &
+                      bff_rcv(1),nxe-nxs+1,mnpr,nup  ,110, &
+                      ncomw,nstat,nerr)
+    do i=nxs,nxe
+       ii = i-nxs
+       phi(i,nye+1) = bff_rcv(ii+1)   
+    enddo
+
+    do i=nxs,nxe
+       ii = i-nxs
+       bff_snd(ii+1)  = phi(i,nye)
+    enddo
+    call MPI_SENDRECV(bff_snd(1),nxe-nxs+1,mnpr,nup  ,100, &
+                      bff_rcv(1),nxe-nxs+1,mnpr,ndown,100, &
+                      ncomw,nstat,nerr)
+    do i=nxs,nxe
+       ii = i-nxs
+       phi(i,nys-1) = bff_rcv(ii+1)   
+    enddo
+
+    if(bc == 0)then
+       phi(nxs-1,nys-1:nye+1) = phi(nxe,nys-1:nye+1)
+       phi(nxe+1,nys-1:nye+1) = phi(nxs,nys-1:nye+1)
+    else if(bc == -1)then
+       select case(l)
+          case(1)
+          phi(nxs-1,nys-1:nye+1) = -phi(nxs  ,nys-1:nye+1)
+          phi(nxe  ,nys-1:nye+1) = -phi(nxe-1,nys-1:nye+1)
+
+          case(2,3)
+          phi(nxs-1,nys-1:nye+1) = phi(nxs+1,nys-1:nye+1)
+          phi(nxe+1,nys-1:nye+1) = phi(nxe-1,nys-1:nye+1)
+       endselect
+    else
+       write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'
+       stop
+    endif
+
+  end subroutine boundary__phi
 
 
 end module boundary

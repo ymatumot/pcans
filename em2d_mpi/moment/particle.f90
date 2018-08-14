@@ -85,7 +85,7 @@ contains
              uvm(2) = up(4,ii,j,isp)+fac1*pf(5)
              uvm(3) = up(5,ii,j,isp)+fac1*pf(6)
 
-             gam = dsqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
+             gam = sqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
              fac1r = fac1/gam
              fac2r = fac2/(gam+txxx*bt2/gam)
 

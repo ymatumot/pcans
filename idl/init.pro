@@ -1,22 +1,11 @@
 ;; Initilization when idl starts up.
-
 ;; set path environment
 !path = expand_path('./') +':'+!path
-!path = getenv('PCANS_DIR')+ '/idl/'+':' + !path
+!path = getenv('PCANS_DIR')+'idl/'+':'+!path
 
-;; set color map for 24-bit display
-device, decomposed=0, retain=2, true_color=24
+;; default object graphics option
+imgdefop = {no_toolbar:1, font_name:'Times', font_size:24, axis_style:2, $
+            xtickdir:1, ytickdir:1, dimension:[1000,1000], xthick:2, ythick:2}
+pldefop = {no_toolbar:1, font_name:'Times', font_size:24, thick:2, dimension:[1000,1000]}
+cpu,tpool_nthreads=!cpu.tpool_nthreads/2
 
-;; color table
-loadct,12,/si
-
-;; setting X
-set_x
-
-;; Graphic environments
-;; using True Type Font
-!p.font = -1
-!p.thick=1.5
-!x.thick=2.0
-!y.thick=2.0
-!z.thick=2.0

@@ -36,8 +36,8 @@ contains
     call random_number(aa)
     call random_number(bb)
 
-    r1 = dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-    r2 = dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+    r1 = sqrt(-2.*log(aa))*cos(2.*pi*bb)
+    r2 = sqrt(-2.*log(aa))*sin(2.*pi*bb)
 
   end subroutine random_gen__bm
 

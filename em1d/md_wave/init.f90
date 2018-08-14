@@ -38,15 +38,15 @@ contains
     r(1) = r(2)*mr    ! ION MASS
     delt = cfl*delx/c ! TIME STEP SIZE
     ldb  = delx*rdbl
-    fpe  = dsqrt(beta*rtemp)*c/(dsqrt(2.D0)*alpha*ldb)
+    fpe  = sqrt(beta*rtemp)*c/(sqrt(2.D0)*alpha*ldb)
     fge  = fpe/alpha
     fgi  = fge*r(2)/r(1)
-    fpi  = fpe*dsqrt(r(2)/r(1))
-    va   = fge/fpe*c*dsqrt(r(2)/r(1))
-    rge  = alpha*ldb*dsqrt(2.D0)
-    rgi  = rge*dsqrt(r(1)/r(2))/dsqrt(rtemp)
+    fpi  = fpe*sqrt(r(2)/r(1))
+    va   = fge/fpe*c*sqrt(r(2)/r(1))
+    rge  = alpha*ldb*sqrt(2.D0)
+    rgi  = rge*sqrt(r(1)/r(2))/sqrt(rtemp)
     vte  = rge*fge
-    vti  = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
+    vti  = vte*sqrt(r(2)/r(1))/sqrt(rtemp)
 
     np2(1:nx+bc,1) = n0
     np2(1:nx+bc,2) = np2(1:nx+bc,1)
@@ -57,7 +57,7 @@ contains
     endif
 
     !CHARGE
-    q(1) = fpi*dsqrt(r(1)/(4.0*pi*np2(1,1)))
+    q(1) = fpi*sqrt(r(1)/(4.0*pi*n0/delx))
     q(2) = -q(1)
 
     !MAGNETIC FIELD STRENGTH
@@ -91,7 +91,7 @@ contains
     integer :: i, ii, isp
     real(8) :: sd, r1, r2, u0
 
-    u0 = v0/dsqrt(1.-(v0/c)**2)
+    u0 = v0/sqrt(1.D0-(v0/c)**2)
 
     !PARTICLE POSITION
     isp = 1
@@ -107,10 +107,10 @@ contains
     !MAXWELLIAN DISTRIBUTION
     do isp=1,nsp
        if(isp == 1) then 
-          sd = vti/dsqrt(2.0D0)
+          sd = vti/sqrt(2.0D0)
        endif
        if(isp == 2) then
-          sd = vte/dsqrt(2.0D0)
+          sd = vte/sqrt(2.0D0)
        endif
 
        do i=1,nx+bc

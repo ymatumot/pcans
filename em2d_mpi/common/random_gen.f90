@@ -41,8 +41,8 @@ contains
     call random_number(bb)
     aa = 1-aa ! (0,1]
 
-    r1 = dsqrt(-2.*dlog(aa))*cos(2.*pi*bb)
-    r2 = dsqrt(-2.*dlog(aa))*sin(2.*pi*bb)
+    r1 = sqrt(-2.*log(aa))*cos(2.*pi*bb)
+    r2 = sqrt(-2.*log(aa))*sin(2.*pi*bb)
 
   end subroutine random_gen__bm
 
@@ -66,8 +66,8 @@ contains
        r2 = 1-r2 ! (0,1]
        r3 = 1-r3 ! (0,1]
        r4 = 1-r4 ! (0,1]
-       e3 = - T * dlog(r1*r2*r3)
-       e4 = - T * dlog(r1*r2*r3*r4)
+       e3 = - T * log(r1*r2*r3)
+       e4 = - T * log(r1*r2*r3*r4)
        !! criterion
        if( ( e4**2 - e3**2 ) .gt. 1.d0 ) then
           exit
@@ -80,7 +80,7 @@ contains
     call random_number(cc)
 
     aa = 2.d0 * aa - 1.d0
-    bb = dsqrt( 1.d0 - aa**2 )
+    bb = sqrt( 1.d0 - aa**2 )
     u1 = e3 * aa
     u2 = e3 * bb * cos(2.*pi*cc)
     u3 = e3 * bb * sin(2.*pi*cc)
@@ -96,9 +96,9 @@ contains
     real(8)                :: u0, dice
     real(8)                :: beta, bgamma
 
-    bgamma = dsqrt( 1.d0 + ubulk**2 )
+    bgamma = sqrt( 1.d0 + ubulk**2 )
     beta   = ubulk / bgamma
-    u0     = dsqrt(1.d0+u1**2+u2**2+u3**2)
+    u0     = sqrt(1.d0+u1**2+u2**2+u3**2)
     if( (u3*beta) .lt. 0.d0 ) then
        call random_number(dice)
        if( (u0*dice).lt.( -beta*u3 ) )then

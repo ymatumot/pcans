@@ -82,7 +82,7 @@ contains
              uvm(2) = up(3,ii,i,isp)+fac1*pf(5)
              uvm(3) = up(4,ii,i,isp)+fac1*pf(6)
 
-             gam = dsqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
+             gam = sqrt(c*c+uvm(1)*uvm(1)+uvm(2)*uvm(2)+uvm(3)*uvm(3))
 
              fac1r = fac1/gam
              fac2r = fac2/(gam+txxx*bt2/gam)
@@ -99,9 +99,9 @@ contains
              gp(3,ii,i,isp) = uvm(2)+fac1*pf(5)
              gp(4,ii,i,isp) = uvm(3)+fac1*pf(6)
 
-             gam = dsqrt(1.0+(+gp(2,ii,i,isp)*gp(2,ii,i,isp) &
-                              +gp(3,ii,i,isp)*gp(3,ii,i,isp) &
-                              +gp(4,ii,i,isp)*gp(4,ii,i,isp))/(c*c))
+             gam = sqrt(1.0D0+(+gp(2,ii,i,isp)*gp(2,ii,i,isp) &
+                               +gp(3,ii,i,isp)*gp(3,ii,i,isp) &
+                               +gp(4,ii,i,isp)*gp(4,ii,i,isp))/(c*c))
              gp(1,ii,i,isp) = up(1,ii,i,isp)+gp(2,ii,i,isp)*delt/gam
           enddo
        enddo

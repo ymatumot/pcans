@@ -27,7 +27,7 @@ module const
 !! OTHER CONSTANTS
   real(8), parameter :: gfac   = 0.501D0 !IMPLICITNESS FACTOR > 0.5
   real(8), parameter :: cfl    = 0.5D0   !CFL CONDITION FOR LIGHT WAVE
-  real(8)            :: delx   = 1.0D0   !CELL WIDTH
+  real(8), parameter :: delx   = 1.0D0   !CELL WIDTH
   real(8), parameter :: rdbl   = 1.0D0   !DEBYE LENGTH / CELL WIDTH
   real(8), parameter :: pi     = 4.0D0*atan(1.0D0)
 
@@ -41,7 +41,7 @@ module const
 !!      v0 : BULK SPEED
 !!   t_ani : TEMPERATURE ANISOTROPY WITH RESPECT TO B0
   integer, parameter :: n0     = 200
-  real(8)            :: c      = 1.0D0
+  real(8), parameter :: c      = 1.0D0
   real(8), parameter :: mr     = 1837.0D0
   real(8), parameter :: alpha  = 5.0D0, beta = 1.0D0, rtemp=1.0D0
   real(8), parameter :: v0     = 0.0D0

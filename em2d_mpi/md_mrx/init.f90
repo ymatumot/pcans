@@ -10,22 +10,16 @@ module init
 
   public :: init__set_param
 
-  integer, public, parameter   :: nroot=0
   integer, allocatable, public :: np2(:,:)
-  integer, public              :: itmax, it0, intvl1, intvl2
-  real(8), public              :: delx, delt, gfac
-  real(8), public              :: c, q(nsp), r(nsp)
+  real(8),              public :: delt
+  real(8),              public :: q(nsp), r(nsp)
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
-  character(len=64), public    :: dir
-  character(len=64), public    :: file12
-  real(8)                      :: pi, v0, x0, y0, vti, vte, rtemp, dr, br, theta_b
-  real(8) :: sdi, sde  ! for Box-Mullter method
-  real(8) :: ncs, nbg  ! Harris sheet density and the background density
-  real(8) :: vdi, vde  ! drift speed
-  real(8) :: b0   ! B0 for harris fields
-  real(8) :: lcs  ! current sheet half thickness
+ 
+  real(8) :: x0, y0, vti, vte
+  real(8) :: b0 
+  real(8) :: lcs
 
 
 contains
@@ -33,154 +27,108 @@ contains
   
   subroutine init__set_param
 
-    use fio, only : fio__input, fio__param
-    real(8) :: fgi, fpi, alpha, va, fpe, fge, rgi, rge
-    real(8) :: ldb       ! Debye length
-    character(len=64) :: file9 
-    character(len=64) :: file11
+    use fio, only      : fio__init, fio__input, fio__param
+    use boundary, only : boundary__init
+    use field, only    : field__init
+    use particle, only : particle__init
+
+    real(8) :: fgi, fpi, va, fpe, fge, rgi, rge, ldb
+    character(len=64) :: fname_restart
 
 !************** MPI settings  *******************!
     call mpi_set__init(nxgs,nxge,nygs,nyge,nproc)
-
+!*********** End of MPI settings  ***************!
+!*********** MEMORY ALLOCATIONS *****************!
     allocate(np2(nys:nye,nsp))
     allocate(uf(6,nxs-2:nxe+2,nys-2:nye+2))
     allocate(up(5,np,nys:nye,nsp))
     allocate(gp(5,np,nys:nye,nsp))
-!*********** End of MPI settings  ***************!
+!*********** End of ALLOCATIONS  ***************!
 
-!*********************************************************************
-!   time0   : start time (if time0 < 0, initial data from input.f)
-!   itmax   : number of iteration
-!   it0     : base count
-!   intvl1  : storage interval for particles & fields
-!   intvl2  : printing interval for energy variation
-!   dir     : directory name for data output
-!   file??  : output file name for unit number ??
-!           :  9 - initial parameters
-!           : 10 - for saving all data
-!           : 11 - for starting from saved data
-!           : 12 - for saving energy history
-!   gfac    : implicit factor
-!             gfac < 0.5 : unstable
-!             gfac = 0.5 : no implicit
-!             gfac = 1.0 : full implicit
-!*********************************************************************
-    pi     = 4.d0*atan(1.0)
-    itmax  = 20000
-    intvl1 = 500
-    intvl2 = 50
-    dir    = './dat/'
-    file9  = 'init_param.dat'
-    file12 = 'energy.dat'
-    gfac   = 0.501
 
-    it0    = 0
-    if(it0 /= 0)then
-       !start from the past calculation
-       write(file11,'(i6.6,a,i3.3,a)') it0,'_rank=',nrank,'.dat'
-       call fio__input(up,uf,np2,c,q,r,delt,delx,it0,                             &
-                       np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,bc,nproc,nrank, &
-                       dir,file11)
-       return
-    endif
+!**** SETTING OTHER NUMERICAL & PHYSICAL CONSTANTS ****!
+    r(2) = 1.0D0      ! ELECTRON MASS
+    r(1) = r(2)*mr    ! ION MASS
+    delt = cfl*delx/c ! TIME STEP SIZE
+    ldb  = delx*rdbl
 
-!*********************************************************************
-!   r(1)  : ion mass             r(2)  : electron mass
-!   q(1)  : ion charge           q(2)  : electron charge
-!   c     : speed of light
-!   ldb   : debye length         lcs   : current sheet width
-!
-!   rgi   : ion Larmor radius    rge   : electron Larmor radius
-!   fgi   : ion gyro-frequency   fge   : electron gyro-frequency
-!   vti   : ion thermal speed    vte   : electron thermal speed
-!   vdi   : ion drift speed      vde   : electron drift speed
-!   b0    : magnetic field       
-!  
-!   alpha : wpe/wge
-!   rtemp : Te/Ti
-!*********************************************************************
-!    Reconnection setup  (by S. Zenitani, NAOJ)   2012/7/19
-!*********************************************************************
-    delx = 1.0
-    c    = 1.0
-    delt = 0.5*delx/c
-    ldb  = delx
-
-    r(1) = 16.d0
-    r(2) =  1.d0
-
-! alpha = fpe/fce = c/c_Ae,
-! where c_Ae = B/sqrt(4pi me n) is the electron Alfven speed
-    alpha = 2.d0
-    rtemp = 0.25d0
-
-! Here we use the pressure balance,
+! HERE WE USE THE PRESSURE BALANCE,
 !   B**2 / 8*pi = n [ kT_e + kT_i ] = n kT_e * ((1+rtemp)/rtemp)
 !               = 0.5*me*n*(vte**2) * ((1+rtemp)/rtemp)
 !   (vte**2) * ((1+rtemp)/rtemp) = B**2 / 4*pi*me*n = (c/alpha)**2
-    vte = dsqrt(rtemp)*c/(dsqrt(1+rtemp)*alpha)
-    vti = vte*dsqrt(r(2)/r(1))/dsqrt(rtemp)
-! We use the following relation to obtain fpe,
+    vte = sqrt(rtemp)*c/(sqrt(1+rtemp)*alpha)
+    vti = vte*sqrt(r(2)/r(1))/sqrt(rtemp)
+! WE USE THE FOLLOWING RELATION TO OBTAIN FPE,
 !   ldb = sqrt( kT_e / 4 pi n e**2 )
 !       = sqrt( 0.5*me*(vte**2) / 4 pi n e**2 )
 !       = vte/fpe/sqrt(2)
-    fpe = vte/ldb/dsqrt(2.d0)
-    fpi = fpe*dsqrt(r(2)/r(1))
+    fpe = vte/ldb/sqrt(2.d0)
+    fpi = fpe*sqrt(r(2)/r(1))
     fge = fpe/alpha
     fgi = fge*r(2)/r(1)
-    va  = fge/fpe*c*dsqrt(r(2)/r(1))
+    va  = fge/fpe*c*sqrt(r(2)/r(1))
     rge = vte/fge
     rgi = vti/fgi
 
-    ! current sheet half thickness (fixed to 0.5 d_i)
-    lcs = 0.5d0 * c/fpi
-    ! current sheet density
-    ncs = 250
-    ! background density
-    nbg = 50
+    ! ELEMENTARY CHARGE
+    q(1) = fpi*sqrt(r(1)/(4.d0*pi*ncs))
+    q(2) = -q(1)  ! -fpe*sqrt(r(2)/(4.d0*pi*ncs))
 
-    ! charge
-    q(1) = fpi*dsqrt(r(1)/(4.d0*pi*ncs))
-    q(2) = -q(1)  ! -fpe*dsqrt(r(2)/(4.d0*pi*ncs))
-    ! Magnetic field amplitude
+    ! MAGNETIC FIELD STRENGTH
     b0  = fgi*r(1)*c/q(1)
-    vdi = 1.d0 / ( 1.d0+rtemp ) * b0/(4*pi*lcs*q(1)*ncs)
-    vde = -rtemp * vdi ! rtemp / (1.d0 + rtemp ) * b0 / ( 8*pi*lcs*q(1)*ncs )
     
-    ! position of the X-point
-    x0 = 0.5*(nxge+nxgs)*delx 
-    y0 = 0.5*(nyge-nygs)*delx
-    ! number of particles in each cell in y
-    np2(nys:nye,1:nsp) = ceiling( nbg*(nxge-nxgs)*delx + ncs*2*lcs + 1d-6)
+    ! POSITION OF THE X-POINT
+    x0  = 0.5*(nxge+nxgs)*delx 
+    y0  = 0.5*(nyge-nygs)*delx
+    ! CURRENT SHEET THICKNESS
+    lcs = lcs * c/fpi
 
-    if(nrank == nroot)then
-       if(np2(nys,1) > np)then
-          write(*,*)'Too large number of particles'
-          stop
-       endif
-    endif
-    
+    ! NUMBER OF PARTICLES IN EACH CELL IN Y
+    np2(nys:nye,1:nsp) = ceiling( nbg*(nxge-nxgs)*delx**2 + ncs*2*lcs*delx + 1d-6)
+
+    !INITIALIZATION OF SUBROUTINES
+    call boundary__init(np,nsp,&
+                        nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,bc, &
+                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat)
+    call particle__init(np,nsp,&
+                        nxs,nxe,nys,nye,nsfo, &
+                        q,r,c,delx,delt)
+    call field__init(np,nsp,&
+                     nxs,nxe,nys,nye,nsfo,bc, &
+                     q,c,delx,delt,gfac,      &
+                     nup,ndown,mnpr,opsum,ncomw,nerr,nstat)
+    call fio__init(np,nsp,&
+                   nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsfo,bc, &
+                   q,r,c,delx,delt,gfac,ncs,                    &
+                   fname_param,fname_energy,dir,                &
+                   nproc,nrank,nroot,nup,ndown,mnpr,opsum,ncomw,nerr,nstat)
     call random_gen__init(nrank)
+
+    !START FROM RESTART DATA IF AVAILABLE
+    if(it0 /= 0)then
+       !START FROM THE PAST CALCULATION
+       write(fname_restart,'(i6.6,a,i3.3,a)') it0,'_rank=',nrank,'.dat'
+       call fio__input(up,uf,np2,it0,fname_restart)
+       return
+    endif
+
+    !SETUP FOR PARTICLES & FIELDS
     call init__loading
-    call fio__param(np,nsp,np2,                             &
-                    nxgs,nxge,nygs,nyge,nys,nye,            &
-                    c,q,r,ncs,0.5*r(1)*vti**2,rtemp,fpe,fge, &
-                    ldb,delt,delx,dir,file9,                &
-                    nroot,nrank)
+    call fio__param(np2,0.5*r(1)*vti**2,rtemp,fpe,fge,ldb)
 
   end subroutine init__set_param
 
 
   subroutine init__loading
 
-    use boundary, only : boundary__particle, boundary__field
-
-    integer              :: i, j, ii, ibg
-    real(8)              :: r1, r2
-    real(8)              :: b_harris, bx_pert, by_pert, jz, density
-    real(8)              :: x, y
-    real(8)              :: f1, f2
-    real(8), parameter   :: e1 = 0.12d0  ! B1/B0: I recommend ~< O(0.5*nbg/ncs).
+    integer            :: i, j, ii, ibg
+    real(8), parameter :: e1 = 0.12d0  ! B1/B0: I recommend ~< O(0.5*nbg/ncs).
+    real(8)            :: r1, r2
+    real(8)            :: jz, density
+    real(8)            :: b_harris, bx_pert, by_pert
+    real(8)            :: x, y
+    real(8)            :: f1, f2
+    real(8)            :: sdi, sde  ! for Box-Mullter method
 
     ! ---------------- Utility functions ------------------
     ! magnetic field strength
@@ -196,38 +144,18 @@ contains
          -2*e1*b0/(4*pi*lcs) * ( 1.d0-((x-x0)**2+(y-y0)**2)/(2*lcs)**2 ) * exp(-((x-x0)**2+(y-y0)**2)/(2*lcs)**2)
 
     ! ---------------- Electromagnetic field ------------------
-    do j=nys,nye
-    do i=nxs,nxe+bc
+    do j=nys-2,nye+2
+    do i=nxs-2,nxe+2
        uf(1,i,j) = 0.0D0
-    enddo
-    enddo
-    do j=nys,nye
-    do i=nxs,nxe
+       uf(1,i,j) = uf(1,i,j) + bx_pert(i*delx,j*delx)
        uf(2,i,j) = b_harris(i*delx)
+       uf(2,i,j) = uf(2,i,j) + by_pert(i*delx,j*delx)
        uf(3,i,j) = 0.d0
        uf(4,i,j) = 0.d0
-    enddo
-    enddo
-    do j=nys,nye
-    do i=nxs,nxe+bc
-       uf(1,i,j) = uf(1,i,j) + bx_pert(i*delx,j*delx)
-    enddo
-    enddo
-    do j=nys,nye
-    do i=nxs,nxe
-       uf(2,i,j) = uf(2,i,j) + by_pert(i*delx,j*delx)
-    enddo
-    enddo
-    do j=nys,nye
-    do i=nxs,nxe+bc
        uf(5,i,j) = 0.d0
        uf(6,i,j) = 0.d0
     enddo
     enddo
-
-    call boundary__field(uf,                &
-                         nxs,nxe,nys,nye,bc, &
-                         nup,ndown,mnpr,nstat,ncomw,nerr)
     ! ---------------- Electromagnetic field ------------------
 
     ! ---------------- Particles ------------------
@@ -239,7 +167,7 @@ contains
 
     do j=nys,nye
 
-       ibg = floor( nbg*(nxe+bc-nxs+1) + 1d-6)
+       ibg = floor( nbg*(nxe+bc-nxs+1)*delx**2 + 1d-6)
        ! Background density: Uniform distribution
        do ii=1,ibg
           call random_number(r1)
@@ -271,11 +199,8 @@ contains
           up(4,ii,j,2) = sde*r1
           up(5,ii,j,2) = sde*r2 + f2*jz(up(1,ii,j,2),up(2,ii,j,2))/density(up(1,ii,j,2))
        enddo
-    enddo
 
-    call boundary__particle(up,                                        &
-                            np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &
-                            nup,ndown,nstat,mnpi,mnpr,ncomw,nerr)
+    enddo
 
   end subroutine init__loading
 

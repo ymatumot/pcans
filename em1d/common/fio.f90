@@ -92,6 +92,7 @@ contains
     real(8), intent(out) :: uf(6,0:nx+1)
     integer, intent(out) :: np2(1:nx+bc,nsp), it0
     integer :: inp, inx, insp, ibc
+    real(8) :: idelx, idelt, ic
 
     if(.not.is_init)then
        write(6,*)'Initialize first by calling fio__init()'
@@ -103,7 +104,8 @@ contains
 
     !time & parameters
     read(11) it0,inp,inx,insp,ibc,delt,delx,c
-    if((inx /= nx) .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc))then
+    if((inx /= nx) .or. (inp /= np) .or. (insp /= nsp) .or. (ibc /= bc) &
+      .or. (idelt /= delt) .or. (idelx /= delx) .or. ic /= c)then
        write(6,*) '** parameter mismatch **'
        stop
     endif
@@ -190,7 +192,7 @@ contains
              u2 =  up(2,ii,i,isp)*up(2,ii,i,isp) &
                   +up(3,ii,i,isp)*up(3,ii,i,isp) &
                   +up(4,ii,i,isp)*up(4,ii,i,isp)
-             gam = dsqrt(1.0+u2/(c*c))
+             gam = sqrt(1.0D0+u2/(c*c))
              vene(isp) = vene(isp)+r(isp)*u2/(gam+1.)
           enddo
        enddo

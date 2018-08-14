@@ -21,10 +21,10 @@ contains
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)
-             ogam = 1./dsqrt(1.0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
-                                 +up(4,ii,j,isp)*up(4,ii,j,isp) &
-                                 +up(5,ii,j,isp)*up(5,ii,j,isp) &
-                                )/(c*c))
+             ogam = 1./sqrt(1.0D0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
+                                   +up(4,ii,j,isp)*up(4,ii,j,isp) &
+                                   +up(5,ii,j,isp)*up(5,ii,j,isp) &
+                                  )/(c*c))
 
              ih = floor(up(1,ii,j,isp)-0.5)
              dx = up(1,ii,j,isp)-0.5-ih
@@ -76,10 +76,10 @@ contains
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)
-             gam = dsqrt(1.0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
-                              +up(4,ii,j,isp)*up(4,ii,j,isp) &
-                              +up(5,ii,j,isp)*up(5,ii,j,isp) &
-                             )/(c*c))
+             gam = sqrt(1.0D0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
+                               +up(4,ii,j,isp)*up(4,ii,j,isp) &
+                               +up(5,ii,j,isp)*up(5,ii,j,isp) &
+                              )/(c*c))
              ogam = 1./gam
 
              ih = floor(up(1,ii,j,isp)-0.5)

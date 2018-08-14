@@ -6,13 +6,14 @@ module mpi_set
 
   include 'mpif.h'
 
-  integer, public, parameter   :: mnpi  = MPI_INTEGER
-  integer, public, parameter   :: mnpr  = MPI_DOUBLE_PRECISION
-  integer, public, parameter   :: mnpc  = MPI_CHARACTER
-  integer, public, parameter   :: opsum = MPI_SUM
-  integer, public              :: nerr, ncomw, nsize, nrank
-  integer, public              :: nstat(MPI_STATUS_SIZE)
-  integer, public              :: nxs, nxe, nys, nye, nup, ndown
+  integer, public, parameter :: mnpi  = MPI_INTEGER
+  integer, public, parameter :: mnpr  = MPI_DOUBLE_PRECISION
+  integer, public, parameter :: mnpc  = MPI_CHARACTER
+  integer, public, parameter :: opsum = MPI_SUM
+  integer, public, parameter :: nroot = 0
+  integer, public            :: nerr, ncomw, nsize, nrank
+  integer, public            :: nstat(MPI_STATUS_SIZE)
+  integer, public            :: nxs, nxe, nys, nye, nup, ndown
 
 
 contains

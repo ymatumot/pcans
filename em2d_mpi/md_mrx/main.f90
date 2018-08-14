@@ -3,14 +3,14 @@ program main
   use const
   use mpi_set
   use init
-  use boundary
-  use fio
+  use boundary, only : boundary__particle
+  use fio, only : fio__output, fio__energy
   use particle
   use field
 
   implicit none
 
-  integer :: it=0
+  integer :: it
 
 !**********************************************************************c
 !
@@ -26,40 +26,18 @@ program main
 !**********************************************************************c
 
   call init__set_param
-  call fio__energy(up,uf,                         &
-                   np,nsp,np2,nxs,nxe,nys,nye,bc, &
-                   c,r,delt,0,it0,dir,file12,     &
-                   nroot,nrank,mnpr,opsum,ncomw,nerr)
-  call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
-                   c,q,r,delt,delx,0,it0,dir)
+  call fio__energy(up,uf,np2,it0)
+  call fio__output(up,uf,np2,it0)
 
   do it=1,itmax-it0
 
-!     if(nrank == nroot) then
-!        write(*,100) it, it*delt
-!100     format('[', I5.5, '] t=', 1p, e11.4)
-!     endif
-     call particle__solv(gp,up,uf,                        &
-                         np,nsp,np2,nxs,nxe,nys,nye,nsfo, &
-                         c,q,r,delt,delx)                 
-     call field__fdtd_i(uf,up,gp,                           &
-                        np,nsp,np2,nxs,nxe,nys,nye,nsfo,bc, &
-                        q,c,delx,delt,gfac,                 &
-                        nup,ndown,mnpr,opsum,nstat,ncomw,nerr)
-     call boundary__particle(up,                                        &
-                             np,nsp,np2,nxgs,nxge,nygs,nyge,nys,nye,bc, &
-                             nup,ndown,nstat,mnpi,mnpr,ncomw,nerr)
+     call particle__solv(gp,up,uf,np2)
+     call field__fdtd_i(uf,up,gp,np2)
+     call boundary__particle(up,np2)
 
-     if (mod(it+it0,intvl1) == 0) then
-        call fio__output(up,uf,np,nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,nsp,np2,bc,nproc,nrank, &
-             c,q,r,delt,delx,it,it0,dir)
-     endif
-     if (mod(it+it0,intvl2) == 0) then
-        call fio__energy(up,uf,                         &
-                         np,nsp,np2,nxs,nxe,nys,nye,bc, &
-                         c,r,delt,it,it0,dir,file12,    &
-                         nroot,nrank,mnpr,opsum,ncomw,nerr)
-     endif
+     if(mod(it+it0,intvl1) == 0) call fio__output(up,uf,np2,it+it0)
+     if(mod(it+it0,intvl2) == 0) call fio__energy(up,uf,np2,it+it0)
+
   enddo
 
   call MPI_FINALIZE(nerr)

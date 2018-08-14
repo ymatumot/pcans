@@ -34,25 +34,23 @@ contains
     real(8) :: fpi, fge, fgi, vti, vae, vai, b0
     character(len=64) :: file11
 
-    vti   = vte * dsqrt(betai/(betae*rmass))
-    c     = vte / dsqrt(sigma * 0.5*betae)
-    fge   = dsqrt(sigma)
-    fpi   = fpe / dsqrt(rmass)
+    r(1)  = rmass
+    r(2)  = 1.0
+    vti   = vte * sqrt(betai/(betae*rmass))
+    c     = vte / sqrt(sigma * 0.5*betae)
+    fge   = sqrt(sigma)
+    fpi   = fpe / sqrt(rmass)
     fgi   = fge / rmass
-    vae   = dsqrt(sigma) * c
-    vai   = dsqrt(sigma/rmass) * c
-    b0    = dsqrt(4*pi*n0) * vae
+    vae   = sqrt(sigma) * c
+    vai   = sqrt(sigma/rmass) * c
     delx  = vte/fpe/rdbl
     delt  = cfl*delx/c
-    bx0   = b0 * dcos(theta)
-    by0   = 0.0d0
-    bz0   = b0 * dsin(theta)
 
     ! FOR UPSTREAM BOUNDARY CONDITION
     vt0(1) = vti
     vt0(2) = vte
     v0   = -ma * vai
-    u0   = v0/dsqrt(1.0-(v0/c)**2)
+    u0   = v0/sqrt(1.0D0-(v0/c)**2)
 
     ! NUMBER OF PARTICLES
     np2(1:nx+bc,1:2) = n0
@@ -61,10 +59,14 @@ contains
        stop
     endif
 
-    ! MASS AND CHARGE
-    r(1) = rmass
-    r(2) = 1.0
-    q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
+    ! MAGNETIC FIELD STRENGTH
+    b0   = sqrt(4*pi*r(2)*n0/delx) * vae
+    bx0  = b0 * cos(theta)
+    by0  = 0.0d0
+    bz0  = b0 * sin(theta)
+
+    ! ELEMENTARY CHARGE
+    q(1) = fpi * sqrt(r(1)/(4.0*pi*n0/delx))
     q(2) = -q(1)
 
     !INTIALIZATION OF SUBROUTINES
@@ -172,7 +174,7 @@ contains
     do i=0,nx+1+bc
        if( dble(i-1) < lbuf ) then
           uu = u0 * dble(i-1)/lbuf
-          vv = uu/dsqrt(1.0+(uu/c)**2)
+          vv = uu/sqrt(1.0D0+(uu/c)**2)
        else
           vv = v0
        end if

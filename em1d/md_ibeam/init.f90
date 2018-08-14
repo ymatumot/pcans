@@ -34,14 +34,15 @@ contains
     real(8) :: fpi, fge, fgi, vti, vae, vai
     character(len=64) :: file11
 
-    vti   = vte * dsqrt(betai/(betae*rmass))
-    c     = vte / dsqrt(sigma * 0.5*betae)
-    fge   = dsqrt(sigma)*fpe
-    fpi   = fpe / dsqrt(rmass)
+    r(1)  = rmass
+    r(2)  = 1.0
+    vti   = vte * sqrt(betai/(betae*rmass))
+    c     = vte / sqrt(sigma * 0.5*betae)
+    fge   = sqrt(sigma)*fpe
+    fpi   = fpe / sqrt(rmass)
     fgi   = fge / rmass
-    vae   = dsqrt(sigma) * c
-    vai   = dsqrt(sigma/rmass) * c
-    b0    = dsqrt(4*pi*n0) * vae
+    vae   = sqrt(sigma) * c
+    vai   = sqrt(sigma/rmass) * c
     delx  = vte/fpe/rdbl
     delt  = cfl*delx/c
 
@@ -56,10 +57,11 @@ contains
        stop
     endif
 
-    ! MASS AND CHARGE
-    r(1) = rmass
-    r(2) = 1.0
-    q(1) = fpi * dsqrt(r(1)/(4.0*pi*n0))
+    ! MAGNETIC FIELD STRENGTH
+    b0   = sqrt(4.0*pi*r(2)*n0/delx) * vae
+
+    ! ELEMENTARY CHARGE
+    q(1) = fpi * sqrt(r(1)/(4.0*pi*n0/delx))
     q(2) = -q(1)
 
     !INTIALIZATION OF SUBROUTINES
@@ -77,6 +79,9 @@ contains
        call fio__input(up,uf,np2,it0,file11)
        return
     endif
+
+    call init__loading
+    call init__set_field
 
     !OUTPUT PARAMETERS
     open(9,file=trim(dir)//trim(file9),status='unknown')
@@ -131,8 +136,8 @@ contains
        nb  = int( np2(i,isp) * nbeam )
        vb1 =+vbeam * (1 - nbeam)
        vb2 =-vbeam * nbeam
-       vt1 = dsqrt(2.0 * tbeam / (1.0 + tbeam)) * vt0(isp)
-       vt2 = dsqrt(2.0         / (1.0 + tbeam)) * vt0(isp)
+       vt1 = sqrt(2.0D0 * tbeam / (1.0D0 + tbeam)) * vt0(isp)
+       vt2 = sqrt(2.0D0         / (1.0D0 + tbeam)) * vt0(isp)
        ! beam componennt
        do ii=1,nb
           call random_gen__bm(r1,r2)

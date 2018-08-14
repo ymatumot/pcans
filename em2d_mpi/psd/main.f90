@@ -23,8 +23,8 @@ program main
   write(*,*)'No. of processes?'
   read(*,*)nproc
 
-  dx = 2.0 !sampling area in the x direction
-  dy = 2.0 !sampling area in the y direction
+  dx = 4.0 !sampling area in the x direction
+  dy = 4.0 !sampling area in the y direction
 
   do idata=4,ndata,nproc
      do irank=0,nproc-1

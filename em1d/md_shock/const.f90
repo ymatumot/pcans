@@ -11,16 +11,14 @@ module const
 !! SETUP FOR SUBROUTINES CALLED IN MAIN PROGRAM
   integer, parameter :: itmax  = 40000 !NUMBER OF ITERATION
   integer            :: it0    = 0     !0:INITIAL, NONZERO/9999999: RESTART DATA
-  integer, parameter :: intvl1 = 1000  !INTERVAL FOR PARTICLES & FIELDS STORAGE
-  integer, parameter :: intvl2 = 1000  !INTERVAL FOR ENERGY CALC.
-  integer, parameter :: intvl3 = 100   !INTERVAL FOR RECORDING MOMENT & FIELDS DATA	
-  integer, parameter :: intvl4 = 2000  !INTERVAL FOR RECORDING PSD DATA
+  integer, parameter :: intvl1 = 5000  !INTERVAL FOR PARTICLES & FIELDS STORAGE
+  integer, parameter :: intvl3 = 1000  !INTERVAL FOR RECORDING MOMENT & FIELDS DATA	
+  integer, parameter :: intvl4 = 1000  !INTERVAL FOR RECORDING PSD DATA
   character(len=128) :: dir    = './dat/' !DIRECTORY FOR OUTPUT
   character(len=128) :: dir_mom= './mom/' !DIRECTORY FOR MOMENT DATA
   character(len=128) :: dir_psd= './psd/' !DIRECTORY FOR MOMENT DATA
   character(len=128) :: file9  = 'init_param.dat' !FILE NAME OF INIT CONDITIONS
   character(len=128) :: file10 = 'file10.dat' !FILE NAME OF PARTICLE DATA
-  character(len=128) :: file12 = 'energy.dat' !FILE NAME OF ENERGY VARIATION
 
 !! OTHER CONSTANTS
   real(8), parameter :: gfac   = 0.501D0 !IMPLICITNESS FACTOR > 0.5

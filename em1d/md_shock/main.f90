@@ -28,7 +28,6 @@ program main
 
   !RECORDING INITIAL DATA
   call fio__output(up,uf,np2,0,file10)
-  call fio__energy(up,uf,np2,0,file12)
 
   do it=1,itmax-it0
 
@@ -42,8 +41,6 @@ program main
 
      if(mod(it+it0,intvl1) == 0) &
           call fio__output(up,uf,np2,it+it0,file10)
-     if(mod(it+it0,intvl2) == 0) &
-          call fio__energy(up,uf,np2,it+it0,file12)
      if(mod(it+it0,intvl3) == 0)then
         call mom_calc__accel(gp,up,uf,np2)
         call mom_calc__nvt(den,vel,temp,gp,np2)

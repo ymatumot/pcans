@@ -125,6 +125,7 @@ contains
        enddo
     enddo
 
+
   end subroutine field__fdtd_i
 
 
@@ -178,10 +179,10 @@ contains
              uj(1,i2+1) = uj(1,i2+1)+qvx2
 
              !Jy and Jz
-             gam = 1./dsqrt(1.0+(+gp(2,ii,i,isp)*gp(2,ii,i,isp) &
-                                 +gp(3,ii,i,isp)*gp(3,ii,i,isp) &
-                                 +gp(4,ii,i,isp)*gp(4,ii,i,isp) &
-                                )/(c*c))
+             gam = 1./sqrt(1.0D0+(+gp(2,ii,i,isp)*gp(2,ii,i,isp) &
+                                  +gp(3,ii,i,isp)*gp(3,ii,i,isp) &
+                                  +gp(4,ii,i,isp)*gp(4,ii,i,isp) &
+                                 )/(c*c))
 
              ih = floor(xh-0.5)
              dx = xh-0.5-ih
@@ -248,7 +249,7 @@ contains
           sum = sum+b(i)*b(i)
        enddo
 
-       eps = dsqrt(sum)*err
+       eps = sqrt(sum)*err
        
        call boundary__phi(x)
 
@@ -259,7 +260,7 @@ contains
           sumr = sumr+r(i)*r(i)
        enddo
 
-       if(dsqrt(sumr) > eps)then
+       if(sqrt(sumr) > eps)then
        
           do while(sum > eps)
              
@@ -281,7 +282,7 @@ contains
              x(1:nx) = x(1:nx)+av*p(1:nx)
              r(1:nx) = r(1:nx)-av*ap(1:nx)
              
-             sum = dsqrt(sumr)
+             sum = sqrt(sumr)
              if(ite >= ite_max) then
                 write(6,*)'********** stop at cgm after ite_max **********'
                 stop
