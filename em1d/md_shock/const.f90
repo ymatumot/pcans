@@ -3,10 +3,10 @@ module const
   implicit none
 
 !!************************ NUMERICAL CONSTANTS ***********************************!!
-  integer, parameter :: nx  = 2048    ! number of grid points
-  integer, parameter :: np  = 1000    ! number of particles in each cell
-  integer, parameter :: nsp = 2       ! number of particle species
-  integer, parameter :: bc  = -1      ! boundary condition (periodic:0, reflective:-1)
+  integer, parameter :: nx  = 2048  ! NUMBER OF GRID POINTS
+  integer, parameter :: np  = 1024  ! NUMBER OF PARTICLES IN EACH CELL
+  integer, parameter :: nsp = 2     ! NUMBER OF PARTICLE SPECIES
+  integer, parameter :: bc  = -1    ! BOUNDARY CONDITION (PERIODIC:0, REFLECTIVE:-1)
 
 !! SETUP FOR SUBROUTINES CALLED IN MAIN PROGRAM
   integer, parameter :: itmax  = 40000 !NUMBER OF ITERATION
@@ -27,7 +27,7 @@ module const
   real(8), parameter :: pi     = 4.0D0*atan(1.0D0)
 
 !!************************ PHYSICAL CONSTANTS ***********************************!!
-!!      n0 : NUMBER OF PARTICLES/CELL
+!!      n0 : NUMBER OF PARTICLES/CELL IN THE UPSTREAM REGION
 !!     vte : ELECTRON THERMAL SPEED
 !!     fpe : ELECTRON PLASMA FREQUENCY
 !!   rmass : ION-TO-ELECTRON MASS RATIO
