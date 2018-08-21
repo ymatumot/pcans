@@ -1,7 +1,7 @@
 ;; Initilization when idl starts up.
 ;; set path environment
 !path = expand_path('./') +':'+!path
-!path = getenv('PCANS_DIR')+'idl/'+':'+!path
+!path = getenv('PCANS_DIR')+'/idl/'+':'+!path
 
 ;; default object graphics option
 imgdefop = {no_toolbar:1, font_name:'Times', font_size:24, axis_style:2, $
