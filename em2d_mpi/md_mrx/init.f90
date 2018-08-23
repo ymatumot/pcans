@@ -19,7 +19,6 @@ module init
  
   real(8) :: x0, y0, vti, vte
   real(8) :: b0 
-  real(8) :: lcs
 
 
 contains

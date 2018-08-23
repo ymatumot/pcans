@@ -42,7 +42,7 @@ module const
   real(8), parameter :: c      = 1.0D0
   real(8), parameter :: mr     = 16.0D0
   real(8), parameter :: alpha  = 2.0D0, beta = 0.5D0, rtemp=0.25D0
-  real(8), parameter :: ncs    = 250, nbg  =  50
+  integer, parameter :: ncs    = 250, nbg  =  50
   real(8)            :: lcs    = 0.5D0
 
 end module
