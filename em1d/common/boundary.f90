@@ -13,19 +13,23 @@ module boundary
 
   logical, save :: is_init = .false.
   integer, save :: np, nx, nsp, bc
+  real(8), save :: d_delx, delx
 
 
 contains
 
 
-  subroutine boundary__init(npin,nxin,nspin,bcin)
+  subroutine boundary__init(npin,nxin,nspin,bcin,delxin)
 
-    integer, intent(in)    :: npin, nxin, nspin, bcin
-
+    integer, intent(in) :: npin, nxin, nspin, bcin
+    real(8), intent(in) :: delxin
+    
     np  = npin
     nx  = nxin
     nsp = nspin
     bc  = bcin
+    delx = delxin
+    d_delx = 1./delxin
     is_init = .true.
 
   end subroutine boundary__init
@@ -51,27 +55,27 @@ contains
        do i=1,nx+bc
           do ii=1,np2(i,isp)
 
-             ipos = floor(up(1,ii,i,isp))
+             ipos = floor(up(1,ii,i,isp)*d_delx)
 
              if(ipos /= i)then
                 if(bc == 0)then
                    if(ipos <= 0)then
                       ipos = nx+ipos
-                      up(1,ii,i,isp) = up(1,ii,i,isp)+nx
+                      up(1,ii,i,isp) = up(1,ii,i,isp)+nx*delx
                    endif
                    if(ipos >= nx+1)then
                       ipos = ipos-nx 
-                      up(1,ii,i,isp) = up(1,ii,i,isp)-nx
+                      up(1,ii,i,isp) = up(1,ii,i,isp)-nx*delx
                    endif
                 else if(bc == -1)then
                    if(ipos <= 0)then
                       ipos = 1-ipos
-                      up(1,ii,i,isp) = 2.0-up(1,ii,i,isp)
+                      up(1,ii,i,isp) = 2.*delx-up(1,ii,i,isp)
                       up(2,ii,i,isp) = -up(2,ii,i,isp)
                    endif
                    if(ipos >= nx)then
-                      ipos = 2*nx-ipos-1 
-                      up(1,ii,i,isp) = 2.0*nx-up(1,ii,i,isp)
+                      ipos = 2*nx-ipos-1
+                      up(1,ii,i,isp) = 2.0*nx*delx-up(1,ii,i,isp)
                       up(2,ii,i,isp) = -up(2,ii,i,isp)
                    endif
                 else

@@ -29,8 +29,8 @@ freq = fltarr(nt)
 datakt = complexarr(nx,nt)
 
 ; READING TEMPS
-t_para = file_read('dat/*_Txx_e.dat')
-t_perp = file_read('dat/*_Tyy_e.dat')
+t_para = file_read('mom/*_Txx_e.dat')
+t_perp = file_read('mom/*_Tyy_e.dat')
 info = size(t_para)
 nt2 = info(2)
 time2 = findgen(nt2)*250

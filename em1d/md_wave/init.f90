@@ -65,7 +65,7 @@ contains
 
     !INTIALIZATION OF SUBROUTINES
     call random_gen__init
-    call boundary__init(np,nx,nsp,bc)
+    call boundary__init(np,nx,nsp,bc,delx)
     call particle__init(np,nx,nsp,bc,q,r,c,delx,delt)
     call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
     call fio__init(np,nx,nsp,bc,q,r,c,delx,delt,pi,dir,dir_mom,dir_psd)
@@ -98,7 +98,7 @@ contains
     do i=1,nx+bc
        do ii=1,np2(i,isp)
           call random_number(r1)
-          up(1,ii,i,1) = dble(i)+delx*r1
+          up(1,ii,i,1) = (dble(i)+r1)*delx
           up(1,ii,i,2) = up(1,ii,i,1) 
        enddo
     enddo

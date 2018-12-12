@@ -71,7 +71,7 @@ contains
 
     !INTIALIZATION OF SUBROUTINES
     call random_gen__init
-    call boundary__init(np,nx,nsp,bc)
+    call boundary__init(np,nx,nsp,bc,delx)
     call particle__init(np,nx,nsp,bc,q,r,c,delx,delt)
     call field__init(np,nx,nsp,bc,q,c,delx,delt,gfac)
     call fio__init(np,nx,nsp,bc,q,r,c,delx,delt,pi,dir,dir_mom,dir_psd)
@@ -126,7 +126,7 @@ contains
     do i=1,nx+bc
        do ii=1,np2(i,isp)
           call random_number(r1)
-          up(1,ii,i,1) = dble(i)+delx*r1
+          up(1,ii,i,1) = (dble(i)+r1)*delx
           up(1,ii,i,2) = up(1,ii,i,1)
        enddo
     enddo
@@ -191,11 +191,11 @@ contains
     real(8) :: rr, r1, r2, ninj, iinj, finj, x0
 
     i  = nx-1
-    x0 = dble(nx)+v0*delt
+    x0 = nx*delx+v0*delt
 
     ! number of particles to be injected
     call random_number(rr)
-    ninj = n0*abs(v0)*delt
+    ninj = n0*abs(v0)*delt/delx
     iinj = floor(ninj)
     finj = ninj - iinj
     dn   = int(iinj) + ceiling(finj-rr)
@@ -206,7 +206,7 @@ contains
        ii2 = np2(i,2) + ii
        ! position
        call random_number(rr)
-       rr = rr*v0*delt + dble(i+1)
+       rr = rr*v0*delt + dble(i+1)*delx
        up(1,ii1,i,1) = rr
        up(1,ii2,i,2) = rr
 
@@ -221,7 +221,7 @@ contains
           up(4,ii3,i,isp) = vt0(isp)*r1
 
           ! folding back
-          if( delt*up(2,ii3,i,isp) > up(1,ii3,i,isp)-dble(i+1) ) then
+          if( delt*up(2,ii3,i,isp) > up(1,ii3,i,isp)-dble(i+1)*delx ) then
              up(1,ii3,i,isp) = 2*x0 - up(1,ii3,i,isp)
              up(2,ii3,i,isp) = 2*v0 - up(2,ii3,i,isp)
           end if

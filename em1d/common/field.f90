@@ -9,7 +9,7 @@ module field
 
   logical, save              :: is_init = .false.
   integer, save              :: np, nx, nsp, bc
-  real(8), save              :: c, delx, delt, gfac, pi, fac1, fac2, ifac1
+  real(8), save              :: c, delx, d_delx, delt, d_delt, gfac, pi, fac1, fac2
   real(8), save, allocatable :: q(:), gf(:,:)
 
 
@@ -34,8 +34,9 @@ contains
     allocate(gf(6,0:nx+1))
     gf(1:6,0:nx+1) = 0.0
     fac1  = 2.0+(delx/(c*delt*gfac))**2
-    ifac1 = 1./fac1
     fac2  = (delx/(c*delt*gfac))**2
+    d_delx = 1./delx
+    d_delt = 1./delt
     is_init = .true.
 
   end subroutine field__init
@@ -135,15 +136,13 @@ contains
     real(8), intent(in)  :: up(4,np,1:nx+bc,nsp), gp(4,np,1:nx+bc,nsp)
     real(8), intent(out) :: uj(3,-1:nx+2)
     integer :: ii, i, isp, ih, i1 ,i2
-    real(8) :: x2, xh, xr, qvx1, qvx2, idelt, idelx, gam
+    real(8) :: x2, xh, xr, qvx1, qvx2, gam
     real(8) :: dx, dxm
 
     !memory clear
     uj(1:3,-1:nx+2) = 0.0D0
 
     !------ Charge Conservation Method for Jx ---------!
-    idelt = 1.D0/delt
-    idelx = 1.D0/delx
     do isp=1,nsp
        do i=1,nx+bc
           do ii=1,np2(i,isp)
@@ -152,16 +151,16 @@ contains
 
              !reflective boundary condition in x
              if(bc == -1)then
-                if(x2 < 1)then
-                   x2  = 2.-x2
+                if(x2 < delx)then
+                   x2  = 2.*delx-x2
                 endif
-                if(x2 > nx)then
-                   x2  = 2.*nx-x2
+                if(x2 > nx*delx)then
+                   x2  = 2.*nx*delx-x2
                 endif
              endif
 
-             i1  = floor(up(1,ii,i,isp)*idelx-0.5)
-             i2  = floor(x2*idelx-0.5)
+             i1  = floor(up(1,ii,i,isp)*d_delx-0.5)
+             i2  = floor(x2*d_delx-0.5)
 
              xh  = 0.5*(up(1,ii,i,isp)+x2)
 
@@ -171,8 +170,8 @@ contains
                 xr = (max(i1,i2)+0.5)*delx
              endif
 
-             qvx1 = q(isp)*(xr-up(1,ii,i,isp))*idelt
-             qvx2 = q(isp)*(x2-xr)*idelt
+             qvx1 = q(isp)*(xr-up(1,ii,i,isp))*d_delt
+             qvx2 = q(isp)*(x2-xr)*d_delt
 
              !Jx
              uj(1,i1+1) = uj(1,i1+1)+qvx1
@@ -184,8 +183,8 @@ contains
                                   +gp(4,ii,i,isp)*gp(4,ii,i,isp) &
                                  )/(c*c))
 
-             ih = floor(xh-0.5)
-             dx = xh-0.5-ih
+             ih = floor(xh*d_delx-0.5)
+             dx = xh*d_delx-0.5-ih
              dxm = 1.-dx
 
              uj(2,ih  ) = uj(2,ih  )+q(isp)*gp(3,ii,i,isp)*gam*dxm
@@ -198,20 +197,20 @@ contains
 
     if(bc == 0)then
        do i=-1,nx+2
-          uj(1:3,i) = uj(1:3,i)*idelx
+          uj(1:3,i) = uj(1:3,i)*d_delx
        enddo
     else if(bc == -1)then
        i=1
-       uj(1,i) = uj(1,i)*2.*idelx
+       uj(1,i) = uj(1,i)*2.*d_delx
        do i=2,nx-1
-          uj(1,i) = uj(1,i)*idelx
+          uj(1,i) = uj(1,i)*d_delx
        enddo
        i=nx
-       uj(1,i) = uj(1,i)*2.*idelx
+       uj(1,i) = uj(1,i)*2.*d_delx
 
        do i=0,nx
-          uj(2,i) = uj(2,i)*idelx
-          uj(3,i) = uj(3,i)*idelx
+          uj(2,i) = uj(2,i)*d_delx
+          uj(3,i) = uj(3,i)*d_delx
        enddo
     else
        write(*,*)'choose bc=0 (periodic) or bc=-1 (reflective)'

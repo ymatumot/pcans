@@ -8,7 +8,7 @@ module mom_calc
 
   logical, save              :: is_init = .false.
   integer, save              :: np, nx, nsp, bc
-  real(8), save              :: c, ddelx, delt
+  real(8), save              :: c, d_delx, delt
   real(8), save, allocatable :: q(:), r(:)
 
 
@@ -29,7 +29,7 @@ contains
     q    = qin
     r    = rin
     c    = cin
-    ddelx = 1./delxin
+    d_delx = 1./delxin
     delt = deltin
     is_init = .true.
 
@@ -63,14 +63,14 @@ contains
           do ii=1,np2(i,isp)
              pf(1) = uf(1,i)
 
-             dx = up(1,ii,i,isp)*ddelx-i
+             dx = up(1,ii,i,isp)*d_delx-i
              dxm = 1.-dx
              pf(2) = +dxm*uf(2,i)+dx*uf(2,i+1)
              pf(3) = +dxm*uf(3,i)+dx*uf(3,i+1)
              pf(4) = +dxm*uf(4,i)+dx*uf(4,i+1)
 
-             ih = floor(up(1,ii,i,isp)*ddelx+0.5)
-             dx = up(1,ii,i,isp)*ddelx+0.5-ih
+             ih = floor(up(1,ii,i,isp)*d_delx+0.5)
+             dx = up(1,ii,i,isp)*d_delx+0.5-ih
              dxm = 1.-dx
              pf(5) = +dxm*uf(5,ih-1)+dx*uf(5,ih)
              pf(6) = +dxm*uf(6,ih-1)+dx*uf(6,ih)
@@ -129,12 +129,12 @@ contains
        do i=1,nx+bc
           do ii=1,np2(i,isp)
              gam = 1./sqrt(1.0D0+(+up(2,ii,i,isp)*up(2,ii,i,isp) &
-                                 +up(3,ii,i,isp)*up(3,ii,i,isp) &
-                                 +up(4,ii,i,isp)*up(4,ii,i,isp) &
-                                )/(c*c))
+                                  +up(3,ii,i,isp)*up(3,ii,i,isp) &
+                                  +up(4,ii,i,isp)*up(4,ii,i,isp) &
+                                 )/(c*c))
 
-             ih = floor(up(1,ii,i,isp)*ddelx+0.5)
-             dx = up(1,ii,i,isp)*ddelx+0.5-ih
+             ih = floor(up(1,ii,i,isp)*d_delx+0.5)
+             dx = up(1,ii,i,isp)*d_delx+0.5-ih
              dxm = 1.-dx
 
 !DENSITY
