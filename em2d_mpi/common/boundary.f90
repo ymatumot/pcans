@@ -15,7 +15,8 @@ module boundary
   integer, save :: nup, ndown, mnpi, mnpr, ncomw
   integer       :: nerr
   integer, allocatable :: nstat(:)
-  real(8), save :: u0x_bnd(2), u0y_bnd(2), u0z_bnd(2)
+  real(8), save :: delx, d_delx
+  real(8), save :: u0x_bnd(2), u0y_bnd(2), u0z_bnd(2), delx_in
 
 
 contains
@@ -24,12 +25,13 @@ contains
   subroutine boundary__init(np_in,nsp_in,&
                             nxgs_in,nxge_in,nygs_in,nyge_in,nxs_in,nxe_in,nys_in,nye_in,bc_in, &
                             nup_in,ndown_in,mnpi_in,mnpr_in,ncomw_in,nerr_in,nstat_in, &
-                            u0x,u0y,u0z)
+                            delx_in,u0x,u0y,u0z)
 
     integer, intent(in) :: np_in, nsp_in
     integer, intent(in) :: nxgs_in, nxge_in, nygs_in, nyge_in, nxs_in, nxe_in, nys_in, nye_in, bc_in
     integer, intent(in) :: nup_in, ndown_in, mnpi_in, mnpr_in, ncomw_in
     integer, intent(in) :: nerr_in, nstat_in(:)
+    real(8), intent(in) :: delx_in
     real(8), optional, intent(in) :: u0x(2), u0y(2), u0z(2)
 
     np    = np_in
@@ -52,6 +54,9 @@ contains
 
     allocate(nstat(size(nstat_in)))
     nstat = nstat_in
+
+    delx = delx_in
+    d_delx = 1./delx
 
     if(present(u0x))then
       u0x_bnd = u0x
@@ -97,25 +102,25 @@ contains
        do j=nys,nye
           do ii=1,np2(j,isp)
 
-             ipos = floor(up(1,ii,j,isp))
-             jpos = floor(up(2,ii,j,isp))
+             ipos = floor(up(1,ii,j,isp)*d_delx)
+             jpos = floor(up(2,ii,j,isp)*d_delx)
 
              if(bc==0)then
                 if(ipos <= nxgs-1)then
-                   up(1,ii,j,isp) = up(1,ii,j,isp)+(nxge-nxgs+1)
+                   up(1,ii,j,isp) = up(1,ii,j,isp)+(nxge-nxgs+1)*delx
                 endif
                 if(ipos >= nxge+1)then
-                   up(1,ii,j,isp) = up(1,ii,j,isp)-(nxge-nxgs+1)
+                   up(1,ii,j,isp) = up(1,ii,j,isp)-(nxge-nxgs+1)*delx
                 endif
              else if(bc==-1)then
                 if(ipos <= nxgs-1)then
-                   up(1,ii,j,isp) = 2.0*nxgs-up(1,ii,j,isp)
+                   up(1,ii,j,isp) = 2.0*delx*nxgs-up(1,ii,j,isp)
                    up(3,ii,j,isp) = 2.0*u0x_bnd(1)-up(3,ii,j,isp)
                    up(4,ii,j,isp) = 2.0*u0y_bnd(1)-up(4,ii,j,isp)
                    up(5,ii,j,isp) = 2.0*u0z_bnd(1)-up(5,ii,j,isp)
                 endif
                 if(ipos >= nxge)then
-                   up(1,ii,j,isp) = 2.0*nxge-up(1,ii,j,isp)
+                   up(1,ii,j,isp) = 2.0*delx*nxge-up(1,ii,j,isp)
                    up(3,ii,j,isp) = 2.0*u0x_bnd(2)-up(3,ii,j,isp)
                    up(4,ii,j,isp) = 2.0*u0y_bnd(2)-up(4,ii,j,isp)
                    up(5,ii,j,isp) = 2.0*u0z_bnd(2)-up(5,ii,j,isp)
@@ -127,10 +132,10 @@ contains
 
              if(jpos /= j)then
                 if(jpos <= nygs-1)then
-                   up(2,ii,j,isp) = up(2,ii,j,isp)+(nyge-nygs+1)
+                   up(2,ii,j,isp) = up(2,ii,j,isp)+(nyge-nygs+1)*delx
                 endif
                 if(jpos >= nyge+1)then
-                   up(2,ii,j,isp) = up(2,ii,j,isp)-(nyge-nygs+1)
+                   up(2,ii,j,isp) = up(2,ii,j,isp)-(nyge-nygs+1)*delx
                 endif
                 bff_ptcl(1+5*cnt(jpos,isp),jpos,isp) = up(1,ii,j,isp)
                 bff_ptcl(2+5*cnt(jpos,isp),jpos,isp) = up(2,ii,j,isp)

@@ -220,6 +220,8 @@ contains
           enddo
        enddo
     enddo
+    
+    uj = uj*d_delx*d_delx
 
   end subroutine ele_cur
 

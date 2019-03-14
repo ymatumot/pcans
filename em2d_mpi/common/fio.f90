@@ -172,7 +172,7 @@ contains
 
     vti = sqrt(2.*temp/r(1))
     vte = sqrt(2.*temp*rtemp/r(2))
-    va  = fge*r(2)*c/q(1)/sqrt(4.*pi*r(1)*n0)
+    va  = fge*r(2)*c/q(1)/sqrt(4.*pi*r(1)*n0*d_delx**2)
 
     if(nrank == nroot)then
 

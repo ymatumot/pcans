@@ -89,7 +89,7 @@ contains
 
              pf(1:6) = 0.D0
 
-             ih = floor(up(1,ii,j,isp))
+             ih = floor(up(1,ii,j,isp)*d_delx)
 
              sh(-2:2,1) = sf(ih,up(1,ii,j,isp)*d_delx-0.5,nsfo)
              sh(-2:2,2) = sf(j ,up(2,ii,j,isp)*d_delx-0.5,nsfo)

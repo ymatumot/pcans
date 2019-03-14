@@ -11,13 +11,12 @@ module init
   public :: init__set_param
 
   integer, allocatable, public :: np2(:,:)
-  real(8),              public :: delt
   real(8),              public :: q(nsp), r(nsp)
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
  
-  real(8) :: vti
+  real(8) :: vti, delt
 
 
 contains
@@ -62,7 +61,7 @@ contains
     !INITIALIZATION OF SUBROUTINES
     call boundary__init(np,nsp,&
                         nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,bc, &
-                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat)
+                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat,delx)
     call particle__init(np,nsp,&
                         nxs,nxe,nys,nye,nsfo, &
                         q,r,c,delx,delt)

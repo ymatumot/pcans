@@ -11,13 +11,12 @@ module init
   public :: init__set_param
 
   integer, allocatable, public :: np2(:,:)
-  real(8),              public :: delt
   real(8),              public :: q(nsp), r(nsp)
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
  
-  real(8) :: v0, u0, b0, vti, vte, delv
+  real(8) :: v0, u0, b0, vti, vte, delt, delv
 
 
 contains
@@ -52,7 +51,7 @@ contains
     fge  = fpe/alpha
     fgi  = fge*r(2)/r(1)
     fpi  = fpe*sqrt(r(2)/r(1))
-    va   = fge/fpe*c*sqrt(r(2)/r(1))
+    va   = c*sqrt(r(2)/r(1))/alpha
     rge  = alpha*ldb*sqrt(2.D0)
     rgi  = rge*sqrt(r(1)/r(2))/sqrt(rtemp)
     vte  = rge*fge
@@ -78,7 +77,7 @@ contains
     !INITIALIZATION OF SUBROUTINES
     call boundary__init(np,nsp,&
                         nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,bc, &
-                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat,   &
+                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat,delx, &
                         u0y=(/-0.5*u0, 0.5*u0/))
     call particle__init(np,nsp,&
                         nxs,nxe,nys,nye,nsfo, &
@@ -134,15 +133,15 @@ contains
     dxvy(x) = +0.5*u0/delv*cosh((x-x0)/delv)**(-2)
 
     !PERTURBATION IN VX
-    dvx(x,y) = -0.05*u0*sin(2.*pi*(y-nygs)/(nyge-nygs+1))/cosh((x-x0)/delv)**2
+    dvx(x,y) = -0.05*u0*sin(2.*pi*(y-nygs*delx)/(delx*(nyge-nygs+1)))/cosh((x-x0)/delv)**2
 
     !NUMBER DENSITY PROFILE
-    den(x) = 0.5*n0*((1.+dr)+(1.-dr)*tanh((x-x0)/delv))
+    den(x) = 0.5*n0/delx**2*((1.+dr)+(1.-dr)*tanh((x-x0)/delv))
 
     !CDF OF DENSITY PROFILE
-    cdf_n(x) = (+((1.+dr)*(   x)+(1.-dr)*delv*log(cosh((   x-x0)/delv))) &
-                -((1.+dr)*(nxgs)+(1.-dr)*delv*log(cosh((nxgs-x0)/delv))) &
-               )/((1.+dr)*(nxge-nxgs))  
+    cdf_n(x) = (+((1.+dr)*(        x)+(1.-dr)*delv*log(cosh((        x-x0)/delv))) &
+                -((1.+dr)*(nxgs*delx)+(1.-dr)*delv*log(cosh((nxgs*delx-x0)/delv))) &
+               )/((1.+dr)*delx*(nxge-nxgs))
 
     !CHARGE DENSITY PROFILE
     dcn(x) = abs(bfabs(x)*cos(theta_b)*gam0(x)**2/(4.*pi*q(1)*c)*dxvy(x))
@@ -175,7 +174,7 @@ contains
 
     !PARTICLE POSITION - BACKGROUND PARTICLES
     do j=nys,nye
-       do ii=1,np2(j,1)-int(dnmax*(nxge+bc-nxgs+1)*delx)
+       do ii=1,np2(j,1)-int(dnmax*(nxge+bc-nxgs+1)*delx**2)
           call random_number(r1)
           left  = nxgs*delx
           right = nxge*delx
@@ -231,7 +230,7 @@ contains
        intf(1:nchart) = intf(1:nchart)/intf0
 
        do j=nys,nye
-          do ii=np2(j,isp)-int(dnmax*(nxge+bc-nxgs+1)*delx)+1,int(np2(j,isp)-isn*dn/2)
+          do ii=np2(j,isp)-int(dnmax*(nxge+bc-nxgs+1)*delx**2)+1,int(np2(j,isp)-isn*dn*delx**2/2)
              call random_number(r1)
              left  = 1
              right = nchart
@@ -248,7 +247,7 @@ contains
              up(2,ii,j,isp) = dble(j)*delx+delx*r1
           enddo
        enddo
-       np2(nys:nye,isp) = np2(nys:nye,isp)-isn*dn/2.
+       np2(nys:nye,isp) = np2(nys:nye,isp)-isn*dn*delx**2/2.
     enddo
 
     !VELOCITY

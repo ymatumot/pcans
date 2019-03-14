@@ -8,9 +8,10 @@ module mom_calc
 
 contains
   
-  subroutine mom_calc__den(den,up,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+  subroutine mom_calc__den(den,up,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
 
     integer, intent(in)    :: np, nys, nye, nxgs, nxge, nygs, nyge, nsp, np2(nys:nye,nsp)
+    real(8), intent(in)    :: delx
     real(8), intent(in)    :: up(5,np,nys:nye,nsp)
     real(8), intent(inout) :: den(nxgs-1:nxge+1,nygs-1:nyge+1,1:nsp)
     integer       :: ii, ih, j, jh, isp
@@ -20,12 +21,12 @@ contains
     do isp=1,nsp
        do j=nys,nye
           do ii=1,np2(j,isp)
-             ih = floor(up(1,ii,j,isp)-0.5)
-             jh = floor(up(2,ii,j,isp)-0.5)
+             ih = floor(up(1,ii,j,isp)/delx-0.5)
+             jh = floor(up(2,ii,j,isp)/delx-0.5)
 
-             dx = up(1,ii,j,isp)-0.5-ih
+             dx = up(1,ii,j,isp)/delx-0.5-ih
              dxm = 1.-dx
-             dy = up(2,ii,j,isp)-0.5-jh
+             dy = up(2,ii,j,isp)/delx-0.5-jh
              dym = 1.-dy
 
              den(ih  ,jh  ,isp) = den(ih  ,jh  ,isp)+dxm*dym
@@ -39,10 +40,10 @@ contains
   end subroutine mom_calc__den
 
 
-  subroutine mom_calc__vel(vel,up,c,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+  subroutine mom_calc__vel(vel,up,c,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
 
     integer, intent(in)    :: np, nys, nye, nxgs, nxge, nygs, nyge, nsp, np2(nys:nye,nsp)
-    real(8), intent(in)    :: c
+    real(8), intent(in)    :: c, delx
     real(8), intent(in)    :: up(5,np,nys:nye,nsp)
     real(8), intent(inout) :: vel(nxgs-1:nxge+1,nygs-1:nyge+1,1:3,1:nsp)
     integer :: ii, i, j, ih, jh, isp
@@ -53,15 +54,15 @@ contains
        do j=nys,nye
           do ii=1,np2(j,isp)
              gam = 1./sqrt(1.0D0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
-                                 +up(4,ii,j,isp)*up(4,ii,j,isp) &
-                                 +up(5,ii,j,isp)*up(5,ii,j,isp) &
-                                )/(c*c))
+                                  +up(4,ii,j,isp)*up(4,ii,j,isp) &
+                                  +up(5,ii,j,isp)*up(5,ii,j,isp) &
+                                 )/(c*c))
 
-             ih = floor(up(1,ii,j,isp)-0.5)
-             dx = up(1,ii,j,isp)-0.5-ih
+             ih = floor(up(1,ii,j,isp)/delx-0.5)
+             dx = up(1,ii,j,isp)/delx-0.5-ih
              dxm = 1.-dx
-             jh = floor(up(2,ii,j,isp)-0.5)
-             dy = up(2,ii,j,isp)-0.5-jh
+             jh = floor(up(2,ii,j,isp)/delx-0.5)
+             dy = up(2,ii,j,isp)/delx-0.5-jh
              dym = 1.-dy
 
              !Vx
@@ -88,10 +89,10 @@ contains
   end subroutine mom_calc__vel
 
 
-  subroutine mom_calc__temp(temp,up,c,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+  subroutine mom_calc__temp(temp,up,c,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
 
     integer, intent(in)    :: np, nys, nye, nxgs, nxge, nygs, nyge, nsp, np2(nys:nye,nsp)
-    real(8), intent(in)    :: c
+    real(8), intent(in)    :: c, delx
     real(8), intent(in)    :: up(5,np,nys:nye,nsp)
     real(8), intent(inout) :: temp(nxgs-1:nxge+1,nygs-1:nyge+1,1:6,1:nsp)
     integer :: ii, i, j, ih, jh, isp
@@ -102,15 +103,15 @@ contains
        do j=nys,nye
           do ii=1,np2(j,isp)
              gam = 1./sqrt(1.0D0+(+up(3,ii,j,isp)*up(3,ii,j,isp) &
-                                 +up(4,ii,j,isp)*up(4,ii,j,isp) &
-                                 +up(5,ii,j,isp)*up(5,ii,j,isp) &
-                                )/(c*c))
+                                  +up(4,ii,j,isp)*up(4,ii,j,isp) &
+                                  +up(5,ii,j,isp)*up(5,ii,j,isp) &
+                                 )/(c*c))
 
-             ih = floor(up(1,ii,j,isp)-0.5)
-             dx = up(1,ii,j,isp)-0.5-ih
+             ih = floor(up(1,ii,j,isp)/delx-0.5)
+             dx = up(1,ii,j,isp)/delx-0.5-ih
              dxm = 1.-dx
-             jh = floor(up(2,ii,j,isp)-0.5)
-             dy = up(2,ii,j,isp)-0.5-jh
+             jh = floor(up(2,ii,j,isp)/delx-0.5)
+             dy = up(2,ii,j,isp)/delx-0.5-jh
              dym = 1.-dy
 
              !Txx

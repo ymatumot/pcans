@@ -11,13 +11,12 @@ module init
   public :: init__set_param, init__inject
 
   integer, allocatable, public :: np2(:,:)
-  real(8),              public :: delt
   real(8),              public :: q(nsp), r(nsp)
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
  
-  real(8), save :: v0, gam0, b0, vti, vte
+  real(8), save :: v0, gam0, b0, vti, vte, delt
 
 
 contains
@@ -74,8 +73,8 @@ contains
 
     !INITIALIZATION OF SUBROUTINES
     call boundary__init(np,nsp,&
-                        nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,bc, &
-                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat, &
+                        nxgs,nxge,nygs,nyge,nxs,nxe,nys,nye,bc,    &
+                        nup,ndown,mnpi,mnpr,ncomw,nerr,nstat,delx, &
                         u0x=(/v0*gam0,0.0D0/))
     call particle__init(np,nsp,&
                         nxs,nxe,nys,nye,nsfo, &
@@ -198,7 +197,7 @@ contains
           ii2 = np2(j,1)+ii
           ii3 = np2(j,2)+ii
           call random_number(r1)
-          up(1,ii2,j,1) = nxs*delx+r1*dx
+          up(1,ii2,j,1) = nxs*delx+r1*dx*delx
           up(1,ii3,j,2) = up(1,ii2,j,1)
 
           call random_number(r1)

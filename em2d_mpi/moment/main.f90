@@ -26,11 +26,11 @@ program main
 
         call fio__input(nproc,ifile)
 
-        call particle__solv(up,uf,c,q,r,0.5*delt,np,nxgs,nxge,nygs,nyge,nys,nye,nsp,np2)
+        call particle__solv(up,uf,c,q,r,delx,0.5*delt,np,nxgs,nxge,nygs,nyge,nys,nye,nsp,np2)
 
-        call mom_calc__den(den,up,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
-        call mom_calc__vel(vel,up,c,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
-        call mom_calc__temp(temp,up,c,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+        call mom_calc__den(den,up,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+        call mom_calc__vel(vel,up,c,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
+        call mom_calc__temp(temp,up,c,delx,np,nys,nye,nxgs,nxge,nygs,nyge,nsp,np2)
 
         deallocate(np2)
         deallocate(up)
