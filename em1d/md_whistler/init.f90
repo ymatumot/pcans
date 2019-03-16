@@ -14,7 +14,6 @@ module init
   real(8), public :: up(4,np,1:nx+bc,nsp)
   real(8), public :: gp(4,np,1:nx+bc,nsp)
   real(8), public :: q(nsp), r(nsp)
-  real(8), public :: delt
   real(8), public :: den(0:nx+1,nsp),vel(0:nx+1,3,nsp),temp(0:nx+1,3,nsp)
   real(8)         :: vti, vte, b0
 
@@ -30,7 +29,7 @@ contains
     use field, only : field__init
     use mom_calc, only : mom_calc__init
 
-    real(8)           :: fgi, fpi, va, fpe, fge, rgi, rge, ldb
+    real(8)           :: fgi, fpi, va, fpe, fge, rgi, rge, ldb, delt
     character(len=64) :: file11
 
 !**** SETTING OTHER NUMERICAL & PHYSICAL CONSTANTS ****!

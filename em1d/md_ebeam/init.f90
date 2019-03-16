@@ -10,14 +10,13 @@ module init
   public :: init__set_param
 
   integer, public :: np2(1:nx+bc,nsp)
-  real(8), public :: delx, delt
   real(8), public :: c
   real(8), public :: uf(6,0:nx+1)
   real(8), public :: up(4,np,1:nx+bc,nsp)
   real(8), public :: q(nsp), r(nsp)
   real(8), public :: gp(4,np,1:nx+bc,nsp)
   real(8), public :: den(0:nx+1,nsp),vel(0:nx+1,3,nsp),temp(0:nx+1,3,nsp)
-  real(8)         :: b0, vt0(nsp)
+  real(8)         :: b0, vt0(nsp), delx
 
 
 contains
@@ -31,7 +30,7 @@ contains
     use field, only : field__init
     use mom_calc, only : mom_calc__init
 
-    real(8) :: fpi, fge, fgi, vti, vae, vai
+    real(8) :: fpi, fge, fgi, vti, vae, vai, delt
     character(len=64) :: file11
 
     r(1)  = rmass
