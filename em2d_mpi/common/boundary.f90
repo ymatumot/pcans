@@ -102,8 +102,8 @@ contains
        do j=nys,nye
           do ii=1,np2(j,isp)
 
-             ipos = floor(up(1,ii,j,isp)*d_delx)
-             jpos = floor(up(2,ii,j,isp)*d_delx)
+             ipos = int(up(1,ii,j,isp)*d_delx)
+             jpos = int(up(2,ii,j,isp)*d_delx)
 
              if(bc==0)then
                 if(ipos <= nxgs-1)then
