@@ -15,8 +15,9 @@ module init
   real(8), allocatable, public :: uf(:,:,:)
   real(8), allocatable, public :: up(:,:,:,:)
   real(8), allocatable, public :: gp(:,:,:,:)
+  real(8),              public :: delt
  
-  real(8) :: vti, delt
+  real(8) :: vti
 
 
 contains
