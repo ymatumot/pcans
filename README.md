@@ -5,13 +5,12 @@
 
 ```
 #!bash
-$ hg clone https://bitbucket.org/ymatumot/pcans
+$ git clone https://www.github.com/ymatumot/pcans
 ```
 で行います。他の開発者が更新している可能性があるので、編集前には
 ```
 #!bash
-$ hg pull https://bitbucket.org/ymatumot/pcans （2回目以降はURLは省略可）
-$ hg update
+$ git pull （URLは省略可）
 ```
 でレポジトリを最新のものに更新しておいてください。
 
